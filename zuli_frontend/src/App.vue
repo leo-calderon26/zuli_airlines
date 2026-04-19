@@ -1,7 +1,7 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import LPReserve from './views/LPReserve.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <LPReserve />
 </template>
