@@ -1,21 +1,31 @@
 
 <template>
     <div class = "landing-page">
-        <TopNavBar />
+        <PublicNavBar />
         <h1>Estamos cooking</h1>
-        <p></p>
+        <PublicBottomBar />
     </div>
 </template>
 
 <script>
-import TopNavBar from '../components/TopNavBar.vue';
+import PublicNavBar from '../components/PublicNavBar.vue';
+import PublicBottomBar from '../components/PublicBottomBar.vue';
     export default {
         components: {
-            TopNavBar
+            PublicNavBar,
+            PublicBottomBar
         }
     }
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
+.landing-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
 
+.landing-page > :last-child {
+  margin-top: auto;
+}
 </style>
