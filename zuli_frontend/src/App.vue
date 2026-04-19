@@ -3,5 +3,5 @@ import LPReserve from './views/LPReserve.vue'
 </script>
 
 <template>
-  <LPReserve />
+  <router-view />
 </template>
