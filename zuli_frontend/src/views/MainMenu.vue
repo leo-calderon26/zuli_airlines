@@ -2,7 +2,7 @@
 <template>
     <div class = "landing-page">
         <PublicNavBar />
-        <h1>Estamos cooking</h1>
+        <h1>Menú</h1>
         <PublicBottomBar />
     </div>
 </template>
