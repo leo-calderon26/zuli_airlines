@@ -1,7 +1,7 @@
 <template>
   <div class="landing-page">
     <PublicNavBar />
-    <h1 class = "message">Consulta en mantenimiento</h1>
+    <h1 class = "message">Users en mantenimiento</h1>
     <PublicBottomBar />
   </div>
 </template>
