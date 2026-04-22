@@ -1,17 +1,15 @@
 <template>
     <header class="top-nav-bar">
-      <div class = "content">
-        <img src="../assets/logoZuli.svg" alt="Logo" class="logo">
-        <nav class ="nav-links">
-          <ul>
-            <li><router-link to="/">Panel Administrativo</router-link></li>
-          </ul>
-        </nav>
-        <router-link to="/administrativo" class="admin-link">
-          <img src="../assets/person.svg" alt="Admin Icon" class="admin-icon">
-          <span>Admin</span>
-        </router-link>
-      </div>
+        <div class="content">
+            <router-link to="/"><img src="../assets/logoZuli.svg" alt="Logo" class="logo"></router-link>
+            <div class="top-content">
+                Panel Administrativo
+            </div>
+            <router-link to="/administrativo" class="admin-link">
+                <img src="../assets/person.svg" alt="Admin Icon" class="admin-icon">
+                <span>Admin</span>
+            </router-link>
+        </div>
     </header>
 </template>
 
@@ -25,7 +23,6 @@
 .top-nav-bar {
     background-color: #711717;
     width: 100%;
-
 }
 
 .content {
@@ -33,6 +30,15 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.top-content {
+    width: 100%;
+    align-items: center;
+    gap: 20px;
+    font-weight: 600;
+    color: white;
+    font-size: 26px;
 }
 
 .logo {

@@ -1,9 +1,8 @@
 <template>
   <footer class="public-bottom-bar">
     <div class="bottom-content">
-      <div>xxxxxxxxxx</div>
-      <div>xxxxxxxxxx</div>
-      <div>xxxxxxxxxx</div>
+        <div>© 2026 Zuli Airplanes. Todos los derechos reservados.</div>
+        <div>Tel. (506) 1234-5678</div>
     </div>
   </footer>
 </template>
