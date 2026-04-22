@@ -1,5 +1,5 @@
 <script setup>
-import LPReserve from './views/LPReserve.vue'
+import Aircrafts from './views/Aircrafts.vue'
 </script>
 
 <template>
