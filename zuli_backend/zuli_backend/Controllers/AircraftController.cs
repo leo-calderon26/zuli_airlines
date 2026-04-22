@@ -14,10 +14,7 @@ namespace zuli_backend.Controllers
         public AircraftController(IAircraftService service) => _service = service;
 
         [HttpPost]
-        public async Task<ActionResult<AircraftDTO>> CreateAircraft(AircraftDTO aircraft)
-        {
-            var createAircraft = await _service.CreateAircraft(aircraft);
-            return Ok(createAircraft);
-        }
+        public async Task<ActionResult<BasicResponseDTO>> CreateAircraft(AircraftDTO aircraft)
+            => await _service.CreateAircraft(aircraft);
     }
 }

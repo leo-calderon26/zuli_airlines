@@ -6,7 +6,7 @@ namespace zuli_Buisiness.DTO
 {
     public class AircraftDTO
     {
-        public int AircraftId { get; set; }
+        public int aircraftId { get; set; }
         public short numberEconomyClassRows { get; set; }
         public short numberSeatingRowsEconomy { get; set; }
         public short numberFirstClassRows { get; set; }

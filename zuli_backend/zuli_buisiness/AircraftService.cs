@@ -23,9 +23,9 @@ namespace zuli_Buisiness
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
         {
-            if (await _repository.AlreadyExist(aircraft.AircraftId))
+            if (await _repository.AlreadyExist(aircraft.aircraftId))
             {
-                throw new ZuliNotFoundException($"Se encontro una aeronave con el mismo id {aircraft.AircraftId}");
+                throw new ZuliNotFoundException($"Se encontro una aeronave con el mismo id {aircraft.aircraftId}");
             }
             // TODO(randy): Preguntar si es necesario validar que el Id de la eronave
             if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
@@ -37,7 +37,7 @@ namespace zuli_Buisiness
 
             var newAircraft = new AircraftEntity
             {
-                AircraftId = aircraft.AircraftId,
+                AircraftId = aircraft.aircraftId,
                 numberEconomyClassRows = aircraft.numberEconomyClassRows,
                 numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
                 numberFirstClassRows = aircraft.numberFirstClassRows,
