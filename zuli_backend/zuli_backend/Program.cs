@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using zuli_backend.Middleware;
 using zuli_Buisiness;
@@ -15,10 +14,10 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Conexión a la base de datos usando SQL Server
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+
+// Registrar DapperContext para manejo de conexiones SQL
+builder.Services.AddScoped<DapperContext>();
+
 
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
