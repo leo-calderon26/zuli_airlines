@@ -5,7 +5,7 @@
             <div class="top-content">
                 Panel Administrativo
             </div>
-            <router-link to="/administrativo" class="admin-link">
+            <router-link to="/profile-settings" class="admin-link">
                 <img src="../assets/person.svg" alt="Admin Icon" class="admin-icon">
                 <span>Admin</span>
             </router-link>
