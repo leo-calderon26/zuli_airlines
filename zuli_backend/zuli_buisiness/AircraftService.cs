@@ -27,7 +27,11 @@ namespace zuli_Buisiness
             {
                 throw new ZuliNotFoundException($"Se encontro una aeronave con el mismo id {aircraft.AircraftId}");
             }
-
+            // TODO(randy): Preguntar si es necesario validar que el Id de la eronave
+            if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
+            {
+                throw new ZuliNotFoundException($"Ya existe una aeronave con el mismo nombre {aircraft.model}");
+            }
             // aqui se tiene que llamar el 
             _validator.ValidateAircraftInfo(aircraft);
 

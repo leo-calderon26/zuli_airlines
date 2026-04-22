@@ -52,11 +52,18 @@ namespace zuli_Repository
             // Con dapper se recomienda hacer una conexion cada vez
             using var connection = _context.CreateConnection();
             // Verificar si existe una aeronave ya con el mismo id
-            var sql = "SELECT COUNT(1) FROM Aircraft WHERE AircraftId = @AircraftId";
+            var sql = "SELECT COUNT(1) FROM Aircraft WHERE aircraftId = @aircraftId";
             var count = await connection.ExecuteScalarAsync<int>(
                 sql,
                 new { aircraftId = aircraftId }
             );
+            return count > 0;
+        }
+        public async Task<bool> AlreadyExistByModel(string model)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = "SELECT COUNT(1) FROM Aircraft WHERE model = @model";
+            var count = await connection.ExecuteScalarAsync<int>(sql, new { model });
             return count > 0;
         }
 

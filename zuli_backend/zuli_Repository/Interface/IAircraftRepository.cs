@@ -9,5 +9,6 @@ namespace zuli_Repository.Interface
     {
         Task<int> CreateAircraft(AircraftEntity aircraft);
         Task<bool> AlreadyExist(int aircraftId);
+        Task<bool> AlreadyExistByModel(string model);
     }
 }
