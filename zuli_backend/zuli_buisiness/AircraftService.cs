@@ -5,8 +5,8 @@ using zuli_Buisiness.DTO;
 using zuli_Buisiness.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
-using zuli_Data.Entities;
 using zuli_Data.Exceptions;
+using zuli_Buisiness.Validation;
 
 namespace zuli_Buisiness
 {
@@ -14,12 +14,22 @@ namespace zuli_Buisiness
     {
         // Inyeccion de dependencias
         private readonly IAircraftRepository _repository;
-        public AircraftService(IAircraftRepository repository) => _repository = repository;
-        
-        public async Task<AircraftDTO?> CreateAircraft(AircraftDTO aircraft) 
+        private readonly AircraftValidator _validator;
+        public AircraftService(IAircraftRepository repository)
         {
-            // TODO(randy) arreglar esto
-            if(aircraft == null) throw new ArgumentNullException(nameof(aircraft));
+            _repository = repository;
+            _validator = new AircraftValidator();
+        }
+
+        public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
+        {
+            if (await _repository.AlreadyExist(aircraft.AircraftId))
+            {
+                throw new ZuliNotFoundException($"Se encontro una aeronave con el mismo id {aircraft.AircraftId}");
+            }
+
+            // aqui se tiene que llamar el 
+            _validator.ValidateAircraftInfo(aircraft);
 
             var newAircraft = new AircraftEntity
             {
@@ -30,28 +40,14 @@ namespace zuli_Buisiness
                 numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
                 model = aircraft.model,
                 weight = aircraft.weight
-
-
             };
 
-            var aircraftCreate = await _repository.CreateAircraft(newAircraft);
-            // TODO(randy) Cambiar esta manejo de error
+            await _repository.CreateAircraft(newAircraft);
 
-            if(aircraftCreate is null)
+            return new BasicResponseDTO
             {
-                throw new NotFoundException($"The aircraft with the id {newAircraft.AircraftId} cannot be created");
-            }
-
-            return new AircraftDTO
-            {
-                AircraftId = aircraft.AircraftId,
-                numberEconomyClassRows = aircraft.numberEconomyClassRows,
-                numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
-                numberFirstClassRows = aircraft.numberFirstClassRows,
-                numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-                model = aircraft.model,
-                weight = aircraft.weight
-
+                StatusCode = 200,
+                Message = "Se realizo la creacion de la aeronave correctamente",
             };
         }
     }
