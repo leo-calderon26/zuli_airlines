@@ -34,7 +34,10 @@ namespace zuli_backend.Middleware
                     context,
                     exeption.StatusCode,
                     exeption.ErrorCode,
-                    exeption.Message);
+                    exeption.Message,
+                    exeption,
+                    exeption.ErrorId
+                    );
             }
             catch(Exception exeption)
             {
@@ -47,7 +50,7 @@ namespace zuli_backend.Middleware
             }
         }
         private async Task WriteProblemAsync(HttpContext context, int statusCode, 
-            string errorCode, string detail)
+            string errorCode, string detail, AppExeptions? appEx = null, int ErrorId = -1)
         {
             context.Response.ContentType = "application/problem+json";
             context.Response.StatusCode =statusCode;
@@ -60,6 +63,9 @@ namespace zuli_backend.Middleware
             };
             error.Extensions["errorCode"] = errorCode;
             error.Extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
+
+            if (appEx is ZuliValidationException ve)
+                error.Extensions["errors"] = ve.Errors;
 
             await context.Response.WriteAsJsonAsync(error);
         }
