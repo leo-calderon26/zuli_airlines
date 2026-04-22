@@ -1,14 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LPReserve from '../src/views/LPReserve.vue'
-import LPCheckIn from '../src/views/LPCheckIn.vue'
-import LPConsult from '../src/views/LPConsult.vue'
-import LPHelp from '../src/views/LPHelp.vue'
+import MainMenu from '../src/views/MainMenu.vue'
+import Aircrafts from '../src/views/Aircrafts.vue'
+import Airports from '../src/views/Airports.vue'
+import Routes from '../src/views/Routes.vue'
+import Users from '../src/views/Users.vue'
 
 const routes = [
-  { path: '/', name: 'reserve', component: LPReserve },
-  { path: '/Check-in', name: 'checkin', component: LPCheckIn },
-  { path: '/Consulta', name: 'consult', component: LPConsult },
-  { path: '/Ayuda', name: 'help', component: LPHelp }
+    { path: '/', name: 'main-menu', component: MainMenu },
+    { path: '/aircrafts', name: 'aircrafts', component: Aircrafts },
+    { path: '/airports', name: 'airports', component: Airports },
+    { path: '/routes', name: 'routes', component: Routes },
+    { path: '/users', name: 'users', component: Users }
+    // { path: '/Reports', name: 'reports', component: Reports }
+    // { path: '/ProfileSettings', name: 'profileSettings', component: profileSettings }
 ]
 
 const router = createRouter({
