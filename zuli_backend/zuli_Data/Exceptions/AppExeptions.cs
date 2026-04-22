@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace zuli_Data.Exceptions
 {
     // Esta clase esta hecha para que la use el middleware
