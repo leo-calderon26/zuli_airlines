@@ -7,6 +7,7 @@ namespace zuli_Repository.Interface
 {
     public interface IAircraftRepository
     {
-        Task<AircraftEntity?> CreateAircraft(AircraftEntity aircraft);
+        Task<int> CreateAircraft(AircraftEntity aircraft);
+        Task<bool> AlreadyExist(int aircraftId);
     }
 }
