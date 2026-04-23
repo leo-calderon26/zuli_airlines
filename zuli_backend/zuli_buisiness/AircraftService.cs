@@ -23,10 +23,7 @@ namespace zuli_Buisiness
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
         {
-            if (await _repository.AlreadyExist(aircraft.aircraftId))
-            {
-                throw new ZuliNotFoundException($"Se encontro una aeronave con el mismo id {aircraft.aircraftId}");
-            }
+
             // TODO(randy): Preguntar si es necesario validar que el Id de la eronave
             if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
             {
@@ -37,13 +34,12 @@ namespace zuli_Buisiness
 
             var newAircraft = new AircraftEntity
             {
-                AircraftId = aircraft.aircraftId,
+                model = aircraft.model,
+                weight = aircraft.weight,
                 numberEconomyClassRows = aircraft.numberEconomyClassRows,
                 numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
                 numberFirstClassRows = aircraft.numberFirstClassRows,
                 numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-                model = aircraft.model,
-                weight = aircraft.weight
             };
 
             await _repository.CreateAircraft(newAircraft);
@@ -53,6 +49,23 @@ namespace zuli_Buisiness
                 StatusCode = 200,
                 Message = "Se realizo la creacion de la aeronave correctamente",
             };
+        }
+
+        public async Task<IEnumerable<AircraftDTO>?> GetAll()
+        {
+            // TODO(randy): Preguntar si es mejor mandar una exepcion de que esta basia la tabla si es null
+            var aircraft = await _repository.GetAll();
+
+            return aircraft.Select(item => new AircraftDTO
+                {
+                    model = item.model,
+                    weight = item.weight, 
+                    numberEconomyClassRows= item.numberEconomyClassRows,
+                    numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
+                    numberFirstClassRows = item.numberFirstClassRows,
+                    numberSeatingRowsFirst = item.numberSeatingRowsFirst,
+                }
+            ).ToList();
         }
     }
 }
