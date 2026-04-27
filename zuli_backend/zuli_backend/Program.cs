@@ -18,9 +18,11 @@ builder.Services.AddOpenApi();
 // Registrar DapperContext para manejo de conexiones SQL
 builder.Services.AddScoped<DapperContext>();
 
-
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
+
+builder.Services.AddScoped<IFlightService, FlightService>();
+builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
 var app = builder.Build();
 app.UseGlobalExeption();
