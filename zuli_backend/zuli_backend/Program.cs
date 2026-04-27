@@ -105,9 +105,11 @@ builder.Services.AddRateLimiter(options =>
 // Registrar DapperContext para manejo de conexiones SQL
 builder.Services.AddScoped<DapperContext>();
 
-// Servicios y repositorios existentes
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
+
+builder.Services.AddScoped<IFlightService, FlightService>();
+builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
 builder.Services.AddScoped<IAirportService, AirportService>();
 builder.Services.AddScoped<IAirportRepository, AirportRepository>();
