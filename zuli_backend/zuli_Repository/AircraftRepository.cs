@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
-using Dapper;
 namespace zuli_Repository
 {
     public class AircraftRepository : IAircraftRepository
@@ -23,42 +24,22 @@ namespace zuli_Repository
             using var connection = _context.CreateConnection();
             // Insertar la nueva aeronave
             var insertSql = @"
-                        INSERT INTO Aircraft (AircraftId, numberEconomyClassRows, numberSeatingRowsEconomy, 
-                                            numberFirstClassRows, numberSeatingRowsFirst, model, weight)
-                        VALUES (@AircraftId, @NumberEconomyClassRows, @NumberSeatingRowsEconomy, 
-                                @NumberFirstClassRows, @NumberSeatingRowsFirst, @Model, @Weight)";
+                        INSERT INTO Aircraft (aircraftId, model, weight, numberEconomyClassRows, numberSeatingRowsEconomy, 
+                                            numberFirstClassRows, numberSeatingRowsFirst)
+                        VALUES (NEWID(),@Model, @Weight, @NumberEconomyClassRows, @NumberSeatingRowsEconomy, 
+                                @NumberFirstClassRows, @NumberSeatingRowsFirst)";
 
             return await connection.ExecuteScalarAsync<int>(insertSql, new
             {
-                aircraftId = aircraft.AircraftId,
+                model = aircraft.model,
+                weight = aircraft.weight,
                 numberEconomyClassRows = aircraft.numberEconomyClassRows,
                 numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
                 numberFirstClassRows = aircraft.numberFirstClassRows,
                 numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-                model = aircraft.model,
-                weight = aircraft.weight
             }); 
         }
 
-        /// <summary>
-        /// Varifica que una aeronave no exista en la base de datos
-        /// </summary>
-        /// <param name="aircraftId">Id a comparar</param>
-        /// <returns>
-        /// <c>true</c> si la aeronave existe; en caso contrario, <c>false</c
-        /// </returns>
-        public async Task<bool> AlreadyExist(int aircraftId)
-        {
-            // Con dapper se recomienda hacer una conexion cada vez
-            using var connection = _context.CreateConnection();
-            // Verificar si existe una aeronave ya con el mismo id
-            var sql = "SELECT COUNT(1) FROM Aircraft WHERE aircraftId = @aircraftId";
-            var count = await connection.ExecuteScalarAsync<int>(
-                sql,
-                new { aircraftId = aircraftId }
-            );
-            return count > 0;
-        }
         public async Task<bool> AlreadyExistByModel(string model)
         {
             using var connection = _context.CreateConnection();
@@ -66,6 +47,12 @@ namespace zuli_Repository
             var count = await connection.ExecuteScalarAsync<int>(sql, new { model });
             return count > 0;
         }
-
+        public async Task<IEnumerable<AircraftEntity>> GetAll()
+        {
+            using var connection = _context.CreateConnection();
+            var sql = "SELECT * From Aircraft";
+            var arrayAircraf = (await connection.QueryAsync<AircraftEntity>(sql)).ToList();
+            return arrayAircraf;
+        }
     }   
 }

@@ -9,7 +9,6 @@ namespace zuli_Buisiness.Validation
     // Esto son tag pasa saber donde esta el error
     public static class AircraftAtributes
     {
-        public const string Id = "Identificacion";
         public const string ECONOMYROWS = "EconomyRows";
         public const string SEATINGECONOMY = "SeatingRowsEconomy";
         public const string FIRSTROWS = "FirstRows";
@@ -23,7 +22,6 @@ namespace zuli_Buisiness.Validation
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
-                {AircraftAtributes.Id, new List<string>() },
                 {AircraftAtributes.ECONOMYROWS, new List<string>() },
                 {AircraftAtributes.SEATINGECONOMY, new List<string>() },
                 {AircraftAtributes.FIRSTROWS, new List<string>() },

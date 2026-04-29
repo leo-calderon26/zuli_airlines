@@ -1,7 +1,7 @@
 Create Database ZuliAzirlines
 use ZuliAzirlines
 CREATE TABLE Aircraft (
-  aircraftId int PRIMARY KEY NOT NULL,
+  aircraftId uniqueidentifier PRIMARY KEY NOT NULL,
   numberEconomyClassRows smallint check(numberEconomyClassRows >= 0),
   numberSeatingRowsEconomy smallint check(numberSeatingRowsEconomy >= 0),
   numberFirstClassRows smallint check(numberFirstClassRows >= 0),

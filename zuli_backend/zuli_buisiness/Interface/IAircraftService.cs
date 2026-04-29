@@ -8,5 +8,6 @@ namespace zuli_Buisiness.Interface
     public interface IAircraftService
     {
         Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft);
+        Task<IEnumerable<AircraftDTO>?> GetAll(); 
     }
 }
