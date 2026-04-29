@@ -36,6 +36,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  position: relative;
 }
 
 .logo {
@@ -72,6 +73,9 @@ nav ul li + li {
 }
 
 .nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   color: white;
   text-decoration: none;
   font-weight: 600;
