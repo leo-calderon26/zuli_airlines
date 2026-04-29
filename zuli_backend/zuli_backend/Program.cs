@@ -22,6 +22,9 @@ builder.Services.AddScoped<DapperContext>();
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
 
+builder.Services.AddScoped<IAirportService, AirportService>();
+builder.Services.AddScoped<IAirportRepository, AirportRepository>();
+
 var app = builder.Build();
 app.UseGlobalExeption();
 
