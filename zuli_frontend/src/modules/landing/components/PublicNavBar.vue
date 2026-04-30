@@ -45,7 +45,7 @@
       </nav>
 
       <router-link
-        to="/admin"
+        to="/administrativo"
         class="ml-auto inline-flex items-center gap-2 rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
       >
         <img src="../../../assets/person.svg" alt="Admin Icon" class="h-6 w-6 shrink-0" />
