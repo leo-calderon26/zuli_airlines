@@ -233,7 +233,7 @@
 </template>
 
 <script>
-    import arrowDownUrl from '../assets/ArrowDown.svg'
+    import arrowDownUrl from '../../../assets/ArrowDown.svg'
 
     export default {
     data() { 
