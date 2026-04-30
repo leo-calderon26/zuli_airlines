@@ -1,6 +1,6 @@
 <template>
-  <footer class="public-bottom-bar">
-    <div class="bottom-content">
+  <footer class="w-full bg-[#711717] px-6 py-4 text-white">
+    <div class="flex flex-col gap-3 font-semibold md:flex-row md:items-center md:justify-around">
       <div>xxxxxxxxxx</div>
       <div>xxxxxxxxxx</div>
       <div>xxxxxxxxxx</div>
@@ -11,28 +11,3 @@
 <script>
 export default {}
 </script>
-
-<style scoped>
-.public-bottom-bar {
-  width: 100%;
-  background-color: #711717;
-  color: white;
-  padding: 18px 24px;
-  box-sizing: border-box;
-}
-
-.bottom-content {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 20px;
-  font-weight: 600;
-}
-
-@media (max-width: 768px) {
-  .bottom-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-</style>
