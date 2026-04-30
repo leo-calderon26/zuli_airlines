@@ -1,17 +1,17 @@
 <template>
     <header class="top-nav-bar">
       <div class = "content">
-        <img src="../assets/logoZuli.svg" alt="Logo" class="logo">
+        <img src="../../../assets/logoZuli.svg" alt="Logo" class="logo">
         <nav class ="nav-links">
           <ul>
             <li><router-link to="/">Reservar</router-link></li>
-            <li><router-link to="/Check-in">Check-in</router-link></li>
-            <li><router-link to="/Consulta">Consulta</router-link></li>
-            <li><router-link to="/Ayuda">Ayuda</router-link></li>
+            <li><router-link to="/check-in">Check-in</router-link></li>
+            <li><router-link to="/consulta">Consulta</router-link></li>
+            <li><router-link to="/ayuda">Ayuda</router-link></li>
           </ul>
         </nav>
         <router-link to="/administrativo" class="admin-link">
-          <img src="../assets/person.svg" alt="Admin Icon" class="admin-icon">
+          <img src="../../../assets/person.svg" alt="Admin Icon" class="admin-icon">
           <span>Panel administrativo</span>
         </router-link>
       </div>

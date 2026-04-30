@@ -9,9 +9,19 @@ import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
 
+import ReserveView from '../modules/landing/view/ReserveView.vue'
+import CheckInView from '../modules/landing/view/CheckInView.vue'
+import ConsultView from '../modules/landing/view/ConsultView.vue'
+import HelpView from '../modules/landing/view/HelpView.vue'
+
 const router = createRouter({
     history: createWebHistory(),
     routes: [
+        {
+            path: "/",
+            name: "reserve",
+            component: ReserveView
+        },
         {
             path: "/admin/",
             name: "mainMenu",
@@ -26,6 +36,26 @@ const router = createRouter({
             path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
+        },
+        {
+            path: "/check-in",
+            name: "checkin",
+            component: CheckInView
+        },
+        {
+            path: "/consulta",
+            name: "consult",
+            component: ConsultView
+        },
+        {
+            path: "/ayuda",
+            name: "help",
+            component: HelpView
+        },
+        {
+            path: "/administrativo",
+            name: "administrativo",
+            component: HelpView
         },
         {
             path: "/admin/airports",
