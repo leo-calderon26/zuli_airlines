@@ -1,8 +1,8 @@
 
 <template>
-    <div class = "landing-page">
+    <div class="flex min-h-screen flex-col bg-[#f3f3f3]">
         <PublicNavBar />
-        <main class="reserve-card-center">
+        <main class="flex flex-1 items-center justify-center px-4 py-6 -translate-y-7 sm:px-6">
             <ReserveCard />
         </main>
         <PublicBottomBar />
@@ -21,21 +21,3 @@ import ReserveCard from '../components/ReserveCard.vue';
         }
     }
 </script>
-
-<style scoped>
-.landing-page {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
-
-.reserve-card-center {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    transform: translateY(-30px);
-}
-
-</style>
