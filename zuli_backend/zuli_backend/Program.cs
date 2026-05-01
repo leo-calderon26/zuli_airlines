@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -110,6 +113,8 @@ builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
+
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 
 builder.Services.AddScoped<IAirportService, AirportService>();
 builder.Services.AddScoped<IAirportRepository, AirportRepository>();
