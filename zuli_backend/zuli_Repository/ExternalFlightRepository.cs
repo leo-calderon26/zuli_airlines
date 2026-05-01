@@ -7,12 +7,12 @@ using zuli_Data.Entities.External;
 using zuli_Repository.Interface;
 namespace zuli_Repository
 {
-    public class FlightRepository : IFlightRepository
+    public class ExternalFlightRepository : IExternalFlightRepository
     {
         // Inyeccion de dependencias de la capa Data
         private readonly DapperContext _context;
 
-        public FlightRepository(DapperContext context) 
+        public ExternalFlightRepository(DapperContext context) 
         {
             _context = context;
             

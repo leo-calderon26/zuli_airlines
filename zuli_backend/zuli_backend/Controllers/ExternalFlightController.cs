@@ -9,11 +9,11 @@ namespace zuli_backend.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
-    public class FlightController : ControllerBase
+    public class ExternalFlightController : ControllerBase
     {
         // Inyeccion de dependencias
-        private readonly IFlightService _service;
-        public FlightController(IFlightService service) => _service = service;
+        private readonly IExternalFlightService _service;
+        public ExternalFlightController(IExternalFlightService service) => _service = service;
 
         // Acordar con los demás grupos el status code utilizado
         [HttpGet]

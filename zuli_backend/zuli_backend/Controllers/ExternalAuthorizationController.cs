@@ -6,10 +6,10 @@ namespace zuli_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthorizationController : ControllerBase
+    public class ExternalAuthorizationController : ControllerBase
     {
-        private readonly IAuthorizationService _service;
-        public AuthorizationController(IAuthorizationService service) => _service = service;
+        private readonly IExternalAuthorizationService _service;
+        public ExternalAuthorizationController(IExternalAuthorizationService service) => _service = service;
 
         [HttpPost]
         [Route("Validar")]

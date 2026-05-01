@@ -11,15 +11,15 @@ using zuli_Buisiness.DTO.External;
 
 namespace zuli_Buisiness
 {
-    public class FlightService : IFlightService
+    public class ExternalFlightService : IExternalFlightService
     {
         // Inyeccion de dependencias
-        private readonly IFlightRepository _repository;
-        private readonly FlightValidator _validator;
-        public FlightService(IFlightRepository repository)
+        private readonly IExternalFlightRepository _repository;
+        private readonly ExternalFlightValidator _validator;
+        public ExternalFlightService(IExternalFlightRepository repository)
         {
             _repository = repository;
-            _validator = new FlightValidator();
+            _validator = new ExternalFlightValidator();
         }
 
         public async Task<IEnumerable<RetrievedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight)

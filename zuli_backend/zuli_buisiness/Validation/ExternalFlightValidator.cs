@@ -16,7 +16,7 @@ namespace zuli_Buisiness.Validation
         public const string LATESTDEPARTURE = "LatestDeparture"; // YYYY-MM-DDThh-mm
         public const string PASSENGERSQUANTITY = "PassengersQuantity"; // Cantidad de pasajeros (es un int)
     }
-    public class FlightValidator
+    public class ExternalFlightValidator
     {
         public void ValidateRequestedFlightInfo(RequestedFlightDTO requestedFlight)
         {

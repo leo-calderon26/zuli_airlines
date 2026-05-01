@@ -16,12 +16,12 @@ using zuli_Repository.Interface;
 
 namespace zuli_Buisiness
 {
-    public class AuthorizationService : IAuthorizationService
+    public class ExternalAuthorizationService : IExternalAuthorizationService
     {
         // Inyeccion de dependencias
         private readonly string secretKey;
         private readonly AuthorizationValidator _validator;
-        public AuthorizationService(IConfiguration config)
+        public ExternalAuthorizationService(IConfiguration config)
         {
             secretKey = config.GetSection("settings").GetSection("secretKey").ToString();
             _validator = new AuthorizationValidator();

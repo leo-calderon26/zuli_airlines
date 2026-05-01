@@ -5,7 +5,7 @@ using zuli_Buisiness.DTO.External;
 
 namespace zuli_Buisiness.Interface
 {
-    public interface IFlightService
+    public interface IExternalFlightService
     {
         Task<IEnumerable<RetrievedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight);
     }
