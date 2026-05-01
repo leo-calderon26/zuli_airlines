@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useAircraft } from '../composable/useAircraft';
-import { useAircraftStore } from '../store/aircraftStrore';
+import { useAircraftStore } from '../store/aircraftStore';
 
 const aircraftStore = useAircraftStore();
 const { fetchAircrafts } = useAircraft();
