@@ -39,4 +39,10 @@ namespace zuli_Data.Exceptions
             : base("Validation failed.", StatusCodes.Status422UnprocessableEntity, "VALIDATION_ERROR", errorId)
             => Errors = new Dictionary<string, List<string>> { { errorKey, new List<string> { errorValue } } };
     }
+
+    public class ZuliUnauthorizedException : AppExeptions
+    {
+        public ZuliUnauthorizedException(string msg, int errorId = -1)
+       : base(msg, StatusCodes.Status401Unauthorized, "FORBIDDEN", errorId) { }
+    }
 }
