@@ -111,10 +111,13 @@ builder.Services.AddScoped<DapperContext>();
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
 
-builder.Services.AddScoped<IFlightService, FlightService>();
-builder.Services.AddScoped<IFlightRepository, FlightRepository>();
+builder.Services.AddScoped<IAirportService, AirportService>();
+builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 
-builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
+builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
+
+builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationService>();
 
 builder.Services.AddScoped<IAirportService, AirportService>();
 builder.Services.AddScoped<IAirportRepository, AirportRepository>();
