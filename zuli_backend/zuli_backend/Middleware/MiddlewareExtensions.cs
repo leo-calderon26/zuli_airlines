@@ -4,7 +4,7 @@
     {
         public static IApplicationBuilder UseGlobalExeption(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<GlobalExeptionMiddleware>();
+            return app.UseMiddleware<GlobalExceptionMiddleware>();
         }
     }
 }
