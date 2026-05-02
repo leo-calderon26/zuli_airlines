@@ -8,40 +8,46 @@
                 <div class="flex items-center justify-center sm:items-stretch px-4 py-5 mx-auto text-heading sm:grid-cols-2 md:grid-cols-3 ">
                     <ul aria-labelledby="menu-button">
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/aircrafts"><img src="../../../assets/aircraft.png" alt="Aircraft Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Aeronaves</div>
-                            </a>
+                            <router-link to="/admin/aircrafts"><img src="../../../assets/aircraft.png" alt="Aircraft Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Aeronaves</div>
+                                </a>
+                            </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/airports"><img src="../../../assets/airport.png" alt="Airport Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Aeropuertos</div>
-                            </a>
+                            <router-link to="/admin/airports"><img src="../../../assets/airport.png" alt="Airport Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Aeropuertos</div>
+                                </a>
+                            </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/routes"><img src="../../../assets/route.png" alt="Route Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Rutas</div>
-                            </a>
+                            <router-link to="/admin/routes"><img src="../../../assets/route.png" alt="Route Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Rutas</div>
+                                </a>
+                            </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/flights"><img src="../../../assets/flight.png" alt="User Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Vuelos</div>
-                            </a>
+                            <router-link to="/admin/flights"><img src="../../../assets/flight.png" alt="User Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Vuelos</div>
+                                </a>
+                            </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/users"><img src="../../../assets/user.png" alt="User Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Usuarios</div>
-                            </a>
+                            <router-link to="/admin/users"><img src="../../../assets/user.png" alt="User Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Usuarios</div>
+                                </a>
+                            </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/users"><img src="../../../assets/report.png" alt="User Icon" class="menuIcons" /></router-link>
-                            <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
-                                <div class="font-semibold text-gold text-center">Reportes</div>
-                            </a>
+                            <router-link to="/admin/users"><img src="../../../assets/report.png" alt="User Icon" class="menuIcons" />
+                                <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
+                                    <div class="font-semibold text-gold text-center">Reportes</div>
+                                </a>
+                            </router-link>
                         </li>
                     </ul>
                 </div>
@@ -53,8 +59,8 @@
 </template>
 
 <script>
-import PublicNavBar from '../../../components/PublicNavBar.vue';
-import PublicBottomBar from '../../../components/PublicBottomBar.vue';
+import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
     export default {
         components: {
             PublicNavBar,
