@@ -23,23 +23,26 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
         {
-
-            // TODO(randy): Preguntar si es necesario validar que el Id de la eronave
+            if (!await _repository.IsAdmin(aircraft.AdminId))
+            {
+                throw new ZuliNotFoundException($"EL Usuario que esta intentando crear la aeronave y no tiene permisos {aircraft.AdminId}");
+            }
             if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
             {
                 throw new ZuliNotFoundException($"Ya existe una aeronave con el mismo nombre {aircraft.model}");
             }
-            // aqui se tiene que llamar el 
             _validator.ValidateAircraftInfo(aircraft);
 
             var newAircraft = new AircraftEntity
             {
+                AdminId = aircraft.AdminId,
                 model = aircraft.model,
                 weight = aircraft.weight,
                 numberEconomyClassRows = aircraft.numberEconomyClassRows,
                 numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
                 numberFirstClassRows = aircraft.numberFirstClassRows,
                 numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
+                baggageCapacity = aircraft.baggageCapacity,
             };
 
             await _repository.CreateAircraft(newAircraft);
@@ -53,19 +56,46 @@ namespace zuli_Business
 
         public async Task<IEnumerable<AircraftDTO>> GetAll()
         {
-            // TODO(randy): Preguntar si es mejor mandar una exepcion de que esta basia la tabla si es null
             var aircraft = await _repository.GetAll();
 
             return aircraft.Select(item => new AircraftDTO
                 {
                     model = item.model,
                     weight = item.weight, 
+                    baggageCapacity = item.baggageCapacity,
                     numberEconomyClassRows= item.numberEconomyClassRows,
                     numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
                     numberFirstClassRows = item.numberFirstClassRows,
                     numberSeatingRowsFirst = item.numberSeatingRowsFirst,
                 }
             ).ToList();
+        }
+
+        public async Task<PaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
+        {
+            var (aircrafts, totalCount) = await _repository.GetAircraftsPaginated(pageNumber, pageSize);
+            
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var aircraftDTOs = aircrafts.Select(item => new AircraftDTO
+            {
+                model = item.model,
+                weight = item.weight,
+                baggageCapacity = item.baggageCapacity,
+                numberEconomyClassRows = item.numberEconomyClassRows,
+                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
+                numberFirstClassRows = item.numberFirstClassRows,
+                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
+            }).ToList();
+
+            return new PaginatedResponseDTO<AircraftDTO>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalCount,
+                TotalPages = totalPages,
+                Data = aircraftDTOs
+            };
         }
     }
 }
