@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
     public class AircraftDTO
     {

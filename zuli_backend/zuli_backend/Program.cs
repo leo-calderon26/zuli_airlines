@@ -1,7 +1,7 @@
 using Scalar.AspNetCore;
 using zuli_backend.Middleware;
-using zuli_Buisiness;
-using zuli_Buisiness.Interface;
+using zuli_Business;
+using zuli_Business.Interface;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;

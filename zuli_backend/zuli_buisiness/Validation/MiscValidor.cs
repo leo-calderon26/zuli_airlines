@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     public static class MiscValidor
     {
