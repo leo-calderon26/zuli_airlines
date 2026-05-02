@@ -1,22 +1,22 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using zuli_Data;
 using zuli_Data.Entities;
+using zuli_Repository.Interface;
 
 namespace zuli_Repository
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
-        private readonly string connectionString;
+        private readonly DapperContext dapperContext;
 
-        public UserRepository(IConfiguration configuration)
+        public UserRepository(DapperContext dapperContext)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            this.dapperContext = dapperContext;
         }
 
         public async Task<AppUser?> GetByBusinessEmailAsync(string businessEmail)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
+            using var connection = dapperContext.CreateConnection();
 
             string sql = @"
                 SELECT
@@ -41,7 +41,7 @@ namespace zuli_Repository
 
         public async Task UpdateLoginStateAsync(AppUser user)
         {
-            using SqlConnection connection = new SqlConnection(connectionString);
+            using var connection = dapperContext.CreateConnection();
 
             string sql = @"
                 UPDATE [User]
