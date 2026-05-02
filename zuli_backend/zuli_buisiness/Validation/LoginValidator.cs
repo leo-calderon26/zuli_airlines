@@ -5,7 +5,7 @@ namespace zuli_buisiness.Validation
 {
     public class LoginValidator
     {
-        public string? Validate(LoginRequestDto? request)
+        public string? Validate(LoginRequestDTO? request)
         {
             if (request == null)
             {

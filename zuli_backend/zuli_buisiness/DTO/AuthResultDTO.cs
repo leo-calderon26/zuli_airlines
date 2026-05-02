@@ -1,6 +1,6 @@
 using zuli_Data.Entities;
 
-namespace zuli_business.DTO
+namespace zuli_buisiness.DTO
 {
     public class AuthResultDTO
     {
