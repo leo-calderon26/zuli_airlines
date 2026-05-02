@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="zuli_backend/zuli_backend.csproj" />
-  <Project Path="zuli_buisiness/zuli_Buisiness.csproj" />
+  <Project Path="zuli_buisiness/zuli_Business.csproj" />
   <Project Path="zuli_Data/zuli_Data.csproj" />
   <Project Path="zuli_Repository/zuli_Repository.csproj" />
 </Solution>

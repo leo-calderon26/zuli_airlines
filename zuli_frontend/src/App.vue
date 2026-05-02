@@ -1,7 +1,7 @@
 <script setup>
-import Aircrafts from './views/Aircrafts.vue'
+  import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <router-view />
+  <RouterView/>
 </template>

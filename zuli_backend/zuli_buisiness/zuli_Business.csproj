@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\zuli_Data\zuli_Data.csproj" />
+    <ProjectReference Include="..\zuli_Repository\zuli_Repository.csproj" />
   </ItemGroup>
 
 </Project>
