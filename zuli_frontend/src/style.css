@@ -11,6 +11,16 @@
   --color-select: #2B0909;
   --color-gold: #8F8029;
 }
+html,
+body,
+#app {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
 @layer base {
 }
