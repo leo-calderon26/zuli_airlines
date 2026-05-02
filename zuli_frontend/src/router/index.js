@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Flights from "../modules/flight/view/FlightList.vue"
-
 import FlightList from "../modules/flight/view/FlightList.vue"
-
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
