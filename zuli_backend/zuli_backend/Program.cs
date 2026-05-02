@@ -8,6 +8,7 @@ using zuli_Buisiness.Interface;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
+using zuli_backend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
 builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
 
 builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationService>();
+
 
 var app = builder.Build();
 app.UseGlobalExeption();
