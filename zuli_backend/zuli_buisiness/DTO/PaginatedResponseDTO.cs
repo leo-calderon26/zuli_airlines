@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace zuli_Business.DTO
 {
     public class PaginatedResponseDTO<T>
