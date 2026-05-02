@@ -2,7 +2,7 @@
     <div class="flex min-w-0 flex-col gap-1">
         <label class="text-xs font-semibold text-slate-700">{{ label }}</label>
         <div class="relative">
-            <div class="flex items-stretch overflow-hidden rounded-md border border-slate-200 bg-[#f7f7f7]">
+            <div :class="containerClasses">
                 <input
                     :value="modelValue"
                     :type="type"
@@ -80,6 +80,11 @@ export default {
         buttonLabel: {
             type: String,
             default: 'Mostrar opciones'
+        }
+        ,
+        containerClasses: {
+            type: String,
+            default: 'flex items-stretch overflow-hidden rounded-md border border-slate-200 bg-[#f7f7f7]'
         }
     },
     emits: ['update:modelValue'],
