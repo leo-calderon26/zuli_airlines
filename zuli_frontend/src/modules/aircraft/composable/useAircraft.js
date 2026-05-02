@@ -1,5 +1,5 @@
 import { getAircrafts } from "../service/aircraftService";
-import { useAircraftStore } from "../store/aircraftStrore";
+import { useAircraftStore } from "../store/aircraftStore";
 
 export function useAircraft() {
     const store = useAircraftStore();
