@@ -15,6 +15,9 @@ import AircraftNavBar from '../components/AircraftNavBar.vue';
             </div>
         </main>
     </div>
+    <PublicNavBar/>   
+    <AircraftNavBar/>
+    <AircraftForm/>
 </template>
 
 <style>
