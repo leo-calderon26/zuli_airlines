@@ -25,6 +25,9 @@ builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
 builder.Services.AddScoped<IAirportService, AirportService>();
 builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 
+builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
+builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
+
 var app = builder.Build();
 app.UseGlobalExeption();
 
