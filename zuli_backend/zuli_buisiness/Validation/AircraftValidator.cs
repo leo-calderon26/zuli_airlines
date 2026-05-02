@@ -15,6 +15,7 @@ namespace zuli_Business.Validation
         public const string SEATINGFIRST = "SeatingRowsFirst";
         public const string MODEL = "Model";
         public const string WEIGHT = "Weight";
+        public const string BAGGAGECAPACITY = "BaggageCapacity";
     }
     public class AircraftValidator
     {
@@ -28,6 +29,7 @@ namespace zuli_Business.Validation
                 {AircraftAtributes.SEATINGFIRST, new List<string>() },
                 {AircraftAtributes.MODEL, new List<string>() },
                 {AircraftAtributes.WEIGHT, new List<string>() },
+                {AircraftAtributes.BAGGAGECAPACITY, new List<string>() },
             };
 
             var IsEmptyInfo = false;
@@ -69,6 +71,11 @@ namespace zuli_Business.Validation
                 errorInfo[AircraftAtributes.WEIGHT].Add("El peso tiene que ser un numero positivo");
                 IsEmptyInfo = true;
             }
+            if (aircraft.baggageCapacity < 0)
+            {
+                errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje tiene que ser un numero positivo");
+                IsEmptyInfo = true;
+            }
             if (IsEmptyInfo)
             {
                 throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
@@ -86,7 +93,17 @@ namespace zuli_Business.Validation
                     errorInfo[AircraftAtributes.MODEL].Add("La cantidad de asientos no puede ser mayor que a 1000 asientos");
                     IsEmptyInfo = true;
                 }
-                if (errorInfo[AircraftAtributes.MODEL].Count > 0)
+                if (aircraft.baggageCapacity > (aircraft.weight * 0.30m))
+                {
+                    errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje no puede ser mayor al 30% del peso de la aeronave");
+                    IsEmptyInfo = true;
+                }
+                if (aircraft.baggageCapacity < (aircraft.weight * 0.30m))
+                {
+                    errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje no puede ser menor al 30% del peso de la aeronave");
+                    IsEmptyInfo = true;
+                }
+                if (errorInfo.Any(x => x.Value.Count > 0))
                     throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
             }
         }
