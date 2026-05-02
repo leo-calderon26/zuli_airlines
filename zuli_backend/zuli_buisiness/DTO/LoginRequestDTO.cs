@@ -1,6 +1,6 @@
-namespace zuli_Data.Entities
+namespace zuli_buisiness.DTO
 {
-    public class LoginRequest
+    public class LoginRequestDto
     {
         public string BusinessEmail { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
