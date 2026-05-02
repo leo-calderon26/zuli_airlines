@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using zuli_Buisiness.DTO.External;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO.External;
+using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
