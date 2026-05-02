@@ -1,16 +1,25 @@
 <template>
-    <header class="top-nav-bar">
-        <div class="content">
-            <router-link to="/"><img src="../assets/logoZuli.svg" alt="Logo" class="logo"></router-link>
-            <div class="top-content">
-                Panel Administrativo
-            </div>
-            <router-link to="/profile-settings" class="admin-link">
-                <img src="../assets/person.svg" alt="Admin Icon" class="admin-icon">
-                <span>Admin</span>
-            </router-link>
+  <nav class="relative bg-primary after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10">
+    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-20 items-center justify-between">
+        <div class="flex items-center justify-center sm:items-stretch sm:justify-start">
+          <div class="flex shrink-0 items-center">
+            <router-link to="/admin/"><img src="../assets/logoZuli.svg" alt="Your Company" class="h-20 w-auto" /></router-link>
+          </div>
         </div>
-    </header>
+        <div class="flex items-center justify-center sm:items-stretch sm:justify-start">
+          
+          <h1 class="font-bold text-heading md:text-5xl lg:text-3xl"><span class="text-transparent bg-clip-text bg-white">Panel Administrativo</span></h1>
+
+        </div>
+        <div class="absolute inset-y-0 right-0 flex items-center sm:static sm:inset-auto">
+          <div class="flex shrink-0 items-center">
+            <router-link to="/admin/profile-settings"><img src="../assets/person.svg" alt="Your Company" class="h-12 w-auto" /></router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script>

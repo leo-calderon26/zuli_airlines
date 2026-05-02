@@ -17,45 +17,55 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "/",
+            path: "/admin/",
             name: "reserve",
             component: ReserveView
         },
         {
             path: "/flights",
-            name: "home",
-            component: FlightList
+            name: "mainMenu",
+            component: MainMenu
         },
         {
-            path: "/aircraft",
+            path: "/admin/aircrafts/",
             name: "aircraftList",
             component: AircraftList
         },
         {
-            path: "/create-aircraft",
+            path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
         },
         {
-            path: "/check-in",
-            name: "checkin",
-            component: CheckInView
+            path: "/admin/airports",
+            name: "airports",
+            component: Airports
         },
         {
-            path: "/consulta",
-            name: "consult",
-            component: ConsultView
+            path: "/admin/routes",
+            name: "routes",
+            component: Routes
+        },
+         {
+            path: "/admin/flights",
+            name: "flights",
+            component: Flights
         },
         {
-            path: "/ayuda",
-            name: "help",
-            component: HelpView
+            path: "/admin/users",
+            name: "users",
+            component: Users
         },
         {
-            path: "/administrativo",
-            name: "administrativo",
-            component: Login
-        }
+            path: "/admin/reports",
+            name: "reports",
+            component: Reports
+        },
+        {
+            path: "/admin/profile-settings",
+            name: "profileSettings",
+            component: ProfileSettings
+        },
     ]
 });
 
