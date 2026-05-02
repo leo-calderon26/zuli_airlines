@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+using System.Linq;
+using System.Text;
 using zuli_Buisiness.DTO;
 using zuli_Data.Exceptions;
 
