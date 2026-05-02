@@ -15,7 +15,7 @@ namespace zuli_backend.Controllers
         public FlightController(IFlightService service) => _service = service;
 
         [HttpPost("Create")]
-        public async Task<ActionResult<BasicResponseDTO>> CreateFlight(AirportDTO Airport)
-            => await _service.CreateFlight(Airport);
+        public async Task<ActionResult<BasicResponseDTO>> CreateFlight([FromBody] FlightDTO flight)
+            => await _service.CreateFlight(flight);
     }
 }

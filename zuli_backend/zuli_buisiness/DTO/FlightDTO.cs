@@ -1,26 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace zuli_Business.DTO
 {
 	public class FlightDTO
 	{
-		public Guid flightId { get; set; }
-		public string status { get; set; }
-		public DateTime flightDate { get; set; }
-		public decimal touristPrice { get; set; }
+		public Guid aircraftId { get; set; }
+		public string originAirport { get; set; } = string.Empty;
+		public string destinationAirport { get; set; } = string.Empty;
+		public bool monday { get; set; }
+		public bool tuesday { get; set; }
+		public bool wednesday { get; set; }
+		public bool thursday { get; set; }
+		public bool friday { get; set; }
+		public bool saturday { get; set; }
+		public bool sunday { get; set; }
+		public TimeSpan departureTime { get; set; }
+		public TimeSpan arrivalTime { get; set; }
+		public TimeSpan duration { get; set; }
 		public decimal firstClassPrice { get; set; }
-		public DateTime realDepartureTime { get; set; }
-		public DateTime realArrivalTime { get; set; }
-		public DateTime checkInStartTime { get; set; }
-		public DateTime checkInDeadline { get; set; }
-		public int duration { get; set; }
+		public decimal touristPrice { get; set; }
 		public decimal carryOnPrice { get; set; }
-		public decimal checkedPrice { get; set; }
+		public decimal carryOnWeightKg { get; set; }
+		public decimal checkedBaggagePrice { get; set; }
+		public decimal checkedBaggageMaxWeightKg { get; set; }
+		public decimal checkedBaggageMultiplierPercent { get; set; }
 		public int availableSeats { get; set; }
-		public int airlineId { get; set; }
-		public int aircraftId { get; set; }
-		public int itineraryId { get; set; }
-		public int adminId { get; set; }
-		public int flightRouteId { get; set; }
+		public string? status { get; set; }
 	}
 }
