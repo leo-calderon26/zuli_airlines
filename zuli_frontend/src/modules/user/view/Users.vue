@@ -3,6 +3,7 @@
     <PublicNavBar />
     <h1 class = "message">Users en mantenimiento</h1>
   </div>
+  <PublicBottomBar />
 </template>
 
 <script>
