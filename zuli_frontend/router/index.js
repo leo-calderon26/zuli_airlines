@@ -1,1 +1,0 @@
-// aqui es donde vamos hacer las rutas de la page
