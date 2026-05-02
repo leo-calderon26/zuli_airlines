@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 
-namespace zuli_Buisiness.Interface
+namespace zuli_Business.Interface
 {
     public interface IAircraftService
     {
         Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft);
-        Task<IEnumerable<AircraftDTO>?> GetAll(); 
+        Task<IEnumerable<AircraftDTO>> GetAll(); 
     }
 }
