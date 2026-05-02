@@ -17,5 +17,18 @@ namespace zuli_backend.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<BasicResponseDTO>> CreateFlight([FromBody] FlightDTO flight)
             => await _service.CreateFlight(flight);
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<FlightDTO>>> GetAllFlights()
+            => Ok(await _service.GetAllFlights());
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<FlightDTO>> GetFlightById(Guid id)
+        {
+            var flight = await _service.GetFlightById(id);
+            if (flight == null)
+                return NotFound(new { message = "Vuelo no encontrado" });
+            return Ok(flight);
+        }
     }
 }

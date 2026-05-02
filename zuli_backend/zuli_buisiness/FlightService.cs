@@ -9,13 +9,11 @@ namespace zuli_Buisiness
     public class FlightService : IFlightService
     {
         private readonly IFlightRepository _repository;
-        private readonly IAirportRepository _airportRepository;
         private readonly FlightValidator _validator;
 
-        public FlightService(IFlightRepository repository, IAirportRepository airportRepository)
+        public FlightService(IFlightRepository repository)
         {
             _repository = repository;
-            _airportRepository = airportRepository;
             _validator = new FlightValidator();
         }
 
@@ -23,42 +21,26 @@ namespace zuli_Buisiness
         {
             _validator.ValidateFlight(flight);
 
-            if (!await _airportRepository.AlreadyExist(flight.originAirport))
-            {
-                throw new zuli_Data.Exceptions.ZuliNotFoundException($"No se encontro un aeropuerto de salida con el codigo {flight.originAirport}");
-            }
-
-            if (!await _airportRepository.AlreadyExist(flight.destinationAirport))
-            {
-                throw new zuli_Data.Exceptions.ZuliNotFoundException($"No se encontro un aeropuerto de llegada con el codigo {flight.destinationAirport}");
-            }
-
             var newFlight = new FlightEntity
             {
-                FlightId = Guid.NewGuid(),
-                aircraftId = flight.aircraftId,
-                originAirport = flight.originAirport,
-                destinationAirport = flight.destinationAirport,
-                monday = flight.monday,
-                tuesday = flight.tuesday,
-                wednesday = flight.wednesday,
-                thursday = flight.thursday,
-                friday = flight.friday,
-                saturday = flight.saturday,
-                sunday = flight.sunday,
-                departureTime = flight.departureTime,
-                arrivalTime = flight.arrivalTime,
-                duration = flight.duration,
-                firstClassPrice = flight.firstClassPrice,
-                touristPrice = flight.touristPrice,
-                carryOnPrice = flight.carryOnPrice,
-                carryOnWeightKg = flight.carryOnWeightKg,
-                checkedBaggagePrice = flight.checkedBaggagePrice,
-                checkedBaggageMaxWeightKg = flight.checkedBaggageMaxWeightKg,
-                checkedBaggageMultiplierPercent = flight.checkedBaggageMultiplierPercent,
-                availableSeats = flight.availableSeats,
-                status = flight.status,
-                createdAt = DateTime.UtcNow,
+                Id = Guid.NewGuid(),
+                Status = flight.Status,
+                FlightDate = flight.FlightDate,
+                TouristPrice = flight.TouristPrice,
+                FirstClassPrice = flight.FirstClassPrice,
+                RealDepartureTime = flight.RealDepartureTime,
+                RealArrivalTime = flight.RealArrivalTime,
+                CheckInStartTime = flight.CheckInStartTime,
+                CheckInDeadline = flight.CheckInDeadline,
+                AirlineId = flight.AirlineId,
+                AircraftId = flight.AircraftId,
+                ItineraryId = flight.ItineraryId,
+                Duration = flight.Duration,
+                CarryOnPrice = flight.CarryOnPrice,
+                CheckedPrice = flight.CheckedPrice,
+                AvailableSeats = flight.AvailableSeats,
+                AdminId = flight.AdminId,
+                FlightRouteId = flight.FlightRouteId,
             };
 
             await _repository.CreateFlight(newFlight);
@@ -69,5 +51,60 @@ namespace zuli_Buisiness
                 Message = "Se realizo la creacion del vuelo correctamente",
             };
         }
-    }
-}
+
+        public async Task<IEnumerable<FlightDTO>> GetAllFlights()
+        {
+            var flights = await _repository.GetAllFlights();
+
+            return flights.Select(f => new FlightDTO
+            {
+                Id = f.Id,
+                Status = f.Status,
+                FlightDate = f.FlightDate,
+                TouristPrice = f.TouristPrice,
+                FirstClassPrice = f.FirstClassPrice,
+                RealDepartureTime = f.RealDepartureTime,
+                RealArrivalTime = f.RealArrivalTime,
+                CheckInStartTime = f.CheckInStartTime,
+                CheckInDeadline = f.CheckInDeadline,
+                AirlineId = f.AirlineId,
+                AircraftId = f.AircraftId,
+                ItineraryId = f.ItineraryId,
+                Duration = f.Duration,
+                CarryOnPrice = f.CarryOnPrice,
+                CheckedPrice = f.CheckedPrice,
+                AvailableSeats = f.AvailableSeats,
+                AdminId = f.AdminId,
+                FlightRouteId = f.FlightRouteId,
+            }).ToList();
+        }
+
+        public async Task<FlightDTO> GetFlightById(Guid id)
+        {
+            var flight = await _repository.GetFlightById(id);
+
+            if (flight == null)
+                return null;
+
+            return new FlightDTO
+            {
+                Id = flight.Id,
+                Status = flight.Status,
+                FlightDate = flight.FlightDate,
+                TouristPrice = flight.TouristPrice,
+                FirstClassPrice = flight.FirstClassPrice,
+                RealDepartureTime = flight.RealDepartureTime,
+                RealArrivalTime = flight.RealArrivalTime,
+                CheckInStartTime = flight.CheckInStartTime,
+                CheckInDeadline = flight.CheckInDeadline,
+                AirlineId = flight.AirlineId,
+                AircraftId = flight.AircraftId,
+                ItineraryId = flight.ItineraryId,
+                Duration = flight.Duration,
+                CarryOnPrice = flight.CarryOnPrice,
+                CheckedPrice = flight.CheckedPrice,
+                AvailableSeats = flight.AvailableSeats,
+                AdminId = flight.AdminId,
+                FlightRouteId = flight.FlightRouteId,
+            };
+        }

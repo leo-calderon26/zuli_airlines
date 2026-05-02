@@ -8,14 +8,12 @@ namespace zuli_Buisiness.Validation
 {
     public static class FlightAtributes
     {
-        public const string AIRCRAFT = "AircraftId";
-        public const string ORIGIN = "OriginAirport";
-        public const string DESTINATION = "DestinationAirport";
-        public const string FREQUENCY = "Frequency";
-        public const string TIMES = "Times";
+        public const string STATUS = "Status";
+        public const string FLIGHT_DATE = "FlightDate";
         public const string DURATION = "Duration";
         public const string PRICES = "Prices";
-        public const string BAGGAGE = "Baggage";
+        public const string ENTITIES = "Entities";
+        public const string ROUTE = "FlightRouteId";
     }
 
     public class FlightValidator
@@ -24,69 +22,73 @@ namespace zuli_Buisiness.Validation
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
-                { FlightAtributes.AIRCRAFT, new List<string>() },
-                { FlightAtributes.ORIGIN, new List<string>() },
-                { FlightAtributes.DESTINATION, new List<string>() },
-                { FlightAtributes.FREQUENCY, new List<string>() },
-                { FlightAtributes.TIMES, new List<string>() },
+                { FlightAtributes.STATUS, new List<string>() },
+                { FlightAtributes.FLIGHT_DATE, new List<string>() },
                 { FlightAtributes.DURATION, new List<string>() },
                 { FlightAtributes.PRICES, new List<string>() },
-                { FlightAtributes.BAGGAGE, new List<string>() },
+                { FlightAtributes.ENTITIES, new List<string>() },
+                { FlightAtributes.ROUTE, new List<string>() },
             };
 
             var hasError = false;
 
-            if (flight.aircraftId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(flight.Status))
             {
-                errorInfo[FlightAtributes.AIRCRAFT].Add("Debe seleccionar una aeronave");
+                errorInfo[FlightAtributes.STATUS].Add("Debe especificar el estado del vuelo");
                 hasError = true;
             }
 
-            if (string.IsNullOrWhiteSpace(flight.originAirport))
+            if (flight.Status?.Length > 20)
             {
-                errorInfo[FlightAtributes.ORIGIN].Add("Debe seleccionar un aeropuerto de salida");
+                errorInfo[FlightAtributes.STATUS].Add("El estado no puede superar 20 caracteres");
                 hasError = true;
             }
 
-            if (string.IsNullOrWhiteSpace(flight.destinationAirport))
+            if (flight.FlightDate == default)
             {
-                errorInfo[FlightAtributes.DESTINATION].Add("Debe seleccionar un aeropuerto de llegada");
+                errorInfo[FlightAtributes.FLIGHT_DATE].Add("Debe especificar la fecha del vuelo");
                 hasError = true;
             }
 
-            if (!string.IsNullOrWhiteSpace(flight.originAirport) && !string.IsNullOrWhiteSpace(flight.destinationAirport) && flight.originAirport == flight.destinationAirport)
+            if (flight.AirlineId <= 0)
             {
-                errorInfo[FlightAtributes.DESTINATION].Add("El aeropuerto de llegada no puede ser igual al de salida");
+                errorInfo[FlightAtributes.ENTITIES].Add("Debe especificar una aerolinea valida");
                 hasError = true;
             }
 
-            if (!(flight.monday || flight.tuesday || flight.wednesday || flight.thursday || flight.friday || flight.saturday || flight.sunday))
+            if (flight.AircraftId == Guid.Empty)
             {
-                errorInfo[FlightAtributes.FREQUENCY].Add("Debe seleccionar al menos un día de frecuencia");
+                errorInfo[FlightAtributes.ENTITIES].Add("Debe especificar una aeronave valida");
                 hasError = true;
             }
 
-            if (flight.departureTime == default || flight.arrivalTime == default)
+            if (flight.ItineraryId <= 0)
             {
-                errorInfo[FlightAtributes.TIMES].Add("Debe especificar la hora de salida y la hora de llegada");
+                errorInfo[FlightAtributes.ENTITIES].Add("Debe especificar un itinerario valido");
                 hasError = true;
             }
 
-            if (flight.duration <= TimeSpan.Zero)
+            if (flight.AdminId == Guid.Empty)
             {
-                errorInfo[FlightAtributes.DURATION].Add("La duración debe ser mayor a cero");
+                errorInfo[FlightAtributes.ENTITIES].Add("Debe especificar un administrador valido");
                 hasError = true;
             }
 
-            if (flight.firstClassPrice < 0 || flight.touristPrice < 0 || flight.carryOnPrice < 0 || flight.checkedBaggagePrice < 0)
+            if (flight.FlightRouteId <= 0)
+            {
+                errorInfo[FlightAtributes.ROUTE].Add("Debe especificar una ruta de vuelo valida");
+                hasError = true;
+            }
+
+            if (flight.Duration <= 0)
+            {
+                errorInfo[FlightAtributes.DURATION].Add("La duracion debe ser mayor a cero");
+                hasError = true;
+            }
+
+            if (flight.FirstClassPrice < 0 || flight.TouristPrice < 0 || (flight.CarryOnPrice.HasValue && flight.CarryOnPrice < 0) || (flight.CheckedPrice.HasValue && flight.CheckedPrice < 0))
             {
                 errorInfo[FlightAtributes.PRICES].Add("Los precios no pueden ser negativos");
-                hasError = true;
-            }
-
-            if (flight.carryOnWeightKg < 0 || flight.checkedBaggageMaxWeightKg < 0 || flight.checkedBaggageMultiplierPercent < 0)
-            {
-                errorInfo[FlightAtributes.BAGGAGE].Add("Los valores de equipaje no pueden ser negativos");
                 hasError = true;
             }
 

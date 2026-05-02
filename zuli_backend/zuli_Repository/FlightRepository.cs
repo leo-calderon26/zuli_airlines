@@ -20,84 +20,123 @@ namespace zuli_Repository
 
             var sql = @"
                 INSERT INTO Flight (
-                    FlightId,
-                    aircraftId,
-                    originAirport,
-                    destinationAirport,
-                    monday,
-                    tuesday,
-                    wednesday,
-                    thursday,
-                    friday,
-                    saturday,
-                    sunday,
-                    departureTime,
-                    arrivalTime,
-                    duration,
-                    firstClassPrice,
-                    touristPrice,
-                    carryOnPrice,
-                    carryOnWeightKg,
-                    checkedBaggagePrice,
-                    checkedBaggageMaxWeightKg,
-                    checkedBaggageMultiplierPercent,
-                    availableSeats,
-                    status,
-                    createdAt
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    CheckInStartTime,
+                    CheckInDeadline,
+                    AirlineId,
+                    AircraftId,
+                    ItineraryId,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    AdminId,
+                    FlightRouteId
                 ) VALUES (
-                    @FlightId,
-                    @aircraftId,
-                    @originAirport,
-                    @destinationAirport,
-                    @monday,
-                    @tuesday,
-                    @wednesday,
-                    @thursday,
-                    @friday,
-                    @saturday,
-                    @sunday,
-                    @departureTime,
-                    @arrivalTime,
-                    @duration,
-                    @firstClassPrice,
-                    @touristPrice,
-                    @carryOnPrice,
-                    @carryOnWeightKg,
-                    @checkedBaggagePrice,
-                    @checkedBaggageMaxWeightKg,
-                    @checkedBaggageMultiplierPercent,
-                    @availableSeats,
-                    @status,
-                    @createdAt
+                    @Id,
+                    @Status,
+                    @FlightDate,
+                    @TouristPrice,
+                    @FirstClassPrice,
+                    @RealDepartureTime,
+                    @RealArrivalTime,
+                    @CheckInStartTime,
+                    @CheckInDeadline,
+                    @AirlineId,
+                    @AircraftId,
+                    @ItineraryId,
+                    @Duration,
+                    @CarryOnPrice,
+                    @CheckedPrice,
+                    @AvailableSeats,
+                    @AdminId,
+                    @FlightRouteId
                 )";
 
             return await connection.ExecuteAsync(sql, new
             {
-                flight.FlightId,
-                flight.aircraftId,
-                flight.originAirport,
-                flight.destinationAirport,
-                flight.monday,
-                flight.tuesday,
-                flight.wednesday,
-                flight.thursday,
-                flight.friday,
-                flight.saturday,
-                flight.sunday,
-                flight.departureTime,
-                flight.arrivalTime,
-                flight.duration,
-                flight.firstClassPrice,
-                flight.touristPrice,
-                flight.carryOnPrice,
-                flight.carryOnWeightKg,
-                flight.checkedBaggagePrice,
-                flight.checkedBaggageMaxWeightKg,
-                flight.checkedBaggageMultiplierPercent,
-                flight.availableSeats,
-                flight.status,
-                createdAt = DateTime.UtcNow
+                flight.Id,
+                flight.Status,
+                flight.FlightDate,
+                flight.TouristPrice,
+                flight.FirstClassPrice,
+                flight.RealDepartureTime,
+                flight.RealArrivalTime,
+                flight.CheckInStartTime,
+                flight.CheckInDeadline,
+                flight.AirlineId,
+                flight.AircraftId,
+                flight.ItineraryId,
+                flight.Duration,
+                flight.CarryOnPrice,
+                flight.CheckedPrice,
+                flight.AvailableSeats,
+                flight.AdminId,
+                flight.FlightRouteId
             });
         }
-    }
-}
+
+        public async Task<IEnumerable<FlightEntity>> GetAllFlights()
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT 
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    CheckInStartTime,
+                    CheckInDeadline,
+                    AirlineId,
+                    AircraftId,
+                    ItineraryId,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    AdminId,
+                    FlightRouteId
+                FROM Flight";
+
+            return await connection.QueryAsync<FlightEntity>(sql);
+        }
+
+        public async Task<FlightEntity> GetFlightById(Guid id)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT 
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    CheckInStartTime,
+                    CheckInDeadline,
+                    AirlineId,
+                    AircraftId,
+                    ItineraryId,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    AdminId,
+                    FlightRouteId
+                FROM Flight
+                WHERE Id = @Id";
+
+            return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
+        }
