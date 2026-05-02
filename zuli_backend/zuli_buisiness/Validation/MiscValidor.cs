@@ -17,5 +17,16 @@ namespace zuli_Buisiness.Validation
         public static bool ContainsNumbersAndChars(string input)
             => !string.IsNullOrWhiteSpace(input) &&
                Regex.IsMatch(input, @"^[A-Za-z\d/-]+$");
+
+        /// <summary>
+        /// Verifica si la cadena contiene solo letras, sin números ni caracteres especiales.
+        /// </summary>
+        /// <param name="input">Texto a validar.</param>
+        /// <returns>
+        /// <c>true</c> si tiene letras únicamente; en caso contrario, <c>false</c>.
+        /// </returns>
+        public static bool ContainsChars(string input)
+            => !string.IsNullOrWhiteSpace(input) &&
+               Regex.IsMatch(input, @"^[A-Za-z]+$");
     }
 }

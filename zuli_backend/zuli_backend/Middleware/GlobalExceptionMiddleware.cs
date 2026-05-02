@@ -7,15 +7,15 @@ using System.Diagnostics;
 
 namespace zuli_backend.Middleware
 {
-    public class GlobalExeptionMiddleware
+    public class GlobalExceptionMiddleware
     {
         // Esta variable se usa para pasar al siguente middleware sino esto se queda pegado
         private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExeptionMiddleware> _logger;
+        private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
         // TODO(you) hacer que los errores se guarden en unos logs si es que los profes lo piden
         // recuerde que el middleware es un singleton
-        public GlobalExeptionMiddleware(RequestDelegate next, ILogger<GlobalExeptionMiddleware> logger)
+        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -27,7 +27,7 @@ namespace zuli_backend.Middleware
             {
                 await _next(context);
             } 
-            catch(AppExeptions exeption)
+            catch(AppExceptions exeption)
             {
                 _logger.LogWarning(exeption, "App exception: {Code}", exeption.ErrorCode);
                 await WriteProblemAsync(
@@ -50,7 +50,7 @@ namespace zuli_backend.Middleware
             }
         }
         private async Task WriteProblemAsync(HttpContext context, int statusCode, 
-            string errorCode, string detail, AppExeptions? appEx = null, int ErrorId = -1)
+            string errorCode, string detail, AppExceptions? appEx = null, int ErrorId = -1)
         {
             context.Response.ContentType = "application/problem+json";
             context.Response.StatusCode =statusCode;

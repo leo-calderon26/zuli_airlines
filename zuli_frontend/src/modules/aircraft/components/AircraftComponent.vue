@@ -1,12 +1,13 @@
 <script setup>
-import {useAircraft} from '../componsables/useAircraft'
 import { onMounted } from 'vue';
-import { useAircraftStore } from '../stores/aircraftStrore';
+import { useAircraft } from '../composable/useAircraft';
+import { useAircraftStore } from '../store/aircraftStore';
 
-const aircraftStore = useAircraftStore(); 
+const aircraftStore = useAircraftStore();
+const { fetchAircrafts } = useAircraft();
 
-onMounted(() => {
-  useAircraft();
+onMounted(async () => {
+    await fetchAircrafts();
 })
 
 </script>

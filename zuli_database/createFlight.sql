@@ -1,0 +1,20 @@
+CREATE TABLE flight(
+	Id uniqueidentifier primary key NOT NULL,
+	Status varchar(20),
+	FlightDate DateTime,
+	TouristPrice decimal(10, 2),
+	FirstClassPrice decimal(10, 2),
+	RealDepartureTime datetime,
+	RealArrivalTime datetime,
+	CheckInStartTime datetime,
+	CheckInDeadline datetime,
+	AirlineId int NOT NULL,
+	AircraftId int NOT NULL,
+	ItineraryId int NOT NULL,
+	Duration int,
+	CarryOnPrice decimal(8, 2),
+	CheckedPrice decimal(8, 2),
+	AvailableSeats int NOT NULL,
+	AdminId int NOT NULL,
+	FlightRouteId int NOT NULL UNIQUE
+)
