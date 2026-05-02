@@ -1,7 +1,6 @@
 <script setup>
-import PublicNavBar from '../../../components/PublicNavBar.vue'
-import PublicBottomBar from '../../../components/PublicBottomBar.vue'
-import HeaderComponent from '../../../shared/HeaderComponent.vue';
+import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
 import AircraftComponent from '../components/AircraftComponent.vue';
 import AircraftNavBar from '../components/AircraftNavBar.vue';
 </script>
@@ -16,5 +15,5 @@ import AircraftNavBar from '../components/AircraftNavBar.vue';
     </div>
     <div class="size-14 grow-2"></div>
     </div>
-
+    <PublicBottomBar />
 </template>

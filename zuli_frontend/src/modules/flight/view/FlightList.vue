@@ -1,7 +1,6 @@
 <script setup>
-import PublicNavBar from '../../../components/PublicNavBar.vue'
-import PublicBottomBar from '../../../components/PublicBottomBar.vue'
-import HeaderComponent from '../../../shared/HeaderComponent.vue';
+import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
 </script>
 <template>
     <PublicNavBar/>
