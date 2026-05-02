@@ -1,6 +1,6 @@
-namespace zuli_Data.Entities
+namespace zuli_buisiness.DTO
 {
-    public class LoginResponse
+    public class LoginResponseDto
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
