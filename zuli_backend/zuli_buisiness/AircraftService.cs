@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO;
+using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 using zuli_Data.Exceptions;
-using zuli_Buisiness.Validation;
+using zuli_Business.Validation;
 
-namespace zuli_Buisiness
+namespace zuli_Business
 {
     public class AircraftService : IAircraftService
     {
@@ -51,7 +51,7 @@ namespace zuli_Buisiness
             };
         }
 
-        public async Task<IEnumerable<AircraftDTO>?> GetAll()
+        public async Task<IEnumerable<AircraftDTO>> GetAll()
         {
             // TODO(randy): Preguntar si es mejor mandar una exepcion de que esta basia la tabla si es null
             var aircraft = await _repository.GetAll();
