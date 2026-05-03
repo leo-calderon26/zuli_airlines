@@ -1,4 +1,4 @@
-namespace zuli_buisiness.DTO
+namespace zuli_Buisiness.DTO
 {
     public class LoginRequestDTO
     {
