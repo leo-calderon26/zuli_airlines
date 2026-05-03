@@ -3,7 +3,6 @@
         <PublicNavBar />
                 <h1 class="message">Profile settings en mantenimiento</h1>
     </div>
-    <PublicBottomBar />
 </template>
 
 <script>
