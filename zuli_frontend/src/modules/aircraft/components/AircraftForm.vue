@@ -167,9 +167,9 @@ async function handleSubmit() {
 }
 
 .form-label {
-    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-base
-     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 
-     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-gold;
+    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
+     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
+     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
 }
 
 .submit-btn {
