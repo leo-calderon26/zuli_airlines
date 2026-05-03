@@ -198,7 +198,6 @@ async function handleSubmit() {
 
 .form-card {
     @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
-    @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
 }
 
 .form-grid {
