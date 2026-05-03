@@ -9,7 +9,7 @@ namespace zuli_Buisiness.DTO
     public class FlightRouteDTO
     {
         [Required(ErrorMessage = "La frecuencia del vuelo es requerida")]
-        public int frequecy { get; set; }
+        public int frequency { get; set; }
         [DataType(DataType.Date)]
         public DateTime scheduledArrivalTime { get; set; }
         [DataType(DataType.Date)]
