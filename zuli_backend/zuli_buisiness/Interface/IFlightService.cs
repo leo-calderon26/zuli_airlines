@@ -9,6 +9,6 @@ namespace zuli_Buisiness.Interface
     {
         Task<BasicResponseDTO> CreateFlight(FlightDTO flight);
         Task<IEnumerable<FlightDTO>> GetAllFlights();
-        Task<FlightDTO> GetFlightById(Guid id);
+        Task<FlightDTO?> GetFlightById(Guid id);
     }
 }

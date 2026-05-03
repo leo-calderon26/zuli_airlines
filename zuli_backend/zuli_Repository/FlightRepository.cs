@@ -111,7 +111,7 @@ namespace zuli_Repository
             return await connection.QueryAsync<FlightEntity>(sql);
         }
 
-        public async Task<FlightEntity> GetFlightById(Guid id)
+        public async Task<FlightEntity?> GetFlightById(Guid id)
         {
             using var connection = _context.CreateConnection();
 
@@ -140,3 +140,5 @@ namespace zuli_Repository
 
             return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
         }
+    }
+}

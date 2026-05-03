@@ -79,7 +79,7 @@ namespace zuli_Buisiness
             }).ToList();
         }
 
-        public async Task<FlightDTO> GetFlightById(Guid id)
+        public async Task<FlightDTO?> GetFlightById(Guid id)
         {
             var flight = await _repository.GetFlightById(id);
 
@@ -108,3 +108,5 @@ namespace zuli_Buisiness
                 FlightRouteId = flight.FlightRouteId,
             };
         }
+    }
+}
