@@ -21,7 +21,7 @@
             <!-- Salir -->
             <button
                 type="button"
-                class="flex h-full w-36 flex-col items-center justify-center border-l border-white/25"
+                class="flex h-full w-36 cursor-pointer flex-col items-center justify-center border-l border-white/25 transition duration-200 hover:bg-[var(--color-select)] active:scale-95"
                 @click="goBack"
             >
                 <img
@@ -124,9 +124,10 @@
                     <div class="mt-10 flex justify-center">
                         <button
                             type="submit"
-                            class="rounded-xl bg-[var(--color-primary)] px-12 py-3 text-lg font-bold text-white transition hover:bg-[var(--color-select)]"
+                            :disabled="isLoading"
+                            class="cursor-pointer rounded-xl bg-[var(--color-primary)] px-12 py-3 text-lg font-bold text-white transition duration-200 hover:bg-[var(--color-select)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            Iniciar sesión
+                            {{ isLoading ? "Validando..." : "Iniciar sesión" }}
                         </button>
                     </div>
 
@@ -134,7 +135,7 @@
                     <div class="mt-12 text-center">
                         <button
                             type="button"
-                            class="text-xs font-bold text-black hover:underline"
+                            class="cursor-pointer text-xs font-bold text-black transition duration-200 hover:text-[var(--color-primary)] hover:underline"
                             @click="recoverPassword"
                         >
                             Recuperar contraseña
@@ -152,6 +153,7 @@
 <script>
 import logoZuli from "../../../assets/logoZuli.svg";
 import arrowDown from "../../../assets/ArrowDown.svg";
+import authService from "../services/authService";
 
 export default {
     name: "Login",
@@ -161,37 +163,57 @@ export default {
             arrowDown,
             businessEmail: "",
             password: "",
-            errorMessage: ""
+            errorMessage: "",
+            isLoading: false
         };
     },
     methods: {
-        login() {
+        async login() {
             this.errorMessage = "";
 
-            if (!this.businessEmail.trim()) {
-                this.errorMessage = "El correo electrónico es obligatorio.";
+            const validationError = this.validateLogin();
+
+            if (validationError) {
+                this.errorMessage = validationError;
                 return;
+            }
+
+            this.isLoading = true;
+
+            try {
+                const result = await authService.login({
+                    businessEmail: this.businessEmail.trim(),
+                    password: this.password
+                });
+
+                sessionStorage.setItem("businessEmail", result.businessEmail || "");
+                sessionStorage.setItem("businessId", result.businessId || "");
+                sessionStorage.setItem("userRole", result.userRole || "");
+
+                this.$router.push({ name: "home" });
+            } catch (error) {
+                this.errorMessage = error.message || "No se pudo iniciar sesión.";
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        validateLogin() {
+            if (!this.businessEmail.trim()) {
+                return "El correo electrónico es obligatorio.";
             }
 
             if (!this.businessEmail.includes("@")) {
-                this.errorMessage = "El correo electrónico no tiene un formato válido.";
-                return;
+                return "El correo electrónico no tiene un formato válido.";
             }
 
             if (!this.password) {
-                this.errorMessage = "La contraseña es obligatoria.";
-                return;
+                return "La contraseña es obligatoria.";
             }
 
-            console.log("Formulario válido. Pendiente conexión a backend.", {
-                businessEmail: this.businessEmail.trim(),
-                password: this.password
-            });
+            return null;
         },
         goBack() {
-            this.businessEmail = "";
-            this.password = "";
-            this.errorMessage = "";
+            this.$router.push({ name: "reserve" });
         },
         recoverPassword() {
             console.log("Recuperar contraseña pendiente de implementación.");
