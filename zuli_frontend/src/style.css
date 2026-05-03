@@ -1,5 +1,7 @@
 @import "tailwindcss";
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @theme {
   --color-brand-500: #3b82f6;
@@ -15,5 +17,13 @@
   --color-error: oklch(57.7% 0.245 27.325);
 }
 
-@layer base {
+@media (prefers-color-scheme: dark) {
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
 }
