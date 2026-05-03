@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO.External;
+using zuli_Business.DTO.External;
 
-namespace zuli_Buisiness.Interface
+namespace zuli_Business.Interface
 {
     public interface IExternalAuthorizationService
     {
