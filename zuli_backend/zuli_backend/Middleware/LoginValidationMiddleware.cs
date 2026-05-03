@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Validation;
+using zuli_Business.DTO;
+using zuli_Business.Validation;
 
 namespace zuli_backend.Middleware
 {

@@ -1,6 +1,6 @@
 USE ZuliAirlines
 
-CREATE TABLE [User] (
+CREATE TABLE AirlineUser (
     UserId UNIQUEIDENTIFIER PRIMARY KEY,
     BusinessEmail VARCHAR(254) NOT NULL UNIQUE,
     BusinessId VARCHAR(50) NOT NULL UNIQUE,

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO;
+using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
-namespace zuli_Buisiness
+namespace zuli_Business
 {
     public class AuthService : IAuthService
     {
