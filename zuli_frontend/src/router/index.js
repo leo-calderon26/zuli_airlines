@@ -1,9 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Flights from "../modules/flight/view/FlightList.vue"
 
 import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
+import Airports from '../modules/airport/view/Airports.vue'
+import Routes from '../modules/route/view/Routes.vue'
+import Users from '../modules/user/view/Users.vue'
+import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
+import Reports from '../modules/reports/view/Reports.vue'
 
 import Login from"../modules/auth/view/Login.vue"
 import authService from "../modules/auth/services/authService";
@@ -22,17 +29,17 @@ const router = createRouter({
             component: ReserveView
         },
         {
-            path: "/flights",
-            name: "home",
-            component: FlightList
+            path: "/admin/",
+            name: "mainMenu",
+            component: MainMenu
         },
         {
-            path: "/aircraft",
+            path: "/admin/aircrafts/",
             name: "aircraftList",
             component: AircraftList
         },
         {
-            path: "/create-aircraft",
+            path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
         },
@@ -52,6 +59,35 @@ const router = createRouter({
             component: HelpView
         },
         {
+            path: "/admin/airports",
+            name: "airports",
+            component: Airports
+        },
+        {
+            path: "/admin/routes",
+            name: "routes",
+            component: Routes
+        },
+         {
+            path: "/admin/flights",
+            name: "flights",
+            component: Flights
+        },
+        {
+            path: "/admin/users",
+            name: "users",
+            component: Users
+        },
+        {
+            path: "/admin/reports",
+            name: "reports",
+            component: Reports
+        },
+        {
+            path: "/admin/profile-settings",
+            name: "profileSettings",
+            component: ProfileSettings
+        },
             path: "/administrativo",
             name: "administrativo",
             component: Login

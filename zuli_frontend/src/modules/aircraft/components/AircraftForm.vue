@@ -1,56 +1,149 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAircraft } from '../composable/useAircraft';
 
-const emit = defineEmits(['submit']);
+const router = useRouter();
+const { addAircraft } = useAircraft();
+
+// ID del administrador
+const ADMIN_ID = 'F25DF80C-B7D9-4A4C-88FB-90BA8D488541';
 
 const form = reactive({
     model: '',
-    weight: 0,
+    weight: null,
     numberEconomyClassRows: 0,
     numberSeatingRowsEconomy: 0,
     numberFirstClassRows: 0,
     numberSeatingRowsFirst: 0,
 });
 
-const fields = [
-    { key: 'model', label: 'Modelo', type: 'text', min: undefined, step: undefined },
-    { key: 'weight', label: 'Peso (kg)', type: 'number', min: 1, step: 1 },
-    { key: 'numberEconomyClassRows', label: 'Filas clase economica', type: 'number', min: 0, step: 1 },
-    { key: 'numberSeatingRowsEconomy', label: 'Asientos por fila economica', type: 'number', min: 0, step: 1 },
-    { key: 'numberFirstClassRows', label: 'Filas primera clase', type: 'number', min: 0, step: 1 },
-    { key: 'numberSeatingRowsFirst', label: 'Asientos por fila primera clase', type: 'number', min: 0, step: 1 },
-];
+const errors = reactive({
+    global: '',
+    fields: {},
+});
 
-const handleSubmit = () => {
-    emit('submit', { ...form });
-};
+const modelPattern = /^[A-Za-z0-9-]{1,15}$/;
+
+const totalSeats = computed(() => {
+    const econ = Number(form.numberEconomyClassRows) * Number(form.numberSeatingRowsEconomy);
+    const first = Number(form.numberFirstClassRows) * Number(form.numberSeatingRowsFirst);
+    return Number.isFinite(econ + first) ? econ + first : 0;
+});
+
+function isIntegerLike(value) {
+    return Number.isInteger(Number(value)) && String(value) !== '';
+}
+
+function validate() {
+    errors.global = '';
+    errors.fields = {};
+    if (!form.model || !modelPattern.test(form.model)) {
+        errors.fields.model = 'Modelo inválido (máx 15 letras/números o guion)';
+    }
+    if (form.weight === null || form.weight === '' || Number(form.weight) <= 0 || isNaN(Number(form.weight))) {
+        errors.fields.weight = 'Peso inválido';
+    }
+    const countFields = ['numberEconomyClassRows', 'numberSeatingRowsEconomy', 'numberFirstClassRows', 'numberSeatingRowsFirst'];
+    for (const key of countFields) {
+        const val = form[key];
+        if (val === '' || val === null || isNaN(Number(val)) || Number(val) < 0 || !isIntegerLike(val)) {
+            errors.fields[key] = 'Debe ingresar valores numéricos válidos mayores o iguales a cero';
+        }
+    }
+    if (totalSeats.value >= 1000) {
+        errors.fields.totalSeats = 'El número total de asientos debe ser menor a 1000';
+    }
+    return Object.keys(errors.fields).length === 0 && errors.global === '';
+}
+
+async function handleSubmit() {
+    if (!validate()) {
+        if (errors.global) alert(errors.global);
+        return;
+    }
+
+    const baggageCapacity = Number((Number(form.weight) * 0.3).toFixed(4));
+
+    const aircraft = {
+        model: form.model,
+        capacity: totalSeats.value,
+        weight: Number(form.weight),
+        numberEconomyClassRows: Number(form.numberEconomyClassRows),
+        numberSeatingRowsEconomy: Number(form.numberSeatingRowsEconomy),
+        numberFirstClassRows: Number(form.numberFirstClassRows),
+        numberSeatingRowsFirst: Number(form.numberSeatingRowsFirst),
+        baggageCapacity,
+        adminId: ADMIN_ID,
+    };
+
+    try {
+        await addAircraft(aircraft);
+        alert('La aeronave se ha creado correctamente');
+        router.push({ name: 'aircraftList' });
+    } catch (error) {
+        errors.global = error.response?.data?.message || 'Error al crear la aeronave';
+        alert(errors.global);
+    }
+}
 </script>
 
 <template>
     <form class="form-card" @submit.prevent="handleSubmit">
         <div class="form-grid">
-            <div v-for="field in fields" :key="field.key" class="form-field group">
-                <input
-                    :id="field.key"
-                    v-model="form[field.key]"
-                    :name="field.key"
-                    :type="field.type"
-                    :min="field.min"
-                    :step="field.step"
-                    class="form-input peer"
-                    placeholder=" "
-                    required
-                />
-                <label :for="field.key" class="form-label">
-                    {{ field.label }}
-                </label>
+            <div class="form-field group">
+                <input id="model" v-model="form.model" name="model" type="text" class="form-input peer" placeholder=" " />
+                <label for="model" class="form-label">Modelo</label>
+                <p v-if="errors.fields.model" class="text-sm text-error">{{ errors.fields.model }}</p>
+            </div>
+
+            <div class="form-field group">
+                <input id="capacity" v-model="totalSeats" name="capacity" type="number" disabled class="form-input peer" placeholder=" " />
+                <label for="capacity" class="form-label">Capacidad (Calculada)</label>
+            </div>
+
+            <div class="form-field group">
+                <input id="weight" v-model="form.weight" name="weight" type="number" min="1" step="1" class="form-input peer" placeholder=" " />
+                <label for="weight" class="form-label">Peso soportado por la aeronave(kg)</label>
+                <p v-if="errors.fields.weight" class="text-sm text-error">{{ errors.fields.weight }}</p>
+            </div>
+
+            <div class="form-field group">
+                <input id="numberEconomyClassRows" v-model="form.numberEconomyClassRows" name="numberEconomyClassRows" type="number" min="0"
+                 step="1" class="form-input peer" placeholder=" " />
+                <label for="numberEconomyClassRows" class="form-label">Filas clase económica</label>
+                <p v-if="errors.fields.numberEconomyClassRows" class="text-sm text-error">{{ errors.fields.numberEconomyClassRows }}</p>
+            </div>
+
+            <div class="form-field group">
+                <input id="numberSeatingRowsEconomy" v-model="form.numberSeatingRowsEconomy" name="numberSeatingRowsEconomy" type="number" min="0" 
+                step="1" class="form-input peer" placeholder=" " />
+                <label for="numberSeatingRowsEconomy" class="form-label">Asientos por fila económica</label>
+                <p v-if="errors.fields.numberSeatingRowsEconomy" class="text-sm text-error">{{ errors.fields.numberSeatingRowsEconomy }}</p>
+            </div>
+
+            <div class="form-field group">
+                <input id="numberFirstClassRows" v-model="form.numberFirstClassRows" name="numberFirstClassRows" type="number" min="0" step="1" 
+                class="form-input peer" placeholder=" " />
+                <label for="numberFirstClassRows" class="form-label">Filas primera clase</label>
+                <p v-if="errors.fields.numberFirstClassRows" class="text-sm text-error">{{ errors.fields.numberFirstClassRows }}</p>
+            </div>
+
+            <div class="form-field group">
+                <input id="numberSeatingRowsFirst" v-model="form.numberSeatingRowsFirst" name="numberSeatingRowsFirst" type="number" min="0" step="1" 
+                class="form-input peer" placeholder=" " />
+                <label for="numberSeatingRowsFirst" class="form-label">Asientos por fila primera clase</label>
+                <p v-if="errors.fields.numberSeatingRowsFirst" class="text-sm text-error">{{ errors.fields.numberSeatingRowsFirst }}</p>
             </div>
         </div>
 
-        <button type="submit" class="submit-btn">
-            Guardar aeronave
-        </button>
+        <div v-if="errors.fields.totalSeats" class="mt-2 text-p">{{ errors.fields.totalSeats }}</div>
+
+        <div class="mt-4">
+            <button type="submit" class="submit-btn">Guardar aeronave</button>
+        </div>
     </form>
+    
 </template>
 
 <style scoped>

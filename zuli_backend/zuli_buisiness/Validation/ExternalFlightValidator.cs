@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO.External;
+using zuli_Business.DTO.External;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     // Esto son tag pasa saber donde esta el error
     public static class FlightAtributes
