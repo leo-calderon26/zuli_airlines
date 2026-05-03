@@ -216,7 +216,6 @@ async function handleSubmit() {
       </div>
     </main>
   </div>
-  <PublicBottomBar />
 </template>
 
 <style scoped>
