@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using zuli_buisiness.DTO;
+using zuli_Buisiness.DTO;
 
-namespace zuli_buisiness.Validation
+namespace zuli_Buisiness.Validation
 {
     public class LoginValidator
     {

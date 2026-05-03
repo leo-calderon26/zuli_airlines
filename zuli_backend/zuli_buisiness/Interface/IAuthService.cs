@@ -1,6 +1,6 @@
-using zuli_buisiness.DTO;
+using zuli_Buisiness.DTO;
 
-namespace zuli_buisiness.Interface
+namespace zuli_Buisiness.Interface
 {
 	public interface IAuthService
 	{
