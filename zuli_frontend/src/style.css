@@ -1,5 +1,7 @@
 @import "tailwindcss";
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @theme {
   --color-brand-500: #3b82f6;
@@ -10,7 +12,17 @@
   --color-body: #F3F3F3;
   --color-select: #2B0909;
   --color-gold: #8F8029;
+  --color-purple: #e8def8;
+  --radius-base: 12px;
 }
 
-@layer base {
+@media (prefers-color-scheme: dark) {
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
 }
