@@ -2,7 +2,6 @@
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
 
 export default {
   components: {
