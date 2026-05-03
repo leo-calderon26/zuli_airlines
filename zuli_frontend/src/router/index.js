@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import FlightList from "../modules/flight/view/FlightList.vue"
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import Login from"../modules/auth/view/Login.vue"
 
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
@@ -49,7 +50,7 @@ const router = createRouter({
         {
             path: "/administrativo",
             name: "administrativo",
-            component: HelpView
+            component: Login
         }
     ]
 });
