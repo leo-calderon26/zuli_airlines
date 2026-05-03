@@ -9,7 +9,7 @@ namespace zuli_Buisiness.Validation
 {
     public static class FlightRouteAtributes
     {
-        public const string FREQUECY = "Frequecy";
+        public const string FREQUENCY = "Frequency";
         public const string SCHEDULED_ARRIVAL_TIME = "ScheduledArrivalTime";
         public const string SCHEDULED_DEPARTURE_TIME = "ScheduledDepartureTime";
         public const string ESTIMATED_DURATION = "EstimatedDuration";
@@ -23,7 +23,7 @@ namespace zuli_Buisiness.Validation
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
-                {FlightRouteAtributes.FREQUECY, new List<string>() },
+                {FlightRouteAtributes.FREQUENCY, new List<string>() },
                 {FlightRouteAtributes.SCHEDULED_ARRIVAL_TIME, new List<string>() },
                 {FlightRouteAtributes.SCHEDULED_DEPARTURE_TIME, new List<string>() },
                 {FlightRouteAtributes.ESTIMATED_DURATION, new List<string>() },
@@ -33,9 +33,9 @@ namespace zuli_Buisiness.Validation
                 {FlightRouteAtributes.DEPARTURE_AIRPORT, new List<string>() },
             };
             var IsEmptyInfo = false;
-            if (flightRoute.frequecy < 0)
+            if (flightRoute.frequency < 0)
             {
-                errorInfo[FlightRouteAtributes.FREQUECY].Add("La frecuencia del vuelo tiene que ser un numero entero positivo");
+                errorInfo[FlightRouteAtributes.FREQUENCY].Add("La frecuencia del vuelo tiene que ser un numero entero positivo");
                 IsEmptyInfo = true;
             }
             if (flightRoute.estimatedDuration < 0)
@@ -77,8 +77,6 @@ namespace zuli_Buisiness.Validation
                     throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
             }
         }
-
-
     }
 
 }

@@ -35,7 +35,7 @@ namespace zuli_Buisiness
                 departureAirport = flightRoute.departureAirport,
                 scheduledArrivalTime = flightRoute.scheduledArrivalTime,
                 scheduledDepartureTime = flightRoute.scheduledDepartureTime,
-                frequency = flightRoute.frequecy,
+                frequency = flightRoute.frequency,
                 estimatedDuration = flightRoute.estimatedDuration
             };
 
