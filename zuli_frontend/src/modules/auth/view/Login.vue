@@ -190,7 +190,7 @@ export default {
                 sessionStorage.setItem("businessId", result.businessId || "");
                 sessionStorage.setItem("userRole", result.userRole || "");
 
-                this.$router.push({ name: "home" });
+                this.$router.push({ name: "mainMenu" });
             } catch (error) {
                 this.errorMessage = error.message || "No se pudo iniciar sesión.";
             } finally {
