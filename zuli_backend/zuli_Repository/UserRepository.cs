@@ -16,7 +16,7 @@ namespace zuli_Repository
 
         public async Task<AppUser?> GetByBusinessEmailAsync(string businessEmail)
         {
-            using var connection = dapperContext.CreateConnection();
+            using var connection = _dapperContext.CreateConnection();
 
             var sql = @"
                 SELECT
@@ -29,7 +29,7 @@ namespace zuli_Repository
                     FailedLoginAttempts,
                     LockoutEnd,
                     ManagedByAdminId
-                FROM AirlineUser
+                FROM [User]
                 WHERE BusinessEmail = @BusinessEmail;
             ";
 
@@ -41,10 +41,10 @@ namespace zuli_Repository
 
         public async Task UpdateLoginStateAsync(AppUser user)
         {
-            using var connection = dapperContext.CreateConnection();
+            using var connection = _dapperContext.CreateConnection();
 
             var sql = @"
-                UPDATE AirlineUser
+                UPDATE [User]
                 SET
                     FailedLoginAttempts = @FailedLoginAttempts,
                     LockoutEnd = @LockoutEnd

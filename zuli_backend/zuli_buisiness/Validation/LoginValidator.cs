@@ -8,26 +8,39 @@ namespace zuli_Business.Validation
     {
         public void Validate(LoginRequestDTO? request)
         {
-            Dictionary<string, string[]> errors = [];
+            var errors = new Dictionary<string, List<string>>();
 
             if (request == null)
             {
-                errors["request"] = ["Solicitud inválida."];
+                errors["request"] = new List<string>
+                {
+                    "Solicitud inválida."
+                };
+
                 throw new ZuliValidationException(errors);
             }
 
             if (string.IsNullOrWhiteSpace(request.BusinessEmail))
             {
-                errors["businessEmail"] = ["El correo es obligatorio."];
+                errors["businessEmail"] = new List<string>
+                {
+                    "El correo es obligatorio."
+                };
             }
             else if (!Regex.IsMatch(request.BusinessEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                errors["businessEmail"] = ["El correo no tiene un formato válido."];
+                errors["businessEmail"] = new List<string>
+                {
+                    "El correo no tiene un formato válido."
+                };
             }
 
             if (string.IsNullOrWhiteSpace(request.Password))
             {
-                errors["password"] = ["La contraseña es obligatoria."];
+                errors["password"] = new List<string>
+                {
+                    "La contraseña es obligatoria."
+                };
             }
 
             if (errors.Count > 0)

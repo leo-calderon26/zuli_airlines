@@ -88,6 +88,7 @@ const router = createRouter({
             name: "profileSettings",
             component: ProfileSettings
         },
+        {
             path: "/administrativo",
             name: "administrativo",
             component: Login
