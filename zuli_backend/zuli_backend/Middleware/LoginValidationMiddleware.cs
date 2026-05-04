@@ -50,9 +50,12 @@ namespace zuli_backend.Middleware
             }
             catch (JsonException)
             {
-                Dictionary<string, string[]> errors = new()
+                var errors = new Dictionary<string, List<string>>
                 {
-                    ["request"] = ["Solicitud inválida."]
+                    ["request"] = new List<string>
+                    {
+                        "Solicitud inválida."
+                    }
                 };
 
                 throw new ZuliValidationException(errors);
