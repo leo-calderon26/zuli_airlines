@@ -7,18 +7,18 @@ namespace zuli_Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly DapperContext dapperContext;
+        private readonly DapperContext _dapperContext;
 
         public UserRepository(DapperContext dapperContext)
         {
-            this.dapperContext = dapperContext;
+            this._dapperContext = dapperContext;
         }
 
         public async Task<AppUser?> GetByBusinessEmailAsync(string businessEmail)
         {
             using var connection = dapperContext.CreateConnection();
 
-            string sql = @"
+            var sql = @"
                 SELECT
                     UserId,
                     BusinessEmail,
@@ -29,7 +29,7 @@ namespace zuli_Repository
                     FailedLoginAttempts,
                     LockoutEnd,
                     ManagedByAdminId
-                FROM [User]
+                FROM AirlineUser
                 WHERE BusinessEmail = @BusinessEmail;
             ";
 
@@ -43,8 +43,8 @@ namespace zuli_Repository
         {
             using var connection = dapperContext.CreateConnection();
 
-            string sql = @"
-                UPDATE [User]
+            var sql = @"
+                UPDATE AirlineUser
                 SET
                     FailedLoginAttempts = @FailedLoginAttempts,
                     LockoutEnd = @LockoutEnd

@@ -1,47 +1,64 @@
 using Microsoft.AspNetCore.Identity;
-using zuli_Business.DTO;
-using zuli_Business.Interface;
+using zuli_Buisiness.DTO;
+using zuli_Buisiness.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
-namespace zuli_Business
+namespace zuli_Buisiness
 {
     public class AuthService : IAuthService
     {
         private const int MaxFailedAttempts = 5;
         private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
-        private readonly IUserRepository userRepository;
-        private readonly PasswordHasher<AppUser> passwordHasher;
+        private readonly IUserRepository _userRepository;
+        private readonly PasswordHasher<AppUser> _passwordHasher;
 
         public AuthService(IUserRepository userRepository)
         {
-            this.userRepository = userRepository;
-            passwordHasher = new PasswordHasher<AppUser>();
+            _userRepository = userRepository;
+            _passwordHasher = new PasswordHasher<AppUser>();
         }
 
         public async Task<AuthResultDTO> LoginAsync(LoginRequestDTO request)
         {
+            var failedLogin = new AuthResultDTO
+            {
+                Success = false,
+                Message = "Correo o contraseña incorrectos.",
+                User = null,
+                Response = new LoginResponseDTO
+                {
+                    Success = false,
+                    Message = "Correo o contraseña incorrectos."
+                }
+            };
+
             string businessEmail = request.BusinessEmail.Trim().ToLower();
 
-            AppUser? user = await userRepository.GetByBusinessEmailAsync(businessEmail);
+            AppUser? user = await _userRepository.GetByBusinessEmailAsync(businessEmail);
 
             if (user == null)
             {
-                return FailedLogin();
+                return failedLogin;
             }
 
             if (!user.IsActive)
             {
-                return FailedLogin();
+                return failedLogin;
+            }
+
+            if (string.IsNullOrWhiteSpace(user.PasswordHash))
+            {
+                return failedLogin;
             }
 
             if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
             {
-                return FailedLogin();
+                return failedLogin;
             }
 
-            PasswordVerificationResult passwordResult = passwordHasher.VerifyHashedPassword(
+            PasswordVerificationResult passwordResult = _passwordHasher.VerifyHashedPassword(
                 user,
                 user.PasswordHash,
                 request.Password
@@ -56,30 +73,50 @@ namespace zuli_Business
                     user.LockoutEnd = DateTime.UtcNow.Add(LockoutDuration);
                 }
 
-                await userRepository.UpdateLoginStateAsync(user);
+                await _userRepository.UpdateLoginStateAsync(user);
 
-                return FailedLogin();
+                return failedLogin;
             }
 
             user.FailedLoginAttempts = 0;
             user.LockoutEnd = null;
 
-            await userRepository.UpdateLoginStateAsync(user);
+            await _userRepository.UpdateLoginStateAsync(user);
 
             return new AuthResultDTO
             {
                 Success = true,
                 Message = "Login exitoso.",
-                User = user
+                User = user,
+                Response = new LoginResponseDTO
+                {
+                    Success = true,
+                    Message = "Login exitoso.",
+                    BusinessEmail = user.BusinessEmail,
+                    BusinessId = user.BusinessId,
+                    UserRole = user.UserRole
+                }
             };
         }
 
-        private AuthResultDTO FailedLogin()
+        public LoginResponseDTO BuildAuthenticatedUserResponse(string? businessEmail, string? businessId, string? userRole)
         {
-            return new AuthResultDTO
+            return new LoginResponseDTO
             {
-                Success = false,
-                Message = "Correo o contraseña incorrectos."
+                Success = true,
+                Message = "Usuario autenticado.",
+                BusinessEmail = businessEmail,
+                BusinessId = businessId,
+                UserRole = userRole
+            };
+        }
+
+        public LoginResponseDTO BuildLogoutResponse()
+        {
+            return new LoginResponseDTO
+            {
+                Success = true,
+                Message = "Sesión cerrada."
             };
         }
     }

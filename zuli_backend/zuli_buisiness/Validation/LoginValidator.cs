@@ -1,33 +1,39 @@
 using System.Text.RegularExpressions;
 using zuli_Business.DTO;
+using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
 {
     public class LoginValidator
     {
-        public string? Validate(LoginRequestDTO? request)
+        public void Validate(LoginRequestDTO? request)
         {
+            Dictionary<string, string[]> errors = [];
+
             if (request == null)
             {
-                return "Solicitud inválida.";
+                errors["request"] = ["Solicitud inválida."];
+                throw new ZuliValidationException(errors);
             }
 
             if (string.IsNullOrWhiteSpace(request.BusinessEmail))
             {
-                return "El correo es obligatorio.";
+                errors["businessEmail"] = ["El correo es obligatorio."];
             }
-
-            if (!Regex.IsMatch(request.BusinessEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            else if (!Regex.IsMatch(request.BusinessEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                return "El correo no tiene un formato válido.";
+                errors["businessEmail"] = ["El correo no tiene un formato válido."];
             }
 
             if (string.IsNullOrWhiteSpace(request.Password))
             {
-                return "La contraseña es obligatoria.";
+                errors["password"] = ["La contraseña es obligatoria."];
             }
 
-            return null;
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
         }
     }
 }
