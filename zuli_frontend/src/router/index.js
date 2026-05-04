@@ -8,6 +8,7 @@ import Routes from '../modules/route/view/Routes.vue'
 import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
+import FlightCreate from "../modules/flight/view/FlightCreate.vue"
 
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
@@ -36,6 +37,11 @@ const router = createRouter({
             path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
+        },
+        {
+            path: "/create-flight",
+            name: "createFlight",
+            component: FlightCreate
         },
         {
             path: "/check-in",
