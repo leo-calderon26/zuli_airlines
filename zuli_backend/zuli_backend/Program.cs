@@ -142,8 +142,6 @@ app.UseCors("FrontendPolicy");
 
 app.UseRateLimiter();
 
-// Si ya creaste LoginValidationMiddleware, dejalo activo.
-// Si todavía no lo creaste o te da error, comentá esta línea temporalmente.
 app.UseMiddleware<LoginValidationMiddleware>();
 
 app.UseAuthentication();

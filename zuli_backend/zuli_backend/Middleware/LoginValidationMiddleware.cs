@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using zuli_Business.DTO;
 using zuli_Business.Validation;
+using zuli_Data.Exceptions;
 
 namespace zuli_backend.Middleware
 {
@@ -49,17 +50,15 @@ namespace zuli_backend.Middleware
             }
             catch (JsonException)
             {
-                await WriteErrorAsync(context, "Solicitud inválida.");
-                return;
+                Dictionary<string, string[]> errors = new()
+                {
+                    ["request"] = ["Solicitud inválida."]
+                };
+
+                throw new ZuliValidationException(errors);
             }
 
-            string? error = loginValidator.Validate(request);
-
-            if (error != null)
-            {
-                await WriteErrorAsync(context, error);
-                return;
-            }
+            loginValidator.Validate(request);
 
             await next(context);
         }
@@ -69,18 +68,5 @@ namespace zuli_backend.Middleware
             return context.Request.Path.StartsWithSegments("/api/auth/login")
                 && context.Request.Method == HttpMethods.Post;
         }
-
-        private static async Task WriteErrorAsync(HttpContext context, string message)
-        {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            context.Response.ContentType = "application/json";
-
-            await context.Response.WriteAsJsonAsync(new LoginResponseDTO
-            {
-                Success = false,
-                Message = message
-            });
-        }
     }
 }
-
