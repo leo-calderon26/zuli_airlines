@@ -3,9 +3,110 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
 
-export default {
-  components: {
-    PublicNavBar
+const router = useRouter();
+
+const form = reactive({
+  origin: '',
+  destination: '',
+  departureTime: '',
+  arrivalTime: '',
+  duration: '',
+  frequency: [],
+});
+
+const errors = reactive({
+  global: '',
+  fields: {},
+});
+
+const daysOfWeek = [
+  { value: 'mon', label: 'Lunes' },
+  { value: 'tue', label: 'Martes' },
+  { value: 'wed', label: 'Miercoles' },
+  { value: 'thu', label: 'Jueves' },
+  { value: 'fri', label: 'Viernes' },
+  { value: 'sat', label: 'Sabado' },
+  { value: 'sun', label: 'Domingo' },
+];
+
+const airportCodePattern = /^[A-Za-z0-9]{3}$/;
+const utcTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function normalizeCode(value) {
+  return String(value || '').toUpperCase().trim();
+}
+
+function isIntegerLike(value) {
+  return Number.isInteger(Number(value)) && String(value) !== '';
+}
+
+function validate() {
+  errors.global = '';
+  errors.fields = {};
+
+  const origin = normalizeCode(form.origin);
+  const destination = normalizeCode(form.destination);
+
+  if (!origin || !airportCodePattern.test(origin)) {
+    errors.fields.origin = 'Origen invalido (3 caracteres, sin especiales)';
+  }
+
+  if (!destination || !airportCodePattern.test(destination)) {
+    errors.fields.destination = 'Destino invalido (3 caracteres, sin especiales)';
+  }
+
+  if (origin && destination && origin === destination) {
+    errors.fields.destination = 'El origen y el destino no pueden ser iguales';
+  }
+
+  if (!form.departureTime || !utcTimePattern.test(form.departureTime)) {
+    errors.fields.departureTime = 'Hora de salida invalida (UTC HH:MM)';
+  }
+
+  if (!form.arrivalTime || !utcTimePattern.test(form.arrivalTime)) {
+    errors.fields.arrivalTime = 'Hora de llegada invalida (UTC HH:MM)';
+  }
+
+  if (
+    form.duration === '' ||
+    form.duration === null ||
+    isNaN(Number(form.duration)) ||
+    !isIntegerLike(form.duration) ||
+    Number(form.duration) <= 0 ||
+    Number(form.duration) > 99
+  ) {
+    errors.fields.duration = 'Duracion invalida (maximo 2 digitos)';
+  }
+
+  if (!Array.isArray(form.frequency) || form.frequency.length === 0) {
+    errors.fields.frequency = 'Debe seleccionar al menos un dia';
+  }
+
+  return Object.keys(errors.fields).length === 0 && errors.global === '';
+}
+
+async function handleSubmit() {
+  if (!validate()) {
+    if (errors.global) alert(errors.global);
+    return;
+  }
+
+  const routePayload = {
+    origin: normalizeCode(form.origin),
+    destination: normalizeCode(form.destination),
+    departureTime: form.departureTime,
+    arrivalTime: form.arrivalTime,
+    duration: Number(form.duration),
+    frequency: [...form.frequency],
+  };
+
+  try {
+    console.log('Route payload', routePayload);
+    alert('La ruta se ha creado correctamente');
+    router.push({ name: 'routes' });
+  } catch (error) {
+    errors.global = error.response?.data?.message || 'Error al crear la ruta';
+    alert(errors.global);
   }
 }
 </script>
