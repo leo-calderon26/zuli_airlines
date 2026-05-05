@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Data.Entites
+namespace zuli_Data.Entities
 {
     public class FlightRouteEntity
     {

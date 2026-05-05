@@ -14,6 +14,7 @@ using zuli_Business.Interface;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
+using zuli_Business.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 

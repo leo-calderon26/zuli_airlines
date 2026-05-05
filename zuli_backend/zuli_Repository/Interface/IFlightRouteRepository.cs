@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Data.Entites;
 using zuli_Data.Entities;
 
 namespace zuli_Repository.Interface

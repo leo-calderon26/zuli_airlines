@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     public static class FlightRouteAtributes
     {
-<<<<<<< HEAD
         public const string FREQUENCY = "Frequency";
-=======
-        public const string FREQUECY = "Frequecy";
->>>>>>> 7ea229a (Implementación de la entidad y servicio para la ruta de vuelo, incluyendo validaciones y DTOs)
         public const string SCHEDULED_ARRIVAL_TIME = "ScheduledArrivalTime";
         public const string SCHEDULED_DEPARTURE_TIME = "ScheduledDepartureTime";
         public const string ESTIMATED_DURATION = "EstimatedDuration";
@@ -27,11 +21,7 @@ namespace zuli_Buisiness.Validation
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
-<<<<<<< HEAD
                 {FlightRouteAtributes.FREQUENCY, new List<string>() },
-=======
-                {FlightRouteAtributes.FREQUECY, new List<string>() },
->>>>>>> 7ea229a (Implementación de la entidad y servicio para la ruta de vuelo, incluyendo validaciones y DTOs)
                 {FlightRouteAtributes.SCHEDULED_ARRIVAL_TIME, new List<string>() },
                 {FlightRouteAtributes.SCHEDULED_DEPARTURE_TIME, new List<string>() },
                 {FlightRouteAtributes.ESTIMATED_DURATION, new List<string>() },
@@ -41,15 +31,9 @@ namespace zuli_Buisiness.Validation
                 {FlightRouteAtributes.DEPARTURE_AIRPORT, new List<string>() },
             };
             var IsEmptyInfo = false;
-<<<<<<< HEAD
             if (flightRoute.frequency < 0)
             {
                 errorInfo[FlightRouteAtributes.FREQUENCY].Add("La frecuencia del vuelo tiene que ser un numero entero positivo");
-=======
-            if (flightRoute.frequecy < 0)
-            {
-                errorInfo[FlightRouteAtributes.FREQUECY].Add("La frecuencia del vuelo tiene que ser un numero entero positivo");
->>>>>>> 7ea229a (Implementación de la entidad y servicio para la ruta de vuelo, incluyendo validaciones y DTOs)
                 IsEmptyInfo = true;
             }
             if (flightRoute.estimatedDuration < 0)
@@ -91,11 +75,5 @@ namespace zuli_Buisiness.Validation
                     throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
             }
         }
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 7ea229a (Implementación de la entidad y servicio para la ruta de vuelo, incluyendo validaciones y DTOs)
     }
-
 }

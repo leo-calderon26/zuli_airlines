@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using zuli_Data;
-using zuli_Data.Entites;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 

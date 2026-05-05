@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Timers;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
     public class FlightRouteDTO
     {
         [Required(ErrorMessage = "La frecuencia del vuelo es requerida")]
-<<<<<<< HEAD
         public int frequency { get; set; }
-=======
-        public int frequecy { get; set; }
->>>>>>> 7ea229a (Implementación de la entidad y servicio para la ruta de vuelo, incluyendo validaciones y DTOs)
         [DataType(DataType.Date)]
         public DateTime scheduledArrivalTime { get; set; }
         [DataType(DataType.Date)]
