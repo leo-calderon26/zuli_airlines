@@ -1,15 +1,14 @@
 <template>
   <div class="landing-page">
     <PublicNavBar />
-    <h1 class = "message">Airports en mantenimiento</h1>
+    <h1 class = "message">Users en mantenimiento</h1>
     <PublicBottomBar />
   </div>
-<PublicBottomBar />
 </template>
 
 <script>
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
+import PublicNavBar from '../components/PublicNavBar.vue'
+import PublicBottomBar from '../components/PublicBottomBar.vue'
 
 export default {
   components: {
