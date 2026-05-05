@@ -11,7 +11,7 @@ namespace zuli_Repository
 
         public UserRepository(DapperContext dapperContext)
         {
-            this._dapperContext = dapperContext;
+            _dapperContext = dapperContext;
         }
 
         public async Task<AppUser?> GetByBusinessEmailAsync(string businessEmail)
@@ -21,22 +21,129 @@ namespace zuli_Repository
             var sql = @"
                 SELECT
                     UserId,
+                    NationalId,
                     BusinessEmail,
                     BusinessId,
+                    FirstName,
+                    FirstLastName,
+                    SecondLastName,
                     UserRole,
                     PasswordHash,
                     IsActive,
                     FailedLoginAttempts,
                     LockoutEnd,
-                    ManagedByAdminId
+                    ManagedByAdminId,
+                    ActivationTokenHash
                 FROM AirlineUser
                 WHERE BusinessEmail = @BusinessEmail;
             ";
 
-            return await connection.QueryFirstOrDefaultAsync<AppUser>(
+            return await connection.QuerySingleOrDefaultAsync<AppUser>(
                 sql,
                 new { BusinessEmail = businessEmail }
             );
+        }
+
+        public async Task<AppUser?> GetByNationalIdAsync(string nationalId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            var sql = @"
+                SELECT
+                    UserId,
+                    NationalId,
+                    BusinessEmail,
+                    BusinessId,
+                    FirstName,
+                    FirstLastName,
+                    SecondLastName,
+                    UserRole,
+                    PasswordHash,
+                    IsActive,
+                    FailedLoginAttempts,
+                    LockoutEnd,
+                    ManagedByAdminId,
+                    ActivationTokenHash
+                FROM AirlineUser
+                WHERE NationalId = @NationalId;
+            ";
+
+            return await connection.QuerySingleOrDefaultAsync<AppUser>(
+                sql,
+                new { NationalId = nationalId }
+            );
+        }
+
+        public async Task<AppUser?> GetByActivationTokenHashAsync(string activationTokenHash)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            var sql = @"
+                SELECT
+                    UserId,
+                    NationalId,
+                    BusinessEmail,
+                    BusinessId,
+                    FirstName,
+                    FirstLastName,
+                    SecondLastName,
+                    UserRole,
+                    PasswordHash,
+                    IsActive,
+                    FailedLoginAttempts,
+                    LockoutEnd,
+                    ManagedByAdminId,
+                    ActivationTokenHash
+                FROM AirlineUser
+                WHERE ActivationTokenHash = @ActivationTokenHash;
+            ";
+
+            return await connection.QuerySingleOrDefaultAsync<AppUser>(
+                sql,
+                new { ActivationTokenHash = activationTokenHash }
+            );
+        }
+
+        public async Task CreatePendingUserAsync(AppUser user)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            var sql = @"
+                INSERT INTO AirlineUser (
+                    UserId,
+                    NationalId,
+                    BusinessEmail,
+                    BusinessId,
+                    FirstName,
+                    FirstLastName,
+                    SecondLastName,
+                    UserRole,
+                    PasswordHash,
+                    IsActive,
+                    FailedLoginAttempts,
+                    LockoutEnd,
+                    ManagedByAdminId,
+                    ActivationTokenHash
+                )
+                VALUES (
+                    @UserId,
+                    @NationalId,
+                    @BusinessEmail,
+                    @BusinessId,
+                    @FirstName,
+                    @FirstLastName,
+                    @SecondLastName,
+                    @UserRole,
+                    @PasswordHash,
+                    @IsActive,
+                    @FailedLoginAttempts,
+                    @LockoutEnd,
+                    @ManagedByAdminId,
+                    @ActivationTokenHash
+                );
+            ";
+
+            await connection.ExecuteAsync(sql, user);
         }
 
         public async Task UpdateLoginStateAsync(AppUser user)
@@ -51,12 +158,25 @@ namespace zuli_Repository
                 WHERE UserId = @UserId;
             ";
 
-            await connection.ExecuteAsync(sql, new
-            {
-                user.UserId,
-                user.FailedLoginAttempts,
-                user.LockoutEnd
-            });
+            await connection.ExecuteAsync(sql, user);
+        }
+
+        public async Task ActivateUserAsync(AppUser user)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            var sql = @"
+                UPDATE AirlineUser
+                SET
+                    PasswordHash = @PasswordHash,
+                    IsActive = 1,
+                    FailedLoginAttempts = 0,
+                    LockoutEnd = NULL,
+                    ActivationTokenHash = NULL
+                WHERE UserId = @UserId;
+            ";
+
+            await connection.ExecuteAsync(sql, user);
         }
         public async Task<bool> IsAdmin(string businesId)
         {
