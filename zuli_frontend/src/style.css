@@ -27,5 +27,13 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer base {
+@media (prefers-color-scheme: dark) {
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
 }

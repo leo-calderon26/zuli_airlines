@@ -1,9 +1,24 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Flights from "../modules/flight/view/FlightList.vue"
 
 import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
+import Airports from '../modules/airport/view/Airports.vue'
+import Routes from '../modules/route/view/Routes.vue'
+import Users from '../modules/user/view/Users.vue'
+import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
+import Reports from '../modules/reports/view/Reports.vue'
+
+import Login from"../modules/auth/view/Login.vue"
+import authService from "../modules/auth/services/authService";
+
+import ReserveView from '../modules/landing/view/ReserveView.vue'
+import CheckInView from '../modules/landing/view/CheckInView.vue'
+import ConsultView from '../modules/landing/view/ConsultView.vue'
+import HelpView from '../modules/landing/view/HelpView.vue'
 
 import Login from"../modules/auth/view/Login.vue"
 import authService from "../modules/auth/services/authService";
@@ -17,12 +32,12 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "/admin/",
+            path: "/",
             name: "reserve",
             component: ReserveView
         },
         {
-            path: "/flights",
+            path: "/admin/",
             name: "mainMenu",
             component: MainMenu
         },
@@ -35,6 +50,21 @@ const router = createRouter({
             path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
+        },
+        {
+            path: "/check-in",
+            name: "checkin",
+            component: CheckInView
+        },
+        {
+            path: "/consulta",
+            name: "consult",
+            component: ConsultView
+        },
+        {
+            path: "/ayuda",
+            name: "help",
+            component: HelpView
         },
         {
             path: "/admin/airports",
