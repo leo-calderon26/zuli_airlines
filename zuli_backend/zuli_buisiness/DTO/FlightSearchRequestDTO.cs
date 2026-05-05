@@ -6,7 +6,7 @@ using System.Text;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
     public class FlightSearchRequestDTO
     {

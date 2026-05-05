@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO;
+using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 using zuli_Data.Exceptions;
-using zuli_Buisiness.Validation;
+using zuli_Business.Validation;
 using System.Globalization;
 using System.Linq;
 
-namespace zuli_Buisiness
+namespace zuli_Business
 {
     public class FlightService : IFlightService
     {
@@ -23,7 +23,7 @@ namespace zuli_Buisiness
             _validator = new FlightSearchValidator();
         }
 
-        public async Task<PagedFlightResponseDTO> Search(FlightSearchRequestDTO request)
+        public async Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request)
         {
 
             _validator.ValidateSearch(request);
@@ -52,7 +52,7 @@ namespace zuli_Buisiness
                 TotalDurationText = FormatDuration(e.TotalDurationSeconds)
             }).ToList();
 
-            return new PagedFlightResponseDTO
+            return new FlightPaginatedResponseDTO
             {
                 TotalRecords = totalCount,
                 CurrentPage = request.Page,

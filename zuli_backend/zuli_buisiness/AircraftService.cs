@@ -71,7 +71,7 @@ namespace zuli_Business
             ).ToList();
         }
 
-        public async Task<PaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
+        public async Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
         {
             var (aircrafts, totalCount) = await _repository.GetAircraftsPaginated(pageNumber, pageSize);
             
@@ -88,7 +88,7 @@ namespace zuli_Business
                 numberSeatingRowsFirst = item.numberSeatingRowsFirst,
             }).ToList();
 
-            return new PaginatedResponseDTO<AircraftDTO>
+            return new AircraftPaginatedResponseDTO<AircraftDTO>
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,

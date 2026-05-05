@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
     public class FlightSearchResponseDTO
     {
@@ -17,13 +17,5 @@ namespace zuli_Buisiness.DTO
         public string LayoverAirports { get; set; }
         public decimal TotalTouristPrice { get; set; }
         public decimal TotalFirstClassPrice { get; set; }
-    }
-
-    public class PagedFlightResponseDTO
-    {
-        public int TotalRecords { get; set; }
-        public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
-        public List<FlightSearchResponseDTO> Flights { get; set; }
     }
 }

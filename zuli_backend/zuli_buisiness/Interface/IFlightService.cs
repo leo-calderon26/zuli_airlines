@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 
-namespace zuli_Buisiness.Interface
+namespace zuli_Business.Interface
 {
     public interface IFlightService
     {
-        Task<PagedFlightResponseDTO> Search(FlightSearchRequestDTO request);
+        Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request);
     }
 }

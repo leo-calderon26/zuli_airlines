@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     public class FlightSearchValidator
     {
