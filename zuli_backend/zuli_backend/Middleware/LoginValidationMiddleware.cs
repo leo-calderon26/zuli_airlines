@@ -21,6 +21,8 @@ namespace zuli_backend.Middleware
         {
             if (!IsLoginRequest(context))
             {
+                if (context.User?.Identity?.IsAuthenticated == false && IsAllowedWithLogin(context))
+                    throw new ZuliUnauthorizedException($"Tiene que iniciar sesión para acceder a esta funcionalidad: {context.Request.Path}");
                 await next(context);
                 return;
             }
@@ -70,6 +72,11 @@ namespace zuli_backend.Middleware
         {
             return context.Request.Path.StartsWithSegments("/api/auth/login")
                 && context.Request.Method == HttpMethods.Post;
+        }
+
+        private static bool IsAllowedWithLogin(HttpContext context)
+        {
+            return context.Request.Path.StartsWithSegments("/api/admin");
         }
     }
 }
