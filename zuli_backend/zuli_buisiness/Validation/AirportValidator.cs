@@ -126,5 +126,24 @@ namespace zuli_Business.Validation
                 }
             }
         }
+        
+        public void ValidateSearchTerm(string searchTerm)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                errors.Add("SearchTerm", new List<string> { "El término de búsqueda no puede estar vacío." });
+            }
+            else if (searchTerm.Trim().Length < 2)
+            {
+                errors.Add("SearchTerm", new List<string> { "Debe ingresar al menos 2 letras para buscar." });
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
     }
 }
