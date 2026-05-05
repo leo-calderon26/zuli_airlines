@@ -53,11 +53,6 @@ const router = createRouter({
             component: HelpView
         },
         {
-            path: "/administrativo",
-            name: "administrativo",
-            component: HelpView
-        },
-        {
             path: "/admin/airports",
             name: "airports",
             component: Airports
