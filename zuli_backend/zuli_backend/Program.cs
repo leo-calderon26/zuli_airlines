@@ -116,6 +116,11 @@ builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
 builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
 
+builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
+builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
+
+builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
+builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
 builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
 builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
 

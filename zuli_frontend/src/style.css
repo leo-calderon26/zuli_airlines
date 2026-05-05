@@ -10,6 +10,21 @@
   --color-body: #F3F3F3;
   --color-select: #2B0909;
   --color-gold: #8F8029;
+  --color-purple: #e8def8;
+  --radius-base: 12px;
+  --color-error: oklch(57.7% 0.245 27.325);
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
