@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
 namespace zuli_Buisiness.Validation

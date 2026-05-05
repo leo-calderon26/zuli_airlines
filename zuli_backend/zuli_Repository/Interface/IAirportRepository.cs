@@ -8,6 +8,7 @@ namespace zuli_Repository.Interface
     public interface IAirportRepository
     {
         Task<int> CreateAirport(AirportEntity Airport);
-        Task<bool> AlreadyExist(string  AirportId);
+        Task<bool> AlreadyExist(string AirportId);
+        Task<IEnumerable<AirportEntity>> GetAll();
     }
 }

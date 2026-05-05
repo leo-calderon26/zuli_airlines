@@ -29,7 +29,7 @@
                             </router-link>
                         </li>
                         <li class="hover:bg-purple">
-                            <router-link to="/admin/flights"><img src="../../../assets/flight.png" alt="User Icon" class="menuIcons" />
+                            <router-link to="/create-flight"><img src="../../../assets/flight.png" alt="User Icon" class="menuIcons" />
                                 <a href="#" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium">
                                     <div class="font-semibold text-gold text-center">Vuelos</div>
                                 </a>

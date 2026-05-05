@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 const createAircraftPayload = (aircraft = {}) => ({
+    aircraftId: aircraft.aircraftId ?? aircraft.id ?? null,
     model: aircraft.model ?? "",
     //capacity: aircraft.capacity ?? 0,
     weight: aircraft.weight ?? 0,

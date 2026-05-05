@@ -56,5 +56,12 @@ namespace zuli_Repository
             return count > 0;
         }
 
+        public async Task<IEnumerable<AirportEntity>> GetAll()
+        {
+            using var connection = _context.CreateConnection();
+            var sql = "SELECT * FROM Airport";
+            return (await connection.QueryAsync<AirportEntity>(sql)).ToList();
+        }
+
     }
 }

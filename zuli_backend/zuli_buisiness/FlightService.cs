@@ -1,4 +1,4 @@
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Buisiness.Interface;
 using zuli_Buisiness.Validation;
 using zuli_Data.Entities;

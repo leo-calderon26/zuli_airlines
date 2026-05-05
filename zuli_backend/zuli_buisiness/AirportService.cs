@@ -47,5 +47,19 @@ namespace zuli_Business
                 Message = "Se realizo la creacion del aeropuerto correctamente",
             };
         }
+
+        public async Task<IEnumerable<AirportDTO>> GetAll()
+        {
+            var airports = await _repository.GetAll();
+
+            return airports.Select(item => new AirportDTO
+            {
+                airportCode = item.AirportCode,
+                name = item.Name,
+                country = item.Country,
+                city = item.City,
+                adminId = item.AdminId
+            }).ToList();
+        }
     }
 }

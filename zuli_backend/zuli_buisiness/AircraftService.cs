@@ -21,7 +21,7 @@ namespace zuli_Business
             _validator = new AircraftValidator();
         }
 
-        public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
+        public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft)
         {
             if (!await _repository.IsAdmin(aircraft.AdminId))
             {
@@ -59,26 +59,28 @@ namespace zuli_Business
             var aircraft = await _repository.GetAll();
 
             return aircraft.Select(item => new AircraftDTO
-                {
-                    model = item.model,
-                    weight = item.weight, 
-                    baggageCapacity = item.baggageCapacity,
-                    numberEconomyClassRows= item.numberEconomyClassRows,
-                    numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
-                    numberFirstClassRows = item.numberFirstClassRows,
-                    numberSeatingRowsFirst = item.numberSeatingRowsFirst,
-                }
+            {
+                aircraftId = item.aircraftId,
+                model = item.model,
+                weight = item.weight,
+                baggageCapacity = item.baggageCapacity,
+                numberEconomyClassRows = item.numberEconomyClassRows,
+                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
+                numberFirstClassRows = item.numberFirstClassRows,
+                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
+            }
             ).ToList();
         }
 
         public async Task<PaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
         {
             var (aircrafts, totalCount) = await _repository.GetAircraftsPaginated(pageNumber, pageSize);
-            
+
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
             var aircraftDTOs = aircrafts.Select(item => new AircraftDTO
             {
+                aircraftId = item.aircraftId,
                 model = item.model,
                 weight = item.weight,
                 baggageCapacity = item.baggageCapacity,
