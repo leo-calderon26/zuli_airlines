@@ -16,6 +16,16 @@
   --radius-base: 12px;
   --color-error: oklch(57.7% 0.245 27.325);
 }
+html,
+body,
+#app {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
 @media (prefers-color-scheme: dark) {
 

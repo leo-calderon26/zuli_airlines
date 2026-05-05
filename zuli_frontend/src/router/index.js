@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Flights from "../modules/flight/view/FlightList.vue"
+
+import FlightList from "../modules/flight/view/FlightList.vue"
+
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
@@ -8,6 +11,9 @@ import Routes from '../modules/route/view/Routes.vue'
 import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
+
+import Login from"../modules/auth/view/Login.vue"
+import authService from "../modules/auth/services/authService";
 
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
@@ -82,7 +88,26 @@ const router = createRouter({
             name: "profileSettings",
             component: ProfileSettings
         },
+        {
+            path: "/administrativo",
+            name: "administrativo",
+            component: Login
+        }
     ]
+});
+
+router.beforeEach(async (to, from, next) => {
+    if (!to.meta.requiresAuth) {
+        next();
+        return;
+    }
+
+    try {
+        await authService.me();
+        next();
+    } catch {
+        next({ name: "administrativo" });
+    }
 });
 
 export default router;
