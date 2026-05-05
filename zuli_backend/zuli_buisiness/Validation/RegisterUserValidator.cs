@@ -60,7 +60,7 @@ namespace zuli_Business.Validation
             {
                 errors["businessEmail"] = new List<string>
                 {
-                    "El correo es obligatorio."
+                    "El correo institucional es obligatorio."
                 };
 
                 return;
@@ -70,7 +70,7 @@ namespace zuli_Business.Validation
             {
                 errors["businessEmail"] = new List<string>
                 {
-                    "El correo no tiene un formato válido."
+                    "El correo institucional no tiene un formato válido."
                 };
             }
         }

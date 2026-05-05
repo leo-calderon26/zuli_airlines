@@ -5,6 +5,7 @@ namespace zuli_Business.DTO
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public Guid? UserId { get; set; }
+        public Guid? PersonId { get; set; }
         public string? BusinessEmail { get; set; }
     }
 }
