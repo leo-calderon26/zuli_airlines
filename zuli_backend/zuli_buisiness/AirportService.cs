@@ -47,5 +47,20 @@ namespace zuli_Business
                 Message = "Se realizo la creacion del aeropuerto correctamente",
             };
         }
+
+        public async Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm)
+        {
+            _validator.ValidateSearchTerm(searchTerm);
+
+            var airports = await _repository.SearchAirportsByTerm(searchTerm.Trim());
+
+            var suggestions = airports.Select(a => new AirportSuggestionDTO
+            {
+                AirportCode = a.AirportCode,
+                DisplayName = $"{a.AirportCode} - {a.City}, {a.Country} ({a.Name})"
+            }).ToList();
+
+            return suggestions;
+        }
     }
 }
