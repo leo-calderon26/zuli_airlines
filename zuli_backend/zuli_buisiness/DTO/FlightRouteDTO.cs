@@ -4,7 +4,7 @@ using System.Text;
 using System.Timers;
 using System.ComponentModel.DataAnnotations;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
     public class FlightRouteDTO
     {
