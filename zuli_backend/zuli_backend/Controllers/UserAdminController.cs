@@ -56,8 +56,8 @@ namespace zuli_backend.Controllers
                 page,
                 pageSize
             );
-            
+
             return Ok(response);
-}
+        }
     }
 }

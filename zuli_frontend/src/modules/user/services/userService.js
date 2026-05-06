@@ -23,6 +23,28 @@ const userService = {
         }
 
         return data;
+    },
+
+    async getUsers(filters) {
+        const query = new URLSearchParams({
+            searchType: filters.searchType,
+            search: filters.search,
+            page: filters.page,
+            pageSize: filters.pageSize
+        });
+
+        const response = await fetch(`/api/admin/users?${query.toString()}`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await readResponseBody(response);
+
+        if (!response.ok) {
+            throw buildRequestError(response, data);
+        }
+
+        return data;
     }
 };
 
@@ -78,7 +100,7 @@ function getDefaultErrorMessage(status) {
     }
 
     if (status === 403) {
-        return "No tiene permisos para crear usuarios.";
+        return "No tiene permisos para consultar usuarios.";
     }
 
     if (status === 429) {
