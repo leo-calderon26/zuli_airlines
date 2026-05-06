@@ -61,6 +61,27 @@ namespace zuli_Repository
             return count > 0;
         }
  
+        public async Task<bool> IsAdmin(string businesId)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = @"
+            SELECT CASE WHEN EXISTS (
+            SELECT 1
+            FROM AirlineUser
+            WHERE BusinessId = @BusinessId AND UserRole = 'Administrator'
+            ) THEN 1 ELSE 0 END";
+            return await connection.ExecuteScalarAsync<bool>(sql, new { BusinessId = businesId });
+        }
+        public async Task<Guid> GetUserId(string businesId)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = @"
+            SELECT UserId
+            FROM AirlineUser
+            WHERE BusinessId = @BusinessId";
+            var userId = await connection.ExecuteScalarAsync<Guid?>(sql, new { BusinessId = businesId });
+            return userId ?? Guid.Empty;
+        }
     }
 
 }
