@@ -60,7 +60,7 @@ namespace zuli_Business.Validation
             }
 
             // Validar que el adminId no venga vacio
-            if (airport.adminId == Guid.Empty)
+            if (airport.businessId == string.Empty)
             {
                 errorInfo[AirportAtributes.ADMINID].Add("El adminId no puede venir vacio");
                 IsEmptyInfo = true;
@@ -124,6 +124,25 @@ namespace zuli_Business.Validation
                                  .ToDictionary(x => x.Key, x => x.Value)
                     );
                 }
+            }
+        }
+        
+        public void ValidateSearchTerm(string searchTerm)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                errors.Add("SearchTerm", new List<string> { "El término de búsqueda no puede estar vacío." });
+            }
+            else if (searchTerm.Trim().Length < 2)
+            {
+                errors.Add("SearchTerm", new List<string> { "Debe ingresar al menos 2 letras para buscar." });
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
             }
         }
     }

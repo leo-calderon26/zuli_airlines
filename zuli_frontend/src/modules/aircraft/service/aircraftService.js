@@ -1,5 +1,5 @@
 import axios from "axios"
-const API_URL = "/api/Aircraft"
+const API_URL = "/api/admin/Aircraft"
 
 export const getAircrafts = async ()=>
 {

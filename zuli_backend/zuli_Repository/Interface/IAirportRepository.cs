@@ -9,5 +9,6 @@ namespace zuli_Repository.Interface
     {
         Task<int> CreateAirport(AirportEntity Airport);
         Task<bool> AlreadyExist(string  AirportId);
+        Task<IEnumerable<AirportEntity>> SearchAirportsByTerm(string searchTerm);
     }
 }

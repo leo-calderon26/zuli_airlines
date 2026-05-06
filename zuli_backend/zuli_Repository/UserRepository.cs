@@ -29,7 +29,7 @@ namespace zuli_Repository
                     FailedLoginAttempts,
                     LockoutEnd,
                     ManagedByAdminId
-                FROM [User]
+                FROM AirlineUser
                 WHERE BusinessEmail = @BusinessEmail;
             ";
 
@@ -44,7 +44,7 @@ namespace zuli_Repository
             using var connection = _dapperContext.CreateConnection();
 
             var sql = @"
-                UPDATE [User]
+                UPDATE AirlineUser
                 SET
                     FailedLoginAttempts = @FailedLoginAttempts,
                     LockoutEnd = @LockoutEnd
@@ -57,6 +57,27 @@ namespace zuli_Repository
                 user.FailedLoginAttempts,
                 user.LockoutEnd
             });
+        }
+        public async Task<bool> IsAdmin(string businesId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+            var sql = @"
+            SELECT CASE WHEN EXISTS (
+            SELECT 1
+            FROM AirlineUser
+            WHERE BusinessId = @BusinessId AND UserRole = 'Administrator'
+            ) THEN 1 ELSE 0 END";
+            return await connection.ExecuteScalarAsync<bool>(sql, new { BusinessId = businesId });
+        }
+        public async Task<Guid> GetUserId(string businesId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+            var sql = @"
+            SELECT UserId
+            FROM AirlineUser
+            WHERE BusinessId = @BusinessId";
+            var userId = await connection.ExecuteScalarAsync<Guid?>(sql, new { BusinessId = businesId });
+            return userId ?? Guid.Empty;
         }
     }
 }
