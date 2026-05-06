@@ -245,7 +245,7 @@ export default {
     z-index: 1;
     width: 100%;
     max-width: 720px;
-    background: var(--color-surface);
+    background: var(--color-white);
     border-radius: 6px;
     padding: 36px;
     box-shadow: 0 3px 8px rgb(0 0 0 / 12%);
