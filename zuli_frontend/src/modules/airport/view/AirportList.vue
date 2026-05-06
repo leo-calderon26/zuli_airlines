@@ -1,16 +1,23 @@
 <template>
-  <div class="landing-page">
+  <div class="flex flex-col">
     <PublicNavBar />
-    <h1 class = "message">Airports en mantenimiento</h1>
+    <AirportNavBar/>
+    <main class="flex-1">
+        <div class="page-shell">
+            <h1>Aqui es donde se va ver la lista de aeropuertos</h1>
+        </div>
+    </main>
   </div>
 </template>
 
 <script>
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import AirportNavBar from '../components/AirportNavBar.vue';
 
 export default {
   components: {
-    PublicNavBar
+    PublicNavBar,
+    AirportNavBar
   }
 }
 </script>

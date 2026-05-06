@@ -272,29 +272,29 @@ async function handleSubmit() {
     alert(errors.global);
     return;
   }
-
-  const routePayload = {
-    frequency: encodeDays(form.frequency),
-    scheduledArrivalTime: toIsoDateTime(
-      buildDateTimeFromParts(form.scheduledArrivalDay, form.scheduledArrivalMonth, form.scheduledArrivalTime)
-    ),
-    scheduledDepartureTime: toIsoDateTime(
-      buildDateTimeFromParts(
-        form.scheduledDepartureDay,
-        form.scheduledDepartureMonth,
-        form.scheduledDepartureTime
-      )
-    ),
-    estimatedDuration: Number(form.duration) * 60,
-    businessId: adminId,
-    airlineId: AIRLINE_ID,
-    arrivalAirport: normalizeCode(form.destination),
-    departureAirport: normalizeCode(form.origin),
-  };
-
   try {
+    const routePayload = {
+      frequency: encodeDays(form.frequency),
+      scheduledArrivalTime: toIsoDateTime(
+        buildDateTimeFromParts(form.scheduledArrivalDay, form.scheduledArrivalMonth, form.scheduledArrivalTime)
+      ),
+      scheduledDepartureTime: toIsoDateTime(
+        buildDateTimeFromParts(
+          form.scheduledDepartureDay,
+          form.scheduledDepartureMonth,
+          form.scheduledDepartureTime
+        )
+      ),
+      estimatedDuration: Number(form.duration) * 60,
+      businessId: adminId,
+      airlineId: AIRLINE_ID,
+      arrivalAirport: normalizeCode(form.destination),
+      departureAirport: normalizeCode(form.origin),
+    };
+
     await createFlightRoute(routePayload);
-    router.push({ name: 'mainMenu' });
+    alert('La ruta de vuelo se ha creado correctamente');
+    router.go(0);
   } catch (error) {
     errors.global = error.response?.data?.message || 'Error al crear la ruta';
     alert(errors.global);

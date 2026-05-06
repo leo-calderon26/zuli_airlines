@@ -43,17 +43,12 @@ namespace zuli_Business
                 return failedLogin;
             }
 
-            if (!user.IsActive)
-            {
-                return failedLogin;
-            }
+            bool cannotLogin =
+                !user.IsActive ||
+                string.IsNullOrWhiteSpace(user.PasswordHash) ||
+                user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow;
 
-            if (string.IsNullOrWhiteSpace(user.PasswordHash))
-            {
-                return failedLogin;
-            }
-
-            if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
+            if (cannotLogin)
             {
                 return failedLogin;
             }
