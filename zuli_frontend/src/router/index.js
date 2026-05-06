@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Flights from "../modules/flight/view/FlightList.vue"
-
+import authService from "../modules/auth/services/authService";
 import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
@@ -11,16 +10,12 @@ import Routes from '../modules/route/view/Routes.vue'
 import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
-<<<<<<< HEAD
 import FlightCreate from "../modules/flight/view/FlightCreate.vue"
-=======
-
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
->>>>>>> develop
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 
@@ -52,9 +47,13 @@ const router = createRouter({
             meta: {requiresAuth: true, adminRequired: true}
         },
         {
-            path: "/admin/create-flight",
-            name: "createFlight",
+            path: "/admin/flights",
+            name: "flights",
             component: FlightCreate
+        },
+        {
+            path: "/admin/create-flight",
+            redirect: "/admin/flights"
         },
         {
             path: "/check-in",
@@ -87,9 +86,9 @@ const router = createRouter({
             meta: {requiresAuth: true, adminRequired: false}
         },
          {
-            path: "/admin/flights",
-            name: "flights",
-            component: Flights,
+            path: "/admin/flight-list",
+            name: "flightList",
+            component: FlightList,
             meta: {requiresAuth: true, adminRequired: false}
         },
         {
