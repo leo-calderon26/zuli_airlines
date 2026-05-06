@@ -6,7 +6,8 @@ export function useAircraft() {
     
     const fetchAircrafts = async () => {
         const data = await getAircrafts();
-        store.aircrafts = data;
+        // store.aircrafts is a ref created in the Pinia store; assign to .value to preserve reactivity
+        store.aircrafts.value = data;
     };
 
     const fetchAircraftsPaginated = async (pageNumber = 1, pageSize = 10) => {

@@ -56,5 +56,34 @@ namespace zuli_Business
                 Message = "Se realizo la creaccion de la ruta correctamente",
             };
         }
+
+        public async Task<FlightRoutePaginatedResponseDTO> GetFlightRoutesPaginated(int pageNumber, int pageSize)
+        {
+            var (flightRoutes, totalCount) = await _flightRouteRepository.GetFlightRoutesPaginated(pageNumber, pageSize);
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var flightRouteDtos = flightRoutes.Select(item => new FlightRouteListDTO
+            {
+                FlightRouteId = item.flightRouteId,
+                Frequency = item.frequency,
+                ScheduledArrivalTime = item.scheduledArrivalTime,
+                ScheduledDepartureTime = item.scheduledDepartureTime,
+                EstimatedDuration = item.estimatedDuration,
+                AdminId = item.adminId,
+                AirlineId = item.airlineId,
+                ArrivalAirport = item.arrivalAirport,
+                DepartureAirport = item.departureAirport,
+            }).ToList();
+
+            return new FlightRoutePaginatedResponseDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalCount,
+                TotalPages = totalPages,
+                Data = flightRouteDtos
+            };
+        }
     }
 }

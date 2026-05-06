@@ -16,7 +16,11 @@ namespace zuli_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<BasicResponseDTO>> CreateAirport(AirportDTO Airport)
             => await _service.CreateAirport(Airport);
-        
+
+        [HttpGet("GetAll")]
+        public async Task<ActionResult<IEnumerable<AirportDTO>>> GetAll()
+            => Ok(await _service.GetAll());
+
         [HttpGet("suggestions")]
         public async Task<ActionResult<List<AirportSuggestionDTO>>> GetSuggestions([FromQuery] string query)
             => await _service.GetAirportSuggestions(query);

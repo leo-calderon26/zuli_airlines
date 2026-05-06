@@ -14,5 +14,6 @@ namespace zuli_Repository.Interface
 
         Task<bool> IsAdmin(string businesId);
         Task<Guid> GetUserId(string businesId);
+        Task<string> GetBusinessId(Guid userId);
     }
 }

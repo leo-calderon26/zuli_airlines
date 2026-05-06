@@ -7,8 +7,10 @@ namespace zuli_Data.Entities
 {
     public class AircraftEntity
     {
+        [Key]
+        public Guid aircraftId { get; set; }
         public Guid AdminId { get; set; }
-        public string model {  get; set; }
+        public string model { get; set; }
         public decimal weight { get; set; }
         public short numberEconomyClassRows { get; set; }
         public short numberSeatingRowsEconomy { get; set; }

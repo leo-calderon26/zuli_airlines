@@ -20,7 +20,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
-var secretKey = builder.Configuration.GetSection("settings").GetSection("secretkey").ToString();
+var secretKey = builder.Configuration["settings:secretkey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException("Secret key not found in configuration");
+}
 var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 
 // Autenticación existente con JWT + autenticación por cookies para login web
@@ -116,6 +120,7 @@ builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
 builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
@@ -155,7 +160,7 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 
-app.UseAuthorization();
+// app.UseAuthorization();
 
 app.UseMiddleware<LoginValidationMiddleware>();
 

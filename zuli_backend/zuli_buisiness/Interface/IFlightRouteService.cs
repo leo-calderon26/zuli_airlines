@@ -8,5 +8,6 @@ namespace zuli_Business.Interface
     public interface IFlightRouteService
     {
         Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRouter);
+        Task<FlightRoutePaginatedResponseDTO> GetFlightRoutesPaginated(int pageNumber, int pageSize);
     }
 }

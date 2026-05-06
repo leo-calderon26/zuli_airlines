@@ -9,12 +9,14 @@
 </template>
 
 <script>
-    import PublicNavBar from '../components/PublicNavBar.vue';
-    import ReserveCard from '../components/ReserveCard.vue';
-        export default {
-            components: {
-                PublicNavBar,
-                ReserveCard
-            }
-        }
+import PublicNavBar from '../components/PublicNavBar.vue';
+import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
+import ReserveCard from '../components/ReserveCard.vue';
+export default {
+    components: {
+        PublicNavBar,
+        PublicBottomBar,
+        ReserveCard
+    }
+}
 </script>
