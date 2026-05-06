@@ -26,8 +26,8 @@ var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 // Autenticación existente con JWT + autenticación por cookies para login web
 builder.Services.AddAuthentication(config =>
 {
-    config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    config.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    config.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(config =>
 {
@@ -148,11 +148,11 @@ app.UseCors("FrontendPolicy");
 
 app.UseRateLimiter();
 
-app.UseMiddleware<LoginValidationMiddleware>();
-
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<LoginValidationMiddleware>();
 
 app.MapControllers();
 

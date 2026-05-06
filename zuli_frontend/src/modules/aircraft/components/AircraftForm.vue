@@ -3,11 +3,13 @@ import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAircraft } from '../composable/useAircraft';
 
+import authService from "../../auth/services/authService";
+
 const router = useRouter();
 const { addAircraft } = useAircraft();
 
 // ID del administrador
-const ADMIN_ID = 'F25DF80C-B7D9-4A4C-88FB-90BA8D488541';
+// const ADMIN_ID = '623D94AD-9F77-4EA2-A156-B44C61EA0607';
 
 const form = reactive({
     model: '',
@@ -65,6 +67,9 @@ async function handleSubmit() {
 
     const baggageCapacity = Number((Number(form.weight) * 0.3).toFixed(4));
 
+    var data = await authService.me();
+    console.log(data.businessId);
+
     const aircraft = {
         model: form.model,
         capacity: totalSeats.value,
@@ -74,7 +79,7 @@ async function handleSubmit() {
         numberFirstClassRows: Number(form.numberFirstClassRows),
         numberSeatingRowsFirst: Number(form.numberSeatingRowsFirst),
         baggageCapacity,
-        adminId: ADMIN_ID,
+        businessId: data.businessId,
     };
 
     try {
