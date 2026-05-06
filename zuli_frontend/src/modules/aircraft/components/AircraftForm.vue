@@ -97,46 +97,93 @@ async function handleSubmit() {
     <form class="form-card" @submit.prevent="handleSubmit">
         <div class="form-grid">
             <div class="form-field group">
-                <input id="model" v-model="form.model" name="model" type="text" class="form-input peer" placeholder=" " />
+                <input 
+                    id="model" 
+                    v-model="form.model" 
+                    name="model" 
+                    type="text" 
+                    class="form-input peer" 
+                    placeholder=" " />
                 <label for="model" class="form-label">Modelo</label>
                 <p v-if="errors.fields.model" class="text-sm text-error">{{ errors.fields.model }}</p>
             </div>
 
             <div class="form-field group">
-                <input id="capacity" v-model="totalSeats" name="capacity" type="number" disabled class="form-input peer" placeholder=" " />
+                <input 
+                    id="capacity" 
+                    v-model="totalSeats" 
+                    name="capacity"
+                    type="number"
+                    disabled 
+                    class="form-input peer" 
+                    placeholder=" " />
                 <label for="capacity" class="form-label">Capacidad (Calculada)</label>
             </div>
 
             <div class="form-field group">
-                <input id="weight" v-model="form.weight" name="weight" type="number" min="1" step="1" class="form-input peer" placeholder=" " />
+                <input 
+                    id="weight"
+                    v-model="form.weight"
+                    name="weight"
+                    type="number"
+                    min="1"
+                    step="1"
+                    class="form-input peer"
+                    placeholder=" " />
                 <label for="weight" class="form-label">Peso soportado por la aeronave(kg)</label>
                 <p v-if="errors.fields.weight" class="text-sm text-error">{{ errors.fields.weight }}</p>
             </div>
 
             <div class="form-field group">
-                <input id="numberEconomyClassRows" v-model="form.numberEconomyClassRows" name="numberEconomyClassRows" type="number" min="0"
-                 step="1" class="form-input peer" placeholder=" " />
+                <input 
+                    id="numberEconomyClassRows"
+                    v-model="form.numberEconomyClassRows" 
+                    name="numberEconomyClassRows" type="number"
+                    min="0"
+                    step="1" 
+                    class="form-input peer"
+                    placeholder=" " />
                 <label for="numberEconomyClassRows" class="form-label">Filas clase económica</label>
                 <p v-if="errors.fields.numberEconomyClassRows" class="text-sm text-error">{{ errors.fields.numberEconomyClassRows }}</p>
             </div>
 
             <div class="form-field group">
-                <input id="numberSeatingRowsEconomy" v-model="form.numberSeatingRowsEconomy" name="numberSeatingRowsEconomy" type="number" min="0" 
-                step="1" class="form-input peer" placeholder=" " />
+                <input 
+                    id="numberSeatingRowsEconomy" 
+                    v-model="form.numberSeatingRowsEconomy"
+                    name="numberSeatingRowsEconomy" type="number"
+                    min="0" 
+                    step="1" 
+                    class="form-input peer"
+                    placeholder=" " />
                 <label for="numberSeatingRowsEconomy" class="form-label">Asientos por fila económica</label>
                 <p v-if="errors.fields.numberSeatingRowsEconomy" class="text-sm text-error">{{ errors.fields.numberSeatingRowsEconomy }}</p>
             </div>
 
             <div class="form-field group">
-                <input id="numberFirstClassRows" v-model="form.numberFirstClassRows" name="numberFirstClassRows" type="number" min="0" step="1" 
-                class="form-input peer" placeholder=" " />
+                <input 
+                    id="numberFirstClassRows" 
+                    v-model="form.numberFirstClassRows"
+                    name="numberFirstClassRows" 
+                    type="number" 
+                    min="0" 
+                    step="1" 
+                    class="form-input peer" 
+                    placeholder=" " />
                 <label for="numberFirstClassRows" class="form-label">Filas primera clase</label>
                 <p v-if="errors.fields.numberFirstClassRows" class="text-sm text-error">{{ errors.fields.numberFirstClassRows }}</p>
             </div>
 
             <div class="form-field group">
-                <input id="numberSeatingRowsFirst" v-model="form.numberSeatingRowsFirst" name="numberSeatingRowsFirst" type="number" min="0" step="1" 
-                class="form-input peer" placeholder=" " />
+                <input 
+                    id="numberSeatingRowsFirst" 
+                    v-model="form.numberSeatingRowsFirst" 
+                    name="numberSeatingRowsFirst" 
+                    type="number" 
+                    min="0" 
+                    step="1" 
+                    class="form-input peer" 
+                    placeholder=" " />
                 <label for="numberSeatingRowsFirst" class="form-label">Asientos por fila primera clase</label>
                 <p v-if="errors.fields.numberSeatingRowsFirst" class="text-sm text-error">{{ errors.fields.numberSeatingRowsFirst }}</p>
             </div>
@@ -155,7 +202,7 @@ async function handleSubmit() {
 @reference "../../../style.css";
 
 .form-card {
-    @apply mx-auto w-full max-w-3xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm;
+    @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
 }
 
 .form-grid {
@@ -167,18 +214,18 @@ async function handleSubmit() {
 }
 
 .form-input {
-    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm
+    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 text-base
      text-gray-900 focus:border-gold focus:outline-none focus:ring-0;
 }
 
 .form-label {
-    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm
-     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 
-     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-gold;
+    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
+     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
+     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
 }
 
 .submit-btn {
-    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-4 py-2.5 text-sm font-medium
+    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-5 py-3 text-base font-medium
      text-white hover:bg-select focus:outline-none focus:ring-2 focus:ring-gold;
 }
 </style>

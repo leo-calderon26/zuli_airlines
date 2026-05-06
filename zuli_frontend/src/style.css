@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 @theme {
@@ -16,21 +14,23 @@
   --radius-base: 12px;
   --color-error: oklch(57.7% 0.245 27.325);
 }
-html,
-body,
-#app {
-    min-height: 100%;
-}
 
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
 
   #social .button-icon {
     filter: invert(1) brightness(2);
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 }
 

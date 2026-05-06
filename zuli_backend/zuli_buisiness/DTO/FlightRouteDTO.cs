@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace zuli_Business.DTO
 {
@@ -13,8 +13,8 @@ namespace zuli_Business.DTO
         // Este sera calculado por la persona que ingrese las rutas y es en segundos
         [Required(ErrorMessage = "Es necesario ingresar la duración estimada")]
         public int estimatedDuration { get; set; }
-        [Required(ErrorMessage = "Es necesario el Id del admin")]
-        public Guid adminId { get; set; }
+        [Required(ErrorMessage = "Es necesario el Id de negocios")]
+        public string businessId { get; set; }
         [Required(ErrorMessage = "Es necesario el Id de la aerolinea")]
         public int airlineId { get; set; }
         [Required(ErrorMessage = "Es necesario el aeropuerto de llegada")]
