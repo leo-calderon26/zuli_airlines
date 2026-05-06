@@ -11,5 +11,8 @@ namespace zuli_Repository.Interface
         Task CreatePendingUserAsync(AppUser user);
         Task UpdateLoginStateAsync(AppUser user);
         Task ActivateUserAsync(AppUser user);
+
+        Task<bool> IsAdmin(string businesId);
+        Task<Guid> GetUserId(string businesId);
     }
 }
