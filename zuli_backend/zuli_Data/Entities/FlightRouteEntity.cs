@@ -7,6 +7,7 @@ namespace zuli_Data.Entities
 {
     public class FlightRouteEntity
     {
+        public int flightRouteId { get; set; }
         public int frequency { get; set; }
         public DateTime scheduledArrivalTime { get; set; }
         public DateTime scheduledDepartureTime { get; set; }

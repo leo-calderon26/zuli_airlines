@@ -5,9 +5,10 @@ using zuli_Business.DTO;
 
 namespace zuli_Business.Interface
 {
-    public interface IAirportService
-    {
-        Task<BasicResponseDTO> CreateAirport(AirportDTO Airport);
-        Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm);
-    }
+        public interface IAirportService
+        {
+                Task<BasicResponseDTO> CreateAirport(AirportDTO Airport);
+                Task<IEnumerable<AirportDTO>> GetAll();
+                Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm);
+        }
 }
