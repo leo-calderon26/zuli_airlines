@@ -9,6 +9,7 @@ using zuli_backend.Middleware;
 
 using zuli_Business;
 using zuli_Business.Interface;
+using zuli_Business.Validation;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;

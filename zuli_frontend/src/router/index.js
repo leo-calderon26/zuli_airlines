@@ -17,6 +17,7 @@ import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
+import Login from '../modules/auth/view/Login.vue'
 
 const router = createRouter({
     history: createWebHistory(),
@@ -37,7 +38,6 @@ const router = createRouter({
             component: AircraftList
         },
         {
-            path: "/admin/create-aircraft",
             path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate
