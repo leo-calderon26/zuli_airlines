@@ -12,7 +12,7 @@ namespace zuli_backend.Controllers
         private readonly IFlightRouteService _service;
         public FlightRouteController(IFlightRouteService service) => _service = service;
 
-        [HttpPost("CreateFlightRouter")]
+        [HttpPost("CreateFlightRoute")]
         public async Task<BasicResponseDTO> CreateFlightRouter([FromBody] FlightRouteDTO flightRouter)
             => await _service.CreateFlightRouter(flightRouter);
 

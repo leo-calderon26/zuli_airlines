@@ -34,7 +34,7 @@
                                 </router-link>
                             </li>
                             <li class="hover:bg-purple">
-                                <router-link to="/admin/users" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img src="../../../assets/report.png" alt="User Icon" class="menuIcons" />
+                                <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img src="../../../assets/report.png" alt="User Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Reportes</div>
                                 </router-link>
                             </li>

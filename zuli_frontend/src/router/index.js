@@ -5,12 +5,14 @@ import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+
+import AirportList from "../modules/airport/view/AirportList.vue";
 import AirportCreate from '../modules/airport/view/AirportCreate.vue'
+
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
-import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
 import RouteList from '../modules/route/view/RouteList.vue'
-import Users from '../modules/user/view/Users.vue'
+
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
 import FlightCreate from "../modules/flight/view/FlightCreate.vue"
@@ -21,6 +23,9 @@ import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
+import UserList from "../modules/user/view/UserList.vue";
+import UserCreate from "../modules/user/view/UserCreate.vue";
+import UserActivation from "../modules/user/view/UserActivation.vue";
 
 
 const router = createRouter({
@@ -64,7 +69,7 @@ const router = createRouter({
             path: "/admin/create-airport",
             name: "createAirport",
             component: AirportCreate,
-            meta: {requiresAuth: true, adminRequired: false}
+            meta: {requiresAuth: true, adminRequired: true}
         },
         {
             path: "/check-in",
@@ -87,7 +92,7 @@ const router = createRouter({
         {
             path: "/admin/airports",
             name: "airports",
-            component: Airports,
+            component: AirportList,
             meta: {requiresAuth: true, adminRequired: false}
         },
         {
@@ -110,9 +115,22 @@ const router = createRouter({
         },
         {
             path: "/admin/users",
-            name: "users",
-            component: Users,
+            name: "user",
+            component: UserList,
             meta: {requiresAuth: true, adminRequired: false}
+
+        },
+        {
+            path: "/admin/create-user",
+            name: "userCreate",
+            meta: {requiresAuth: true, adminRequired: true},
+            component: UserCreate
+            
+        },
+        {
+            path: "/users/activation",
+            name: "userActivation",
+            component: UserActivation
         },
         {
             path: "/admin/reports",
