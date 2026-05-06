@@ -23,6 +23,8 @@ namespace zuli_backend.Middleware
             {
                 if (context.User?.Identity?.IsAuthenticated == false && IsAllowedWithLogin(context) == true)
                     throw new ZuliUnauthorizedException($"Tiene que iniciar sesión para acceder a esta funcionalidad: {context.Request.Path}");
+                if ((!context.User!.IsInRole("Administrator")) == false && NeedsAdministrativeRole(context) == true)
+                    throw new ZuliUnauthorizedException($"Tiene que ser administrador para acceder a esta funcionalidad: {context.Request.Path}");
                 await next(context);
                 return;
             }
@@ -77,6 +79,13 @@ namespace zuli_backend.Middleware
         private static bool IsAllowedWithLogin(HttpContext context)
         {
             return context.Request.Path.StartsWithSegments("/api/admin");
+        }
+
+        private static bool NeedsAdministrativeRole(HttpContext context)
+        {
+            if (context.Request.Path.StartsWithSegments("/api/admin/create-flight"))
+                return false;
+            return context.Request.Path.StartsWithSegments("/api/admin/create-");
         }
     }
 }
