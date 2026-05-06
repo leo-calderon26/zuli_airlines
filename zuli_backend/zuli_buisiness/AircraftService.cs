@@ -26,15 +26,16 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft) 
         {
+            _validator.ValidateAircraftInfo(aircraft);
+
             if (!await _userRepository.IsAdmin(aircraft.businessId))
             {
-                throw new ZuliNotFoundException($"EL Usuario que esta intentando crear la aeronave y no tiene permisos {aircraft.businessId}");
+                throw new ZuliNotFoundException($"El Usuario que esta intentando crear la aeronave y no tiene permisos {aircraft.businessId}");
             }
             if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
             {
                 throw new ZuliNotFoundException($"Ya existe una aeronave con el mismo nombre {aircraft.model}");
             }
-            _validator.ValidateAircraftInfo(aircraft);
 
             var userId = await _userRepository.GetUserId(aircraft.businessId);
 
