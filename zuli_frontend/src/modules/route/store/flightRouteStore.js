@@ -5,6 +5,8 @@ const createFlightRoutePayload = (route = {}) => ({
     flightRouteId: route.flightRouteId ?? 0,
     departureAirport: route.departureAirport ?? "",
     arrivalAirport: route.arrivalAirport ?? "",
+    scheduledDepartureTime: route.scheduledDepartureTime ?? route.ScheduledDepartureTime ?? "",
+    scheduledArrivalTime: route.scheduledArrivalTime ?? route.ScheduledArrivalTime ?? "",
     estimatedDuration: route.estimatedDuration ?? 0,
     frequency: route.frequency ?? 0,
     airlineId: route.airlineId ?? 0,

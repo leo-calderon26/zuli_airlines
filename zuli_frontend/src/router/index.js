@@ -9,6 +9,7 @@ import AirportCreate from '../modules/airport/view/AirportCreate.vue'
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
+import RouteList from '../modules/route/view/RouteList.vue'
 import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
@@ -92,6 +93,12 @@ const router = createRouter({
         {
             path: "/admin/routes",
             name: "routes",
+            component: RouteList,
+            meta: {requiresAuth: true, adminRequired: false}
+        },
+        {
+            path: "/admin/create-route",
+            name: "createRoute",
             component: Routes,
             meta: {requiresAuth: true, adminRequired: false}
         },
