@@ -27,6 +27,16 @@ function validate() {
     if (!form.airportCode || form.airportCode.length < 3) {
         errors.fields.airportCode = 'El código debe tener al menos 3 caracteres';
     }
+    if (!form.name.trim()) {
+        errors.fields.name = 'El nombre es obligatorio';
+    }
+    if (!form.country.trim()) {
+        errors.fields.country = 'El país es obligatorio';
+    }
+    if (!form.city.trim()) {
+        errors.fields.city = 'La ciudad es obligatoria';
+    }
+
     return Object.keys(errors.fields).length === 0 && errors.global === '';
 }
 
