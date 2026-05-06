@@ -78,6 +78,8 @@ namespace zuli_backend.Middleware
 
         private static bool IsAllowedWithLogin(HttpContext context)
         {
+            if (context.Request.Path.StartsWithSegments("/api/admin/airport/suggestions"))
+                return false;
             return context.Request.Path.StartsWithSegments("/api/admin");
         }
 
