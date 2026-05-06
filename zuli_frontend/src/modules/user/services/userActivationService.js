@@ -1,6 +1,6 @@
 const userActivationService = {
     async activateUser(activationData) {
-        const response = await fetch("/api/user/activation", {
+        const response = await fetch("/api/users/activation", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

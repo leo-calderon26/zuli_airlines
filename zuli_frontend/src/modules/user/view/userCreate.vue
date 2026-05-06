@@ -1,49 +1,66 @@
 <template>
-    <div class="admin-page">
+    <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
         <PublicNavBar />
 
-        <main class="page-content">
-            <section class="form-shell">
-                <form class="user-form" @submit.prevent="createUser">
-                    <h2 class="form-title">
+        <main class="flex-1 bg-[var(--color-secondary)] px-6 pb-32 pt-8">
+            <section class="relative mx-auto flex min-h-[690px] max-w-6xl justify-center pt-8">
+                <div class="absolute left-[7%] right-[5%] top-[175px] h-px bg-[var(--color-purple)]"></div>
+
+                <form
+                    class="relative z-10 w-full max-w-[720px] rounded-md bg-white px-9 py-9 shadow-md"
+                    @submit.prevent="createUser"
+                >
+                    <h2 class="mb-10 text-[15px] font-medium text-[var(--color-content)]">
                         Crear Nuevo Usuario
                     </h2>
 
-                    <div class="form-grid">
-                        <div class="field">
-                            <label>Cédula</label>
+                    <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+                        <div class="flex flex-col">
+                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                                Cédula
+                            </label>
                             <input
                                 v-model.trim="form.nationalId"
+                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 maxlength="9"
                                 placeholder="Ej. 123456789"
                                 type="text"
                             />
                         </div>
 
-                        <div class="field">
-                            <label>Primer Nombre</label>
+                        <div class="flex flex-col">
+                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                                Primer Nombre
+                            </label>
                             <input
                                 v-model.trim="form.firstName"
+                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 maxlength="50"
                                 placeholder="Ej. Jonathan"
                                 type="text"
                             />
                         </div>
 
-                        <div class="field">
-                            <label>Segundo Apellido</label>
+                        <div class="flex flex-col">
+                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                                Segundo Apellido
+                            </label>
                             <input
                                 v-model.trim="form.secondLastName"
+                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 maxlength="50"
                                 placeholder="Ej. Alexander"
                                 type="text"
                             />
                         </div>
 
-                        <div class="field">
-                            <label>Primer Apellido</label>
+                        <div class="flex flex-col">
+                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                                Primer Apellido
+                            </label>
                             <input
                                 v-model.trim="form.firstLastName"
+                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 maxlength="50"
                                 placeholder="Ej. Smith"
                                 type="text"
@@ -51,48 +68,64 @@
                         </div>
                     </div>
 
-                    <div class="field field-full">
-                        <label>Correo</label>
+                    <div class="mt-5 flex flex-col">
+                        <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                            Correo
+                        </label>
                         <input
                             v-model.trim="form.businessEmail"
+                            class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                             placeholder="j.smith@zuliairlines.com"
                             type="email"
                         />
                     </div>
 
-                    <div class="field field-full">
-                        <label>rol</label>
-                        <select v-model="form.userRole">
+                    <div class="mt-5 flex flex-col">
+                        <label class="mb-2 text-[15px] text-[var(--color-content)]">
+                            rol
+                        </label>
+                        <select
+                            v-model="form.userRole"
+                            class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition hover:cursor-pointer focus:border-[var(--color-primary)]"
+                        >
                             <option value="" disabled>Asignar Rol de Acceso</option>
                             <option value="Administrator">Administrador</option>
                             <option value="Operator">Operador</option>
                         </select>
                     </div>
 
-                    <p v-if="errorMessage" class="error-message">
+                    <p
+                        v-if="errorMessage"
+                        class="mt-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700"
+                    >
                         {{ errorMessage }}
                     </p>
 
-                    <p v-if="successMessage" class="success-message">
+                    <p
+                        v-if="successMessage"
+                        class="mt-5 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-center text-sm font-bold text-green-700"
+                    >
                         {{ successMessage }}
                     </p>
 
-                    <div class="form-actions">
-                        <button
-                            class="cancel-button"
-                            type="button"
-                            @click="cancel"
-                        >
-                            Cancelar
-                        </button>
+                    <div class="mt-7 border-t border-[var(--color-secondary)] pt-9">
+                        <div class="flex justify-center gap-4">
+                            <button
+                                class="h-11 w-[136px] rounded-full border border-[var(--color-primary)] bg-white font-medium text-[var(--color-primary)] transition hover:cursor-pointer hover:brightness-75"
+                                type="button"
+                                @click="cancel"
+                            >
+                                Cancelar
+                            </button>
 
-                        <button
-                            class="submit-button"
-                            :disabled="isLoading"
-                            type="submit"
-                        >
-                            {{ isLoading ? "Creando..." : "Crear Usuario" }}
-                        </button>
+                            <button
+                                class="h-11 w-[168px] rounded-full bg-[var(--color-primary)] font-medium text-white shadow-md transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-60"
+                                :disabled="isLoading"
+                                type="submit"
+                            >
+                                {{ isLoading ? "Creando..." : "Crear Usuario" }}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </section>
@@ -206,178 +239,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-.admin-page {
-    min-height: 100svh;
-    background: var(--color-secondary);
-    display: flex;
-    flex-direction: column;
-}
-
-.page-content {
-    flex: 1;
-    padding: 32px 24px 140px;
-    background: var(--color-secondary);
-}
-
-.form-shell {
-    position: relative;
-    min-height: 690px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-top: 32px;
-}
-
-.form-shell::before {
-    content: "";
-    position: absolute;
-    top: 175px;
-    left: 7%;
-    right: 5%;
-    height: 1px;
-    background: var(--color-purple);
-}
-
-.user-form {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 720px;
-    background: var(--color-white);
-    border-radius: 6px;
-    padding: 36px;
-    box-shadow: 0 3px 8px rgb(0 0 0 / 12%);
-}
-
-.form-title {
-    margin-bottom: 38px;
-    color: var(--color-content);
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-}
-
-.field-full {
-    margin-top: 22px;
-}
-
-.field label {
-    margin-bottom: 8px;
-    color: var(--color-content);
-    font-size: 15px;
-}
-
-.field input,
-.field select {
-    height: 40px;
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-body));
-    background: var(--color-body);
-    color: var(--color-content);
-    padding: 0 16px;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s ease, filter 0.2s ease;
-}
-
-.field input::placeholder {
-    color: color-mix(in srgb, var(--color-content) 45%, white);
-}
-
-.field input:focus,
-.field select:focus {
-    border-color: var(--color-primary);
-}
-
-.field select:hover {
-    cursor: pointer;
-}
-
-.error-message,
-.success-message {
-    margin-top: 22px;
-    padding: 12px 16px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.error-message {
-    border: 1px solid var(--color-error);
-    background: color-mix(in srgb, var(--color-error) 10%, white);
-    color: var(--color-error);
-}
-
-.success-message {
-    border: 1px solid var(--color-gold);
-    background: color-mix(in srgb, var(--color-gold) 10%, white);
-    color: var(--color-content);
-}
-
-.form-actions {
-    margin-top: 28px;
-    padding-top: 36px;
-    border-top: 1px solid var(--color-secondary);
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-}
-
-.cancel-button,
-.submit-button {
-    height: 44px;
-    border-radius: 999px;
-    font-weight: 500;
-    transition: filter 0.2s ease, opacity 0.2s ease;
-}
-
-.cancel-button {
-    width: 136px;
-    border: 1px solid var(--color-primary);
-    background: var(--color-surface);
-    color: var(--color-primary);
-}
-
-.submit-button {
-    width: 168px;
-    border: none;
-    background: var(--color-primary);
-    color: white;
-    box-shadow: 0 4px 8px rgb(0 0 0 / 20%);
-}
-
-.cancel-button:hover,
-.submit-button:hover {
-    cursor: pointer;
-    filter: brightness(0.75);
-}
-
-.submit-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-@media (max-width: 760px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .user-form {
-        padding: 28px;
-    }
-}
-</style>

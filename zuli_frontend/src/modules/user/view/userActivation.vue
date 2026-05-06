@@ -1,57 +1,82 @@
 <template>
-    <div class="activation-page">
+    <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
         <PublicNavBar />
 
-        <main class="activation-content">
-            <form class="activation-card" @submit.prevent="activateUser">
-                <div class="activation-header">
-                    <h1>Activar Cuenta</h1>
+        <main class="flex flex-1 items-start justify-center bg-[var(--color-secondary)] px-6 pb-36 pt-[140px]">
+            <form
+                class="w-full max-w-[735px] overflow-hidden rounded-md bg-white shadow-sm"
+                @submit.prevent="activateUser"
+            >
+                <div class="bg-[var(--color-primary)] px-6 py-6 text-center">
+                    <h1 class="text-[28px] font-bold tracking-wide text-white">
+                        Activar Cuenta
+                    </h1>
                 </div>
 
-                <div class="activation-body">
-                    <div class="input-row">
-                        <div class="icon-box">
-                            <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                <div class="bg-white px-16 py-20">
+                    <div class="mb-8 flex items-end gap-5">
+                        <div class="flex h-12 w-12 items-center justify-center">
+                            <svg
+                                class="h-9 w-9 text-[var(--color-content)]"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                            >
                                 <path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 14H7V10h10v10Z" />
                             </svg>
                         </div>
 
-                        <div class="field">
-                            <label>Contraseña</label>
+                        <div class="flex flex-1 flex-col">
+                            <label class="mb-2 text-[18px] font-bold text-gray-400">
+                                Contraseña
+                            </label>
                             <input
                                 v-model="form.password"
+                                class="h-12 w-full rounded-md border border-gray-300 bg-[var(--color-body)] px-4 text-[16px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 type="password"
                             />
                         </div>
                     </div>
 
-                    <div class="input-row">
-                        <div class="icon-box">
-                            <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <div class="mb-12 flex items-end gap-5">
+                        <div class="flex h-12 w-12 items-center justify-center">
+                            <svg
+                                class="h-9 w-9 text-[var(--color-content)]"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                            >
                                 <path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 14H7V10h10v10Z" />
                             </svg>
                         </div>
 
-                        <div class="field">
-                            <label>Confirmar Contraseña</label>
+                        <div class="flex flex-1 flex-col">
+                            <label class="mb-2 text-[18px] font-bold text-gray-400">
+                                Confirmar Contraseña
+                            </label>
                             <input
                                 v-model="form.confirmPassword"
+                                class="h-12 w-full rounded-md border border-gray-300 bg-[var(--color-body)] px-4 text-[16px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
                                 type="password"
                             />
                         </div>
                     </div>
 
-                    <p v-if="errorMessage" class="error-message">
+                    <p
+                        v-if="errorMessage"
+                        class="mb-7 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700"
+                    >
                         {{ errorMessage }}
                     </p>
 
-                    <p v-if="successMessage" class="success-message">
+                    <p
+                        v-if="successMessage"
+                        class="mb-7 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-center text-sm font-bold text-green-700"
+                    >
                         {{ successMessage }}
                     </p>
 
-                    <div class="button-container">
+                    <div class="mt-14 flex justify-center">
                         <button
-                            class="activate-button"
+                            class="h-12 w-[240px] rounded-lg bg-[var(--color-primary)] text-[22px] font-bold text-white transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-60"
                             :disabled="isLoading"
                             type="submit"
                         >
@@ -171,156 +196,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-.activation-page {
-    min-height: 100svh;
-    background: var(--color-secondary);
-    display: flex;
-    flex-direction: column;
-}
-
-.activation-content {
-    flex: 1;
-    padding: 140px 24px 150px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-
-.activation-card {
-    width: 100%;
-    max-width: 735px;
-    overflow: hidden;
-    border-radius: 6px;
-    background: var(--color-surface);
-    box-shadow: 0 3px 8px rgb(0 0 0 / 8%);
-}
-
-.activation-header {
-    background: var(--color-primary);
-    padding: 22px;
-    text-align: center;
-}
-
-.activation-header h1 {
-    color: white;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.activation-body {
-    padding: 80px 64px;
-}
-
-.input-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.icon-box {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lock-icon {
-    width: 36px;
-    height: 36px;
-    color: black;
-}
-
-.field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.field label {
-    margin-bottom: 8px;
-    color: #a7a7a7;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.field input {
-    height: 48px;
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid #aaa;
-    background: #f7f7f7;
-    padding: 0 16px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-
-.field input:focus {
-    border-color: var(--color-primary);
-}
-
-.error-message,
-.success-message {
-    margin: 8px 0 28px;
-    padding: 12px 16px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.error-message {
-    border: 1px solid #fecaca;
-    background: #fef2f2;
-    color: #b91c1c;
-}
-
-.success-message {
-    border: 1px solid #bbf7d0;
-    background: #f0fdf4;
-    color: #15803d;
-}
-
-.button-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 56px;
-}
-
-.activate-button {
-    height: 48px;
-    width: 240px;
-    border: none;
-    border-radius: 8px;
-    background: var(--color-primary);
-    color: white;
-    font-size: 22px;
-    font-weight: 700;
-    transition: filter 0.2s ease, opacity 0.2s ease;
-}
-
-.activate-button:hover {
-    cursor: pointer;
-    filter: brightness(0.75);
-}
-
-.activate-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-@media (max-width: 720px) {
-    .activation-body {
-        padding: 48px 28px;
-    }
-
-    .input-row {
-        gap: 12px;
-    }
-}
-</style>
