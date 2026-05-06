@@ -4,7 +4,7 @@
         <div class="relative">
             <div :class="containerClasses">
                 <input
-                    :value="modelValue"
+                    :value="displayValue"
                     :type="type"
                     :readonly="readonly"
                     :placeholder="placeholder"
@@ -26,13 +26,13 @@
                 class="absolute left-0 right-0 top-full z-10 mt-1 max-h-44 overflow-y-auto rounded-md border border-slate-200 bg-[#f7f7f7] p-1 shadow-lg"
             >
                 <button
-                    v-for="option in options"
-                    :key="option"
+                    v-for="option in normalizedOptions"
+                    :key="option.value"
                     type="button"
                     class="block w-full rounded px-3 py-2 text-left text-sm text-slate-900 transition hover:bg-slate-300"
                     @click="selectOption(option)"
                 >
-                    {{ option }}
+                    {{ option.label }}
                 </button>
             </div>
         </div>
@@ -56,6 +56,14 @@ export default {
         options: {
             type: Array,
             default: () => []
+        },
+        optionLabelKey: {
+            type: String,
+            default: 'label'
+        },
+        optionValueKey: {
+            type: String,
+            default: 'value'
         },
         placeholder: {
             type: String,
@@ -94,12 +102,33 @@ export default {
             arrowDownUrl
         }
     },
+    computed: {
+        normalizedOptions() {
+            return this.options.map((option) => {
+                if (option !== null && typeof option === 'object') {
+                    return {
+                        label: option[this.optionLabelKey] ?? '',
+                        value: option[this.optionValueKey] ?? ''
+                    }
+                }
+
+                return {
+                    label: String(option),
+                    value: option
+                }
+            })
+        },
+        displayValue() {
+            const selected = this.normalizedOptions.find((option) => option.value === this.modelValue)
+            return selected ? selected.label : this.modelValue
+        }
+    },
     methods: {
         toggleMenu() {
             this.showMenu = !this.showMenu
         },
         selectOption(option) {
-            this.$emit('update:modelValue', option)
+            this.$emit('update:modelValue', option.value)
             this.showMenu = false
         },
         onInput(event) {

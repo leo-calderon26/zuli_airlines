@@ -7,6 +7,7 @@ namespace zuli_Business.DTO
 {
     public class FlightSearchResponseDTO
     {
+        public string PathIds { get; set; }
         public string Origin { get; set; }
         public string Destination { get; set; }
         public string DepartureTimeText { get; set; }
@@ -14,8 +15,7 @@ namespace zuli_Business.DTO
         public string ArrivalDateText { get; set; }
         public string TotalDurationText { get; set; }
         public int Stops { get; set; }
-        public string LayoverAirports { get; set; }
-        public decimal TotalTouristPrice { get; set; }
-        public decimal TotalFirstClassPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public List<FlightSegmentDTO> Segments { get; set; } = new List<FlightSegmentDTO>();
     }
 }

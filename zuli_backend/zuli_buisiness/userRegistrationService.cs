@@ -186,5 +186,68 @@ namespace zuli_Business
 
             throw new ZuliValidationException(errors);
         }
+        public async Task<UserSearchResponseDTO> GetUsersAsync(
+            string? searchType,
+            string? search,
+            int page,
+            int pageSize)
+        {
+            string normalizedSearchType = NormalizeSearchType(searchType);
+            string normalizedSearch = search?.Trim() ?? string.Empty;
+
+            int normalizedPage = page <= 0 ? 1 : page;
+            int normalizedPageSize = pageSize <= 0 ? 10 : pageSize;
+
+            if (normalizedPageSize > 50)
+            {
+                normalizedPageSize = 50;
+            }
+
+            var result = await _userRepository.GetUsersAsync(
+                normalizedSearchType,
+                normalizedSearch,
+                normalizedPage,
+                normalizedPageSize
+            );
+
+            int totalPages = result.TotalItems == 0
+                ? 1
+                : (int)Math.Ceiling(result.TotalItems / (double)normalizedPageSize);
+
+            return new UserSearchResponseDTO
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Usuarios obtenidos correctamente.",
+                Page = normalizedPage,
+                PageSize = normalizedPageSize,
+                TotalItems = result.TotalItems,
+                TotalPages = totalPages,
+                Users = result.Users.Select(user => new UserListItemDTO
+                {
+                    UserId = user.UserId,
+                    PersonId = user.PersonId,
+                    NationalId = user.NationalId,
+                    FirstName = user.FirstName,
+                    FirstLastName = user.FirstLastName,
+                    SecondLastName = user.SecondLastName,
+                    BusinessEmail = user.BusinessEmail,
+                    UserRole = user.UserRole,
+                    IsActive = user.IsActive
+                }).ToList()
+            };
+        }
+        private static string NormalizeSearchType(string? searchType)
+        {
+            string normalizedSearchType = searchType?.Trim() ?? "all";
+
+            return normalizedSearchType switch
+            {
+                "email" => "email",
+                "name" => "name",
+                "nationalId" => "nationalId",
+                _ => "all"
+            };
+        }
+
     }
 }

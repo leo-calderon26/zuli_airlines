@@ -11,5 +11,6 @@ namespace zuli_Repository.Interface
         Task<bool> AlreadyExistFlightRoute(FlightRouteEntity flightRoute);
         Task<bool> IsAdmin(string businessId); 
         Task<Guid> GetUserId(string businessId);
+        Task<(IEnumerable<FlightRouteEntity> flightRoutes, int totalCount)> GetFlightRoutesPaginated(int pageNumber, int pageSize);
     }
 }

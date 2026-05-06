@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Flights from "../modules/flight/view/FlightList.vue"
 import authService from "../modules/auth/services/authService";
+import FlightSearchResults from '../modules/landing/view/FlightSearchResults.vue';
 
 import FlightList from "../modules/flight/view/FlightList.vue"
 
@@ -12,10 +13,11 @@ import AirportCreate from '../modules/airport/view/AirportCreate.vue'
 
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Routes from '../modules/route/view/Routes.vue'
+import RouteList from '../modules/route/view/RouteList.vue'
 
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
-
+import FlightCreate from "../modules/flight/view/FlightCreate.vue"
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
@@ -38,6 +40,12 @@ const router = createRouter({
             meta: {requiresAuth: false, adminRequired: false}
         },
         {
+            path: "/buscar-vuelos",
+            name: "buscarVuelos",
+            component: FlightSearchResults,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
             path: "/admin/",
             name: "mainMenu",
             component: MainMenu,
@@ -54,6 +62,16 @@ const router = createRouter({
             name: "createAircraft",
             component: AircraftCreate,
             meta: {requiresAuth: true, adminRequired: true}
+        },
+        {
+            path: "/admin/flights",
+            name: "flights",
+            component: FlightCreate,
+            meta: {requiresAuth: true, adminRequired: false}
+        },
+        {
+            path: "/admin/create-flight",
+            redirect: "/admin/flights"
         },
         {
             path: "/admin/create-airport",
@@ -88,13 +106,19 @@ const router = createRouter({
         {
             path: "/admin/routes",
             name: "routes",
+            component: RouteList,
+            meta: {requiresAuth: true, adminRequired: false}
+        },
+        {
+            path: "/admin/create-route",
+            name: "createRoute",
             component: Routes,
             meta: {requiresAuth: true, adminRequired: false}
         },
          {
-            path: "/admin/flights",
-            name: "flights",
-            component: Flights,
+            path: "/admin/flight-list",
+            name: "flightList",
+            component: FlightList,
             meta: {requiresAuth: true, adminRequired: false}
         },
         {

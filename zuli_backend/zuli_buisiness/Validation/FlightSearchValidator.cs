@@ -22,8 +22,8 @@ namespace zuli_Business.Validation
             if (request.Origin?.ToUpper() == request.Destination?.ToUpper())
                 AddError(errors, "Destination", "El origen y destino no pueden ser iguales.");
 
-            if (request.Date.Date < DateTime.Now.Date)
-                AddError(errors, "Date", "La fecha de búsqueda no puede ser en el pasado.");
+            //if (request.Date.Date < DateTime.Now.Date) Solo busca vuelos despues de hoy, cuidado.
+                //AddError(errors, "Date", "La fecha de búsqueda no puede ser en el pasado.");
 
             if (request.Seats <= 0)
                 AddError(errors, "Seats", "Debe buscar al menos 1 asiento.");

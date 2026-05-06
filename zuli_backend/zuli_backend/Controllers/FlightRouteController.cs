@@ -15,6 +15,10 @@ namespace zuli_backend.Controllers
         [HttpPost("CreateFlightRoute")]
         public async Task<BasicResponseDTO> CreateFlightRouter([FromBody] FlightRouteDTO flightRouter)
             => await _service.CreateFlightRouter(flightRouter);
+
+        [HttpGet("GetPaginated")]
+        public async Task<FlightRoutePaginatedResponseDTO> GetPaginated(int pageNumber = 1, int pageSize = 10)
+            => await _service.GetFlightRoutesPaginated(pageNumber, pageSize);
     }
 }
 

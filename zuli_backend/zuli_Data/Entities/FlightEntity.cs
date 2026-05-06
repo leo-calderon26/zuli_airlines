@@ -1,18 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+using System;
 
 namespace zuli_Data.Entities
 {
-    public class RequestedFlightEntity
+    public class FlightEntity
     {
-        [Key] public int flightId { get; set; }
-        public DateTime date { get; set; }
-        public string status { get; set; }
-        public TimeOnly realArrivalTime { get; set; }
-        public TimeOnly checkInStartTime { get; set; }
-        public TimeOnly checkInDeadline { get; set; }
-        public TimeOnly realDepartureTime { get; set; }
+        public Guid Id { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public DateTime FlightDate { get; set; }
+        public decimal TouristPrice { get; set; }
+        public decimal FirstClassPrice { get; set; }
+        public DateTime? RealDepartureTime { get; set; }
+        public DateTime? RealArrivalTime { get; set; }
+        public DateTime? CheckInStartTime { get; set; }
+        public DateTime? CheckInDeadline { get; set; }
+        public int AirlineId { get; set; }
+        public Guid AircraftId { get; set; }
+        public int ItineraryId { get; set; }
+        public int Duration { get; set; }
+        public decimal? CarryOnPrice { get; set; }
+        public decimal? CheckedPrice { get; set; }
+        public int AvailableSeats { get; set; }
+        public Guid AdminId { get; set; }
+        public int FlightRouteId { get; set; }
     }
 }
