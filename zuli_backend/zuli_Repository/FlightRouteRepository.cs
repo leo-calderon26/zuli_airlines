@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using System.Linq;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -81,6 +82,35 @@ namespace zuli_Repository
             WHERE BusinessId = @BusinessId";
             var userId = await connection.ExecuteScalarAsync<Guid?>(sql, new { BusinessId = businesId });
             return userId ?? Guid.Empty;
+        }
+
+        public async Task<(IEnumerable<FlightRouteEntity> flightRoutes, int totalCount)> GetFlightRoutesPaginated(int pageNumber, int pageSize)
+        {
+            using var connection = _context.CreateConnection();
+
+            var countSql = "SELECT COUNT(1) FROM FlightRoute";
+            var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
+
+            var offset = (pageNumber - 1) * pageSize;
+
+            var sql = @"
+                SELECT
+                    flightRouteId,
+                    frequency,
+                    scheduledArrivalTime,
+                    scheduledDeparture AS scheduledDepartureTime,
+                    estimatedDuration,
+                    adminId,
+                    airlineId,
+                    arrivalAirport,
+                    departureAirport
+                FROM FlightRoute
+                ORDER BY flightRouteId
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY";
+
+            var flightRoutes = (await connection.QueryAsync<FlightRouteEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
+            return (flightRoutes, totalCount);
         }
     }
 
