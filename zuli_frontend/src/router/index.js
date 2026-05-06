@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Flights from "../modules/flight/view/FlightList.vue"
 import authService from "../modules/auth/services/authService";
+import FlightSearchResults from '../modules/landing/view/FlightSearchResults.vue';
+
 import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
@@ -35,6 +37,12 @@ const router = createRouter({
             path: "/",
             name: "reserve",
             component: ReserveView,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/buscar-vuelos",
+            name: "buscarVuelos",
+            component: FlightSearchResults,
             meta: {requiresAuth: false, adminRequired: false}
         },
         {

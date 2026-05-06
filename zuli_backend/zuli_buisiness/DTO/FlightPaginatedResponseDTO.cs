@@ -7,9 +7,13 @@ namespace zuli_Business.DTO
 {
     public class FlightPaginatedResponseDTO
     {
-        public int TotalRecords { get; set; }
+        public int TotalRecordsOutbound { get; set; }
+        public int TotalPagesOutbound { get; set; }
+        public List<FlightSearchResponseDTO> OutboundFlights { get; set; } = new List<FlightSearchResponseDTO>();
+
+        public int TotalRecordsReturn { get; set; }
+        public int TotalPagesReturn { get; set; }
+        public List<FlightSearchResponseDTO> ReturnFlights { get; set; } = new List<FlightSearchResponseDTO>();
         public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
-        public List<FlightSearchResponseDTO> Flights { get; set; }
     }
 }
