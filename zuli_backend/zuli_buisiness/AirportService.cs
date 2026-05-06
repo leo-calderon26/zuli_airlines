@@ -13,21 +13,29 @@ namespace zuli_Business
     public class AirportService : IAirportService
     {
         private readonly IAirportRepository _repository;
+        private readonly IUserRepository _userRepository;
         private readonly AirportValidator _validator;
 
-        public AirportService(IAirportRepository repository)
+        public AirportService(IAirportRepository repository, IUserRepository userRepository)
         {
             _repository = repository;
+            _userRepository = userRepository;
             _validator = new AirportValidator();
         }
 
         public async Task<BasicResponseDTO> CreateAirport(AirportDTO airport)
         {
+
+            if (!await _userRepository.IsAdmin(airport.businessId))
+            {
+                throw new ZuliNotFoundException($"El Usuario que esta intentando crear un aeropuerto y no tiene permisos {airport.businessId}");
+            }
             if (await _repository.AlreadyExist(airport.airportCode))
             {
                 throw new ZuliNotFoundException($"Se encontro un aeropuerto con el mismo codigo {airport.airportCode}");
             }
 
+            var userId = await _userRepository.GetUserId(airport.businessId);
             _validator.ValidateAirportInfo(airport);
 
             var newAirport = new AirportEntity
@@ -36,7 +44,7 @@ namespace zuli_Business
                 Name = airport.name,
                 Country = airport.country,
                 City = airport.city,
-                AdminId = airport.adminId
+                AdminId = userId,
             };
 
             await _repository.CreateAirport(newAirport);
@@ -58,7 +66,7 @@ namespace zuli_Business
                 name = item.Name,
                 country = item.Country,
                 city = item.City,
-                adminId = item.AdminId
+                businessId = item.AdminId.ToString()
             }).ToList();
         }
 

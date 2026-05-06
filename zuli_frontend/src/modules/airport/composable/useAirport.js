@@ -1,7 +1,9 @@
 import { ref } from "vue"
-import { getAirports } from "../service/airportService"
+import { getAirports, createAirport } from "../service/airportService"
+import { useAirportStore } from "../store/airportStore";
 
 export function useAirport() {
+    const store = useAirportStore();
     const airports = ref([])
 
     const fetchAirports = async () => {
@@ -9,8 +11,15 @@ export function useAirport() {
         airports.value = data
     }
 
+    const addAirport = async (airportData) => {
+        const newAirport = await createAirport(airportData);
+        store.addAirport(newAirport);
+        return newAirport;
+    };
+
     return {
         airports,
         fetchAirports,
+        addAirport,
     }
-}
+}    

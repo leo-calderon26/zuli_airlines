@@ -8,8 +8,8 @@ namespace zuli_Business.DTO
         {
                 public Guid aircraftId { get; set; }
                 public Guid AdminId { get; set; }
-                public string businessId { get; set; }
-                public string model { get; set; }
+                public string? businessId { get; set; }
+                public string? model { get; set; }
                 public decimal weight { get; set; }
                 public short numberEconomyClassRows { get; set; }
                 public short numberSeatingRowsEconomy { get; set; }
