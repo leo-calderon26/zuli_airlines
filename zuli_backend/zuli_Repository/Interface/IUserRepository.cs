@@ -6,5 +6,7 @@ namespace zuli_Repository.Interface
     {
         Task<AppUser?> GetByBusinessEmailAsync(string businessEmail);
         Task UpdateLoginStateAsync(AppUser user);
+        Task<bool> IsAdmin(string businesId);
+        Task<Guid> GetUserId(string businesId);
     }
 }
