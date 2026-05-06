@@ -125,7 +125,6 @@ namespace zuli_Repository
             {
                 var personSql = @"
                     INSERT INTO Person (
-                        PersonId,
                         NationalId,
                         FirstName,
                         FirstLastName,
@@ -133,16 +132,23 @@ namespace zuli_Repository
                         Email
                     )
                     VALUES (
-                        @PersonId,
                         @NationalId,
                         @FirstName,
                         @FirstLastName,
                         @SecondLastName,
                         @Email
                     );
+
+                    SELECT CAST(SCOPE_IDENTITY() AS INT);
                 ";
 
-                await connection.ExecuteAsync(personSql, user, transaction);
+                int personId = await connection.QuerySingleAsync<int>(
+                    personSql,
+                    user,
+                    transaction
+                );
+
+                user.PersonId = personId;
 
                 var userSql = @"
                     INSERT INTO AirlineUser (

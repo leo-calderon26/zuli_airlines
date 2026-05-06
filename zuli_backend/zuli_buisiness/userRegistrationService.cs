@@ -57,7 +57,7 @@ namespace zuli_Business
             var user = new AppUser
             {
                 UserId = Guid.NewGuid(),
-                PersonId = Guid.NewGuid(),
+
                 NationalId = nationalId,
                 FirstName = firstName,
                 FirstLastName = firstLastName,

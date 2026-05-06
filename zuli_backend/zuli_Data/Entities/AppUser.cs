@@ -3,7 +3,7 @@ namespace zuli_Data.Entities
     public class AppUser
     {
         public Guid UserId { get; set; }
-        public Guid PersonId { get; set; }
+        public int PersonId { get; set; }
 
         public string NationalId { get; set; } = string.Empty;
 
