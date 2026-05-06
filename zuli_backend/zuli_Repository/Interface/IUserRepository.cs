@@ -8,5 +8,6 @@ namespace zuli_Repository.Interface
         Task UpdateLoginStateAsync(AppUser user);
         Task<bool> IsAdmin(string businesId);
         Task<Guid> GetUserId(string businesId);
+        Task<string> GetBusinessId(Guid userId);
     }
 }

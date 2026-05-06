@@ -4,6 +4,7 @@ namespace zuli_Business.DTO
 {
 	public class FlightDTO
 	{
+		//TODO(you) Esto se tiene que ir ya que esto nosotros no usamos esto
 		public Guid? Id { get; set; }
 		public string Status { get; set; } = string.Empty;
 		public DateTime FlightDate { get; set; }
@@ -20,7 +21,9 @@ namespace zuli_Business.DTO
 		public decimal? CarryOnPrice { get; set; }
 		public decimal? CheckedPrice { get; set; }
 		public int AvailableSeats { get; set; }
-		public Guid AdminId { get; set; }
+		// TODO(you) se cambio esto
+		// public Guid AdminId { get; set; }
+		public string BusinessId { get; set; }
 		public int FlightRouteId { get; set; }
 		public bool Monday { get; set; }
 		public bool Tuesday { get; set; }

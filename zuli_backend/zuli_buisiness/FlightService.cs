@@ -17,17 +17,21 @@ namespace zuli_Business
         private readonly IFlightRepository _repository;
         private readonly FlightValidator _validator;
         private readonly FlightSearchValidator _searchValidator;
+        private readonly IUserRepository _userRepository;
 
-        public FlightService(IFlightRepository repository)
+        public FlightService(IFlightRepository repository, IUserRepository userRepository)
         {
             _repository = repository;
             _validator = new FlightValidator();
             _searchValidator = new FlightSearchValidator();
+            _userRepository = userRepository;
         }
 
         public async Task<BasicResponseDTO> CreateFlight(FlightDTO flight)
         {
             _validator.ValidateFlight(flight);
+            // TOD(you); tiene que validar el compa tiene permisos
+            var adminId = await _userRepository.GetUserId(flight.BusinessId);
 
             var newFlight = new FlightEntity
             {
@@ -47,7 +51,7 @@ namespace zuli_Business
                 CarryOnPrice = flight.CarryOnPrice,
                 CheckedPrice = flight.CheckedPrice,
                 AvailableSeats = flight.AvailableSeats,
-                AdminId = flight.AdminId,
+                AdminId = adminId,
                 FlightRouteId = flight.FlightRouteId,
                 Monday = flight.Monday,
                 Tuesday = flight.Tuesday,
@@ -74,8 +78,12 @@ namespace zuli_Business
         public async Task<IEnumerable<FlightDTO>> GetAllFlights()
         {
             var flights = await _repository.GetAllFlights();
+            var flightList = flights.ToList();
+            var businessIds = await Task.WhenAll(
+                flightList.Select(f => _userRepository.GetBusinessId(f.AdminId))
+            );
 
-            return flights.Select(f => new FlightDTO
+            return flightList.Select((f, index) => new FlightDTO
             {
                 Id = f.Id,
                 Status = f.Status,
@@ -93,7 +101,7 @@ namespace zuli_Business
                 CarryOnPrice = f.CarryOnPrice,
                 CheckedPrice = f.CheckedPrice,
                 AvailableSeats = f.AvailableSeats,
-                AdminId = f.AdminId,
+                BusinessId = businessIds[index],
                 FlightRouteId = f.FlightRouteId,
                 Monday = f.Monday,
                 Tuesday = f.Tuesday,

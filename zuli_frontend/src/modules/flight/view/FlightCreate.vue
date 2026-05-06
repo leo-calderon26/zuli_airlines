@@ -23,7 +23,6 @@ const form = reactive({
   airlineId: 1,
   aircraftId: '',
   itineraryId: 0,
-  businessId: '',
   flightRouteId: 0,
   availableSeats: 0,
   carryOnPrice: null,
@@ -73,6 +72,8 @@ const dayLabels = [
   { key: 'saturday', label: 'Sabado', bit: 32 },
   { key: 'sunday', label: 'Domingo', bit: 64 },
 ]
+
+const BUSINESS_ID_COOKIE = 'businessId'
 
 const hasSelectedRoute = computed(() => Number(form.flightRouteId) > 0)
 const selectedDaysText = computed(() => {
@@ -157,10 +158,14 @@ function toIsoDateTime(value) {
   return value ? new Date(value).toISOString() : null
 }
 
-function isValidGuid(value) {
-  // Validación flexible: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-  // Acepta cualquier GUID aunque no sea RFC 4122 estricto
-  return typeof value === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value)
+function getCookieValue(name) {
+  if (typeof document === 'undefined') return ''
+  const matches = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'))
+  return matches ? decodeURIComponent(matches[1]) : ''
+}
+
+function getBusinessId() {
+  return getCookieValue(BUSINESS_ID_COOKIE) || sessionStorage.getItem('businessId') || ''
 }
 
 function validate() {
@@ -183,25 +188,8 @@ function validate() {
     console.warn('❌ AircraftId está vacío')
     return 'El id de la aeronave es requerido'
   }
-  
-  const isValidAircraft = isValidGuid(form.aircraftId)
-  console.log('✅ ¿Es GUID válido?', isValidAircraft)
-  if (!isValidAircraft) {
-    console.warn('❌ AircraftId no es GUID válido:', form.aircraftId)
-    return 'La aeronave seleccionada debe entregar un GUID válido'
-  }
-  
   if (form.itineraryId <= 0) return 'El itinerario es requerido'
 
-  if (!form.businessId) return 'El business id es requerido'
-
-  console.log('👤 Validando businessId:', form.businessId, 'Tipo:', typeof form.businessId)
-  const isValidBusiness = isValidGuid(form.businessId)
-  console.log('✅ ¿BusinessId es GUID válido?', isValidBusiness, 'Validador usado:', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/)
-  if (!isValidBusiness) {
-    console.warn('❌ BusinessId no es GUID válido:', form.businessId)
-    return 'El business id debe ser un GUID válido'
-  }
   if (form.flightRouteId <= 0) return 'Selecciona una ruta de vuelo antes de continuar'
   if (!form.departureAirportCode) return 'La ruta seleccionada no tiene aeropuerto de salida'
   if (!form.arrivalAirportCode) return 'La ruta seleccionada no tiene aeropuerto de llegada'
@@ -223,6 +211,12 @@ async function submit() {
     return
   }
 
+  const businessId = getBusinessId()
+  if (!businessId) {
+    error.value = 'No se pudo obtener el businessId desde las cookies.'
+    return
+  }
+
   const payload = {
     Status: form.status,
     FlightDate: toIsoDateTime(form.flightDate),
@@ -236,7 +230,7 @@ async function submit() {
     AirlineId: Number(form.airlineId),
     AircraftId: form.aircraftId,
     ItineraryId: Number(form.itineraryId),
-    BusinessId: form.businessId,
+    BusinessId: businessId,
     FlightRouteId: Number(form.flightRouteId),
     AvailableSeats: Number(form.availableSeats),
     CarryOnPrice: form.carryOnPrice ? Number(form.carryOnPrice) : null,
@@ -393,11 +387,6 @@ async function submit() {
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Itinerario (id)
             <input v-model.number="form.itineraryId" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-          </label>
-
-
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Business id (GUID)
-            <input v-model="form.businessId" type="text" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
 
