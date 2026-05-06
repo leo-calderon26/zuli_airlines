@@ -8,6 +8,7 @@ using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
+using Microsoft.AspNetCore.Http;
 
 namespace zuli_Business
 {
@@ -89,7 +90,7 @@ namespace zuli_Business
 
             return new RegisterUserResponseDTO
             {
-                Success = true,
+                StatusCode = StatusCodes.Status200OK,
                 Message = "Usuario registrado. Se envió el correo de activación.",
                 UserId = user.UserId,
                 PersonId = user.PersonId,
@@ -125,7 +126,7 @@ namespace zuli_Business
 
             return new BasicResponseDTO
             {
-                Success = true,
+                StatusCode = StatusCodes.Status200OK,
                 Message = "Cuenta activada correctamente."
             };
         }
@@ -151,6 +152,8 @@ namespace zuli_Business
         {
             string frontendBaseUrl = _configuration["Frontend:BaseUrl"]
                 ?? throw new InvalidOperationException("Frontend:BaseUrl is not configured.");
+
+            return $"{frontendBaseUrl}/activar-cuenta?token={Uri.EscapeDataString(token)}";
         }
 
         private static string GenerateSecureToken()

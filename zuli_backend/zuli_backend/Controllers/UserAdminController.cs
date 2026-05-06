@@ -31,7 +31,7 @@ namespace zuli_backend.Controllers
             {
                 return Unauthorized(new BasicResponseDTO
                 {
-                    Success = false,
+                    StatusCode = StatusCodes.Status401Unauthorized,
                     Message = "No se pudo identificar al administrador."
                 });
             }
