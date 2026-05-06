@@ -5,7 +5,7 @@ using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
     public class AirportController : ControllerBase
     {
@@ -20,5 +20,10 @@ namespace zuli_backend.Controllers
         [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<AirportDTO>>> GetAll()
             => Ok(await _service.GetAll());
+
+        [HttpGet("suggestions")]
+        public async Task<ActionResult<List<AirportSuggestionDTO>>> GetSuggestions([FromQuery] string query)
+            => await _service.GetAirportSuggestions(query);
+
     }
 }

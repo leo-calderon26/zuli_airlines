@@ -4,7 +4,7 @@ using System.Linq;
 using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     public static class FlightAtributes
     {

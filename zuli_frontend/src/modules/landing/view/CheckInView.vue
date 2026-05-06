@@ -1,6 +1,7 @@
 <template>
   <div class="landing-page">
     <PublicNavBar />
+<<<<<<< HEAD
     <h1 class = "message">Check-in en mantenimiento</h1>
     <PublicBottomBar />
   </div>
@@ -10,18 +11,24 @@
 <script>
 import PublicNavBar from '../components/PublicNavBar.vue';
 import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
+=======
+    <h1 class = "message">Airports en mantenimiento</h1>
+  </div>
+</template>
+
+<script>
+import PublicNavBar from '../../../shared/PublicNavBar.vue';
+>>>>>>> develop
 
 export default {
   components: {
-    PublicNavBar,
-    PublicBottomBar
+    PublicNavBar
   }
 }
 </script>
 
 <style scoped>
 .landing-page {
-  min-height: 100svh;
   display: flex;
   flex-direction: column;
 }

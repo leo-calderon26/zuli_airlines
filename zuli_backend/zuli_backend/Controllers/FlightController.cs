@@ -1,8 +1,7 @@
-﻿
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using zuli_Business.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
@@ -10,7 +9,6 @@ namespace zuli_backend.Controllers
     [ApiController]
     public class FlightController : ControllerBase
     {
-
         private readonly IFlightService _service;
         public FlightController(IFlightService service) => _service = service;
 
@@ -29,6 +27,13 @@ namespace zuli_backend.Controllers
             if (flight == null)
                 return NotFound(new { message = "Vuelo no encontrado" });
             return Ok(flight);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<FlightPaginatedResponseDTO>> SearchFlights([FromQuery] FlightSearchRequestDTO request)
+        {
+            var result = await _service.Search(request);
+            return Ok(result);
         }
     }
 }

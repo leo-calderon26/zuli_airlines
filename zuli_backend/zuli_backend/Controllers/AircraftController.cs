@@ -6,7 +6,7 @@ using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
     public class AircraftController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace zuli_backend.Controllers
             => await _service.GetAll();
 
         [HttpGet("GetPaginated")]
-        public async Task<PaginatedResponseDTO<AircraftDTO>> GetPaginated(int pageNumber = 1, int pageSize = 10)
+        public async Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetPaginated(int pageNumber = 1, int pageSize = 10)
             => await _service.GetAircraftsPaginated(pageNumber, pageSize);
     }
 }

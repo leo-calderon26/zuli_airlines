@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
@@ -11,6 +13,7 @@ namespace zuli_Business.Validation
         public const string SCHEDULED_ARRIVAL_TIME = "ScheduledArrivalTime";
         public const string SCHEDULED_DEPARTURE_TIME = "ScheduledDepartureTime";
         public const string ESTIMATED_DURATION = "EstimatedDuration";
+        public const string BUSINESS_ID = "BusinessId";
         public const string AIRLINE_ID = "AirlineId";
         public const string ARRIVAL_AIRPORT = "ArrivalAirport";
         public const string DEPARTURE_AIRPORT = "DepartureAirport";
@@ -25,6 +28,7 @@ namespace zuli_Business.Validation
                 {FlightRouteAtributes.SCHEDULED_ARRIVAL_TIME, new List<string>() },
                 {FlightRouteAtributes.SCHEDULED_DEPARTURE_TIME, new List<string>() },
                 {FlightRouteAtributes.ESTIMATED_DURATION, new List<string>() },
+                {FlightRouteAtributes.BUSINESS_ID, new List<string>() },
 
                 {FlightRouteAtributes.AIRLINE_ID, new List<string>() },
                 {FlightRouteAtributes.ARRIVAL_AIRPORT, new List<string>() },
@@ -49,6 +53,12 @@ namespace zuli_Business.Validation
             if (string.IsNullOrWhiteSpace(flightRoute.departureAirport))
             {
                 errorInfo[FlightRouteAtributes.DEPARTURE_AIRPORT].Add("Es necesario ingresar el aeropuerto de salida");
+                IsEmptyInfo = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(flightRoute.businessId))
+            {
+                errorInfo[FlightRouteAtributes.BUSINESS_ID].Add("Es necesario ingresar el Id de negocio");
                 IsEmptyInfo = true;
             }
 

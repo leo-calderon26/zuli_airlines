@@ -11,15 +11,18 @@ import Routes from '../modules/route/view/Routes.vue'
 import Users from '../modules/user/view/Users.vue'
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
+<<<<<<< HEAD
 import FlightCreate from "../modules/flight/view/FlightCreate.vue"
-
-import Login from"../modules/auth/view/Login.vue"
-import authService from "../modules/auth/services/authService";
+=======
 
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
+import Login from '../modules/auth/view/Login.vue'
+>>>>>>> develop
+
+import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -27,22 +30,26 @@ const router = createRouter({
         {
             path: "/",
             name: "reserve",
-            component: ReserveView
+            component: ReserveView,
+            meta: {requiresAuth: false, adminRequired: false}
         },
         {
             path: "/admin/",
             name: "mainMenu",
-            component: MainMenu
+            component: MainMenu,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/aircrafts/",
             name: "aircraftList",
-            component: AircraftList
+            component: AircraftList,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/create-aircraft",
             name: "createAircraft",
-            component: AircraftCreate
+            component: AircraftCreate,
+            meta: {requiresAuth: true, adminRequired: true}
         },
         {
             path: "/admin/create-flight",
@@ -52,58 +59,74 @@ const router = createRouter({
         {
             path: "/check-in",
             name: "checkin",
-            component: CheckInView
+            component: CheckInView,
+            meta: {requiresAuth: false, adminRequired: false}
         },
         {
             path: "/consulta",
             name: "consult",
-            component: ConsultView
+            component: ConsultView,
+            meta: {requiresAuth: false, adminRequired: false}
         },
         {
             path: "/ayuda",
             name: "help",
-            component: HelpView
+            component: HelpView,
+            meta: {requiresAuth: false, adminRequired: false}
         },
         {
             path: "/admin/airports",
             name: "airports",
-            component: Airports
+            component: Airports,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/routes",
             name: "routes",
-            component: Routes
+            component: Routes,
+            meta: {requiresAuth: true, adminRequired: false}
         },
          {
             path: "/admin/flights",
             name: "flights",
-            component: Flights
+            component: Flights,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/users",
             name: "users",
-            component: Users
+            component: Users,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/reports",
             name: "reports",
-            component: Reports
+            component: Reports,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/profile-settings",
             name: "profileSettings",
-            component: ProfileSettings
+            component: ProfileSettings,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/administrativo",
             name: "administrativo",
-            component: Login
+            component: Login,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/admin/unauthorizedAccess",
+            name: "unauthorizedAccess",
+            component: UnauthorizedAccess,
+            meta: {requiresAuth: false, adminRequired: false}
         }
     ]
 });
 
 router.beforeEach(async (to, from, next) => {
-    if (!to.meta.requiresAuth) {
+    if (to.meta.requiresAuth === false) {
         next();
         return;
     }
@@ -113,6 +136,24 @@ router.beforeEach(async (to, from, next) => {
         next();
     } catch {
         next({ name: "administrativo" });
+    }
+});
+
+router.beforeEach(async (to, from, next) => {
+    if (to.meta.adminRequired === false) {
+        next();
+        return;
+    }
+    try {
+        var data = await authService.me();
+        if (data.userRole === 'Administrator') {
+            next();
+            return;
+        }
+        else
+            next({ name: "unauthorizedAccess" });
+    } catch {
+        next({ name: "unauthorizedAccess" });
     }
 });
 

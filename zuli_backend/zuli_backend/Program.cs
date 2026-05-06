@@ -6,11 +6,10 @@ using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
-using zuli_Business.Validation;
+
 using zuli_Business;
 using zuli_Business.Interface;
-using zuli_Buisiness;
-using zuli_Buisiness.Interface;
+using zuli_Business.Validation;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
@@ -27,8 +26,8 @@ var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 // Autenticación existente con JWT + autenticación por cookies para login web
 builder.Services.AddAuthentication(config =>
 {
-    config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    config.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    config.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(config =>
 {
@@ -126,9 +125,6 @@ builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationS
 builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
 builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
 
-builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
-builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
-
 // Servicios y repositorios de login
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -152,11 +148,11 @@ app.UseCors("FrontendPolicy");
 
 app.UseRateLimiter();
 
-app.UseMiddleware<LoginValidationMiddleware>();
-
 app.UseAuthentication();
 
 // app.UseAuthorization();
+
+app.UseMiddleware<LoginValidationMiddleware>();
 
 app.MapControllers();
 
