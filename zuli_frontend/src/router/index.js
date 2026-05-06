@@ -6,9 +6,11 @@ import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+
+import AirportList from "../modules/airport/view/AirportList.vue";
 import AirportCreate from '../modules/airport/view/AirportCreate.vue'
+
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
-import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
 
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
@@ -57,7 +59,7 @@ const router = createRouter({
             path: "/admin/create-airport",
             name: "createAirport",
             component: AirportCreate,
-            meta: {requiresAuth: true, adminRequired: false}
+            meta: {requiresAuth: true, adminRequired: true}
         },
         {
             path: "/check-in",
@@ -80,7 +82,7 @@ const router = createRouter({
         {
             path: "/admin/airports",
             name: "airports",
-            component: Airports,
+            component: AirportList,
             meta: {requiresAuth: true, adminRequired: false}
         },
         {
@@ -103,9 +105,9 @@ const router = createRouter({
 
         },
         {
-            path: "/admin/users/create",
+            path: "/admin/create-user",
             name: "userCreate",
-            meta: {requiresAuth: true, adminRequired: false},
+            meta: {requiresAuth: true, adminRequired: true},
             component: UserCreate
             
         },

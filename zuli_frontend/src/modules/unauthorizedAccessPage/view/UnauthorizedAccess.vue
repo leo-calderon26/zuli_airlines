@@ -21,5 +21,4 @@ const goBack = () => router.back();
             </div>
         </div>
     </section>
-    <PublicBottomBar/>
 </template>
