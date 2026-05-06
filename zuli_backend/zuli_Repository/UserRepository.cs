@@ -253,11 +253,14 @@ namespace zuli_Repository
             WHERE UserId = @UserId";
             var businessId = await connection.ExecuteScalarAsync<string?>(sql, new { UserId = userId });
             return businessId ?? string.Empty;
+        }
         public async Task<(List<AppUser> Users, int TotalItems)> GetUsersAsync(
             string searchType,
             string search,
             int page,
             int pageSize)
+
+
         {
             using var connection = _dapperContext.CreateConnection();
 

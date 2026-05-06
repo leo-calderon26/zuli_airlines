@@ -236,6 +236,18 @@ namespace zuli_Business
                 }).ToList()
             };
         }
+        private static string NormalizeSearchType(string? searchType)
+        {
+            string normalizedSearchType = searchType?.Trim() ?? "all";
+
+            return normalizedSearchType switch
+            {
+                "email" => "email",
+                "name" => "name",
+                "nationalId" => "nationalId",
+                _ => "all"
+            };
+        }
 
     }
 }
