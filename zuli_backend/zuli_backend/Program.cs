@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -15,7 +12,6 @@ using zuli_Business.Interface;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
-using zuli_Business.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 

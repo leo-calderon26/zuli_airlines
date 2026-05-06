@@ -1,7 +1,7 @@
 CREATE TABLE FlighRoute(
 flightRouteId int IDENTITY NOT NULL,
 adminId uniqueidentifier NOT NULL,
-airlineId int NOT NULL UNIQUE,
+airlineId int NOT NULL,
 arrivalAirport varchar(3) NOT NULL,
 departureAirport varchar(3) NOT NULL,
 scheduledArrivalTime DateTime NOT NULL,
