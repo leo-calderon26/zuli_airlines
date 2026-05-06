@@ -5,7 +5,7 @@ using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
     public class AirportController : ControllerBase
     {
