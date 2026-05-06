@@ -21,6 +21,9 @@ import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
+import UserList from "../modules/user/view/UserList.vue";
+import UserCreate from "../modules/user/view/UserCreate.vue";
+import UserActivation from "../modules/user/view/UserActivation.vue";
 
 
 const router = createRouter({
@@ -96,7 +99,20 @@ const router = createRouter({
             path: "/admin/users",
             name: "users",
             component: Users,
-            meta: {requiresAuth: true, adminRequired: false}
+            meta: {requiresAuth: true, adminRequired: false},
+            component: UserList
+        },
+        {
+            path: "/admin/users/create",
+            name: "userCreate",
+            meta: {requiresAuth: true, adminRequired: false},
+            component: UserCreate
+            
+        },
+        {
+            path: "/user/activation",
+            name: "userActivation",
+            component: UserActivation
         },
         {
             path: "/admin/reports",
