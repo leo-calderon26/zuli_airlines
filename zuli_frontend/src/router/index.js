@@ -10,7 +10,7 @@ import AirportCreate from '../modules/airport/view/AirportCreate.vue'
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
-import Users from '../modules/user/view/Users.vue'
+
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
 
