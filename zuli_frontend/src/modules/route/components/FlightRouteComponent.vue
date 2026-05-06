@@ -1,8 +1,10 @@
 <script setup>
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useFlightRoute } from "../composable/useFlightRoute";
 import { useFlightRouteStore } from "../store/flightRouteStore";
 
+const router = useRouter();
 const flightRouteStore = useFlightRouteStore();
 const { fetchRoutesPaginated, changePage } = useFlightRoute();
 
@@ -44,6 +46,20 @@ const formatDuration = (value) => {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return `${hours} h ${minutes} min`;
+};
+
+const selectRoute = (route) => {
+  if (!route?.flightRouteId) return;
+  router.push({
+    name: "flights",
+    query: {
+      routeId: route.flightRouteId,
+      departure: route.departureAirport,
+      arrival: route.arrivalAirport,
+      duration: route.estimatedDuration,
+      frequency: route.frequency,
+    },
+  });
 };
 
 const startIndex = () => {
@@ -109,7 +125,7 @@ onMounted(async () => {
           <th scope="col" class="px-8 py-4 font-medium">Llegada programada</th>
           <th scope="col" class="px-8 py-4 font-medium">Duracion estimada</th>
           <th scope="col" class="px-8 py-4 font-medium">Frecuencia</th>
-          <th scope="col" class="px-8 py-4 font-medium">Detalles</th>
+          <th scope="col" class="px-8 py-4 font-medium">Accion</th>
         </tr>
       </thead>
       <tbody>
@@ -137,7 +153,13 @@ onMounted(async () => {
             <p>{{ formatFrequency(route.frequency) }}</p>
           </td>
           <td class="px-8 py-5">
-            <a href="#" class="font-medium text-gold hover:underline">Edit</a>
+            <button
+              type="button"
+              class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-select"
+              @click="selectRoute(route)"
+            >
+              Seleccionar
+            </button>
           </td>
         </tr>
       </tbody>

@@ -2,13 +2,13 @@
 import PublicNavBar from '../../../shared/PublicNavBar.vue'
 import LandingDropdownField from '../../landing/components/LandingDropdownField.vue'
 import axios from 'axios'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAircraft } from '../../aircraft/composable/useAircraft'
-import { useAirport } from '../../airport/composable/useAirport'
 
 const flightCreateUrl = '/api/Flight/Create'
+const route = useRoute()
 const { fetchAircrafts, aircrafts } = useAircraft()
-const { fetchAirports, airports } = useAirport()
 
 const form = reactive({
   status: '',
@@ -20,10 +20,10 @@ const form = reactive({
   touristPrice: 0,
   firstClassPrice: 0,
   duration: 0,
-  airlineId: 0,
+  airlineId: 1,
   aircraftId: '',
   itineraryId: 0,
-  adminId: '',
+  businessId: '',
   flightRouteId: 0,
   availableSeats: 0,
   carryOnPrice: null,
@@ -64,20 +64,94 @@ const aircraftOptions = computed(() => {
   return options
 })
 
-const airportOptions = computed(() => (airports.value ?? [])
-  .map((airport) => ({
-    label: `${airport.airportCode} - ${airport.city}`,
-    value: airport.airportCode
-  }))
-  .filter((airport) => airport.value !== ''))
+const dayLabels = [
+  { key: 'monday', label: 'Lunes', bit: 1 },
+  { key: 'tuesday', label: 'Martes', bit: 2 },
+  { key: 'wednesday', label: 'Miercoles', bit: 4 },
+  { key: 'thursday', label: 'Jueves', bit: 8 },
+  { key: 'friday', label: 'Viernes', bit: 16 },
+  { key: 'saturday', label: 'Sabado', bit: 32 },
+  { key: 'sunday', label: 'Domingo', bit: 64 },
+]
+
+const hasSelectedRoute = computed(() => Number(form.flightRouteId) > 0)
+const selectedDaysText = computed(() => {
+  const selected = dayLabels
+    .filter((day) => form[day.key])
+    .map((day) => day.label)
+  return selected.length ? selected.join(', ') : 'Sin frecuencia'
+})
+
+function formatDuration(value) {
+  const totalSeconds = Number(value)
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return '-'
+  const totalMinutes = Math.round(totalSeconds / 60)
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return '-'
+  if (totalMinutes < 60) return `${totalMinutes} min`
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return `${hours} h ${minutes} min`
+}
 
 onMounted(async () => {
   console.log('🚀 FlightCreate mounted')
   await fetchAircrafts()
   console.log('✈️ Aircrafts loaded:', aircrafts.value)
-  await fetchAirports()
-  console.log('🏠 Airports loaded:', airports.value)
 })
+
+watch(
+  () => route.query,
+  (query) => {
+    applyRouteSelection(query)
+  },
+  { immediate: true }
+)
+
+function applyRouteSelection(query = {}) {
+  const {
+    routeId,
+    departure,
+    arrival,
+    departureAirport,
+    arrivalAirport,
+    origin,
+    destination,
+    duration,
+    estimatedDuration,
+    frequency,
+  } = query
+
+  if (routeId) {
+    const parsedRouteId = Number(routeId)
+    form.flightRouteId = Number.isFinite(parsedRouteId) ? parsedRouteId : 0
+  }
+
+  const departureValue = departure ?? departureAirport ?? origin
+  const arrivalValue = arrival ?? arrivalAirport ?? destination
+
+  if (departureValue) {
+    form.departureAirportCode = String(departureValue)
+  }
+
+  if (arrivalValue) {
+    form.arrivalAirportCode = String(arrivalValue)
+  }
+
+  const durationValue = duration ?? estimatedDuration
+  if (durationValue) {
+    const parsedDuration = Number(durationValue)
+    if (Number.isFinite(parsedDuration)) {
+      form.duration = parsedDuration
+    }
+  }
+
+  const frequencyValue = Number(frequency)
+  if (Number.isFinite(frequencyValue)) {
+    dayLabels.forEach((day) => {
+      form[day.key] = (frequencyValue & day.bit) !== 0
+    })
+  }
+}
 
 function toIsoDateTime(value) {
   return value ? new Date(value).toISOString() : null
@@ -103,7 +177,6 @@ function validate() {
   if (!form.checkInStartTime) return 'La hora de inicio de check-in es requerida'
   if (!form.checkInDeadline) return 'La hora límite de check-in es requerida'
   if (form.duration <= 0) return 'La duración debe ser mayor a 0'
-  if (form.airlineId <= 0) return 'La aerolínea es requerida'
   
   console.log('🛩️ Validando aircraftId:', form.aircraftId, 'Tipo:', typeof form.aircraftId)
   if (!form.aircraftId) {
@@ -120,21 +193,21 @@ function validate() {
   
   if (form.itineraryId <= 0) return 'El itinerario es requerido'
 
-  if (!form.adminId) return 'El id del administrador es requerido'
-  
-  console.log('👤 Validando adminId:', form.adminId, 'Tipo:', typeof form.adminId)
-  const isValidAdmin = isValidGuid(form.adminId)
-  console.log('✅ ¿AdminId es GUID válido?', isValidAdmin, 'Validador usado:', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/)
-  if (!isValidAdmin) {
-    console.warn('❌ AdminId no es GUID válido:', form.adminId)
-    return 'El id del administrador debe ser un GUID válido'
+  if (!form.businessId) return 'El business id es requerido'
+
+  console.log('👤 Validando businessId:', form.businessId, 'Tipo:', typeof form.businessId)
+  const isValidBusiness = isValidGuid(form.businessId)
+  console.log('✅ ¿BusinessId es GUID válido?', isValidBusiness, 'Validador usado:', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/)
+  if (!isValidBusiness) {
+    console.warn('❌ BusinessId no es GUID válido:', form.businessId)
+    return 'El business id debe ser un GUID válido'
   }
-  if (form.flightRouteId <= 0) return 'La ruta de vuelo es requerida'
-  if (!form.departureAirportCode) return 'El aeropuerto de salida es requerido'
-  if (!form.arrivalAirportCode) return 'El aeropuerto de llegada es requerido'
+  if (form.flightRouteId <= 0) return 'Selecciona una ruta de vuelo antes de continuar'
+  if (!form.departureAirportCode) return 'La ruta seleccionada no tiene aeropuerto de salida'
+  if (!form.arrivalAirportCode) return 'La ruta seleccionada no tiene aeropuerto de llegada'
   if (form.departureAirportCode === form.arrivalAirportCode) return 'La salida y la llegada no pueden ser el mismo aeropuerto'
   if (!form.monday && !form.tuesday && !form.wednesday && !form.thursday && !form.friday && !form.saturday && !form.sunday) {
-    return 'Debes seleccionar al menos un día de disponibilidad'
+    return 'La ruta seleccionada no tiene dias de disponibilidad'
   }
   
   console.log('✅ Validación pasada')
@@ -163,7 +236,7 @@ async function submit() {
     AirlineId: Number(form.airlineId),
     AircraftId: form.aircraftId,
     ItineraryId: Number(form.itineraryId),
-    AdminId: form.adminId,
+    BusinessId: form.businessId,
     FlightRouteId: Number(form.flightRouteId),
     AvailableSeats: Number(form.availableSeats),
     CarryOnPrice: form.carryOnPrice ? Number(form.carryOnPrice) : null,
@@ -184,7 +257,7 @@ async function submit() {
   }
   
   console.log('📦 Payload enviado:', JSON.stringify(payload, null, 2))
-  console.log('🔎 AdminId en payload:', payload.AdminId)
+  console.log('🔎 BusinessId en payload:', payload.BusinessId)
 
   try {
     console.log('🔄 Enviando POST a:', flightCreateUrl)
@@ -216,7 +289,30 @@ async function submit() {
       </div>
 
       <form @submit.prevent="submit" class="grid gap-6">
-        
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm font-semibold text-slate-800">Ruta seleccionada</p>
+            <router-link
+              class="rounded-lg border border-primary px-3 py-1 text-xs font-semibold text-primary transition hover:bg-primary hover:text-white"
+              :to="{ name: 'routes' }"
+            >
+              Cambiar ruta
+            </router-link>
+          </div>
+          <div v-if="hasSelectedRoute" class="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+            <p><span class="font-semibold">Origen:</span> {{ form.departureAirportCode || '-' }}</p>
+            <p><span class="font-semibold">Destino:</span> {{ form.arrivalAirportCode || '-' }}</p>
+            <p><span class="font-semibold">Duracion:</span> {{ formatDuration(form.duration) }}</p>
+            <p><span class="font-semibold">Dias disponibles:</span> {{ selectedDaysText }}</p>
+          </div>
+          <div v-else class="text-sm text-slate-600">
+            Selecciona una ruta para prellenar origen, destino, duracion y dias disponibles.
+            <router-link class="ml-1 font-semibold text-primary hover:underline" :to="{ name: 'routes' }">
+              Ir a rutas
+            </router-link>
+          </div>
+        </div>
+
         <div class="grid gap-6 lg:grid-cols-2">
           <LandingDropdownField
             v-model="form.status"
@@ -226,25 +322,28 @@ async function submit() {
             button-label="Mostrar estados"
           />
 
-          <LandingDropdownField
-            v-model="form.departureAirportCode"
-            label="Aeropuerto salida"
-            placeholder="Selecciona un aeropuerto"
-            :options="airportOptions"
-            button-label="Mostrar aeropuertos"
-          />
+          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Aeropuerto salida
+            <input
+              :value="form.departureAirportCode"
+              type="text"
+              readonly
+              class="rounded-xl border border-slate-300 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 outline-none"
+            />
+          </label>
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Fecha del vuelo
             <input v-model="form.flightDate" type="datetime-local" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
-          <LandingDropdownField
-            v-model="form.arrivalAirportCode"
-            label="Aeropuerto llegada"
-            placeholder="Selecciona un aeropuerto"
-            :options="airportOptions"
-            button-label="Mostrar aeropuertos"
-          />
+          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Aeropuerto llegada
+            <input
+              :value="form.arrivalAirportCode"
+              type="text"
+              readonly
+              class="rounded-xl border border-slate-300 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 outline-none"
+            />
+          </label>
+
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Hora real de salida
             <input v-model="form.realDepartureTime" type="datetime-local" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
@@ -270,9 +369,6 @@ async function submit() {
             <input v-model="form.checkInDeadline" type="datetime-local" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Duración
-            <input v-model.number="form.duration" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-          </label>
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Asientos disponibles
             <input v-model.number="form.availableSeats" type="number" min="0" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
@@ -294,55 +390,16 @@ async function submit() {
             <input v-model.number="form.checkedPrice" type="number" min="0" step="0.01" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Aerolínea (id)
-            <input v-model.number="form.airlineId" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-          </label>
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Itinerario (id)
             <input v-model.number="form.itineraryId" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Ruta de vuelo (id)
-            <input v-model.number="form.flightRouteId" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
+
+          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Business id (GUID)
+            <input v-model="form.businessId" type="text" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
 
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Id administrador (GUID)
-            <input v-model="form.adminId" type="text" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
-          </label>
-
-          <fieldset class="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p class="text-sm font-semibold text-slate-800 mb-3">Días disponibles del vuelo</p>
-            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.monday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Lunes
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.tuesday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Martes
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.wednesday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Miércoles
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.thursday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Jueves
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.friday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Viernes
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.saturday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Sábado
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.sunday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Domingo
-              </label>
-            </div>
-          </fieldset>
 
           <fieldset class="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p class="text-sm font-semibold text-slate-800 mb-3">Servicios incluidos en el vuelo</p>
