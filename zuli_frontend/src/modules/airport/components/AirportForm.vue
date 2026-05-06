@@ -23,6 +23,10 @@ const errors = reactive({
 function validate() {
     errors.global = '';
     errors.fields = {};
+    
+    if (!form.airportCode || form.airportCode.length < 3) {
+        errors.fields.airportCode = 'El código debe tener al menos 3 caracteres';
+    }
     return Object.keys(errors.fields).length === 0 && errors.global === '';
 }
 
