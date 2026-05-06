@@ -71,7 +71,6 @@
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import PublicNavBar from '../components/PublicNavBar.vue';
-import PublicBottomBar from '../components/PublicBottomBar.vue';
 import FlightCard from '../components/FlightCard.vue';
 import { useFlightSearchStore } from '../store/flightSearchStore';
 
