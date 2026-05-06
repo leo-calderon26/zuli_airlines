@@ -82,7 +82,6 @@ namespace zuli_Business
             var businessIds = await Task.WhenAll(
                 flightList.Select(f => _userRepository.GetBusinessId(f.AdminId))
             );
-
             return flightList.Select((f, index) => new FlightDTO
             {
                 Id = f.Id,
@@ -123,6 +122,8 @@ namespace zuli_Business
 
             if (flight == null)
                 return null;
+            
+            var businessId = await _userRepository.GetBusinessId(flight.AdminId);
 
             return new FlightDTO
             {
@@ -142,7 +143,7 @@ namespace zuli_Business
                 CarryOnPrice = flight.CarryOnPrice,
                 CheckedPrice = flight.CheckedPrice,
                 AvailableSeats = flight.AvailableSeats,
-                AdminId = flight.AdminId,
+                BusinessId = businessId,
                 FlightRouteId = flight.FlightRouteId,
                 Monday = flight.Monday,
                 Tuesday = flight.Tuesday,

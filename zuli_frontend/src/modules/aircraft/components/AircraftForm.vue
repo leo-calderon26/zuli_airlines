@@ -8,9 +8,6 @@ import authService from "../../auth/services/authService";
 const router = useRouter();
 const { addAircraft } = useAircraft();
 
-// ID del administrador
-// const ADMIN_ID = '623D94AD-9F77-4EA2-A156-B44C61EA0607';
-
 const form = reactive({
     model: '',
     weight: null,

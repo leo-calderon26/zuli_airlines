@@ -70,7 +70,7 @@ namespace zuli_Business.Validation
                 hasError = true;
             }
 
-            if (flight.AdminId == Guid.Empty)
+            if (flight.BusinessId == string.Empty)
             {
                 errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar un administrador valido");
                 hasError = true;
