@@ -153,7 +153,7 @@ namespace zuli_Business
             string frontendBaseUrl = _configuration["Frontend:BaseUrl"]
                 ?? throw new InvalidOperationException("Frontend:BaseUrl is not configured.");
 
-            return $"{frontendBaseUrl}/activar-cuenta?token={Uri.EscapeDataString(token)}";
+            return $"{frontendBaseUrl}/users/activation?token={Uri.EscapeDataString(token)}";
         }
 
         private static string GenerateSecureToken()

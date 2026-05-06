@@ -4,7 +4,7 @@ using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {
-    [Route("api/account")]
+    [Route("api/user")]
     [ApiController]
     public class AccountActivationController : ControllerBase
     {
@@ -15,7 +15,7 @@ namespace zuli_backend.Controllers
             _userRegistrationService = userRegistrationService;
         }
 
-        [HttpPost("activate")]
+        [HttpPost("activation")]
         public async Task<IActionResult> ActivateAccount([FromBody] ActivateAccountRequestDTO request)
         {
             BasicResponseDTO response = await _userRegistrationService.ActivateAccountAsync(request);
