@@ -21,7 +21,7 @@ namespace zuli_backend.Middleware
         {
             if (!IsLoginRequest(context))
             {
-                if (context.User?.Identity?.IsAuthenticated == false && IsAllowedWithLogin(context))
+                if (context.User?.Identity?.IsAuthenticated == false && IsAllowedWithLogin(context) == true)
                     throw new ZuliUnauthorizedException($"Tiene que iniciar sesión para acceder a esta funcionalidad: {context.Request.Path}");
                 await next(context);
                 return;
