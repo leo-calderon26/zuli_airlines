@@ -14,7 +14,7 @@ namespace zuli_Business.Validation
         public const string PRICES = "Prices";
         public const string ENTITIES = "Entities";
         public const string ROUTE = "FlightRouteId";
-        public const string AVAILABILITY = "Availability";
+        public const string SERVICES = "Services";
     }
 
     public class FlightValidator
@@ -29,7 +29,7 @@ namespace zuli_Business.Validation
                 { FlightValidationFields.PRICES, new List<string>() },
                 { FlightValidationFields.ENTITIES, new List<string>() },
                 { FlightValidationFields.ROUTE, new List<string>() },
-                { FlightValidationFields.AVAILABILITY, new List<string>() },
+                { FlightValidationFields.SERVICES, new List<string>() },
             };
 
             var hasError = false;
@@ -100,9 +100,9 @@ namespace zuli_Business.Validation
                 hasError = true;
             }
 
-            if (!flight.Monday && !flight.Tuesday && !flight.Wednesday && !flight.Thursday && !flight.Friday && !flight.Saturday && !flight.Sunday)
+            if (!string.IsNullOrWhiteSpace(flight.ServiceDescription) && flight.ServiceDescription.Length > 100)
             {
-                errorInfo[FlightValidationFields.AVAILABILITY].Add("Debe seleccionar al menos un dia de disponibilidad");
+                errorInfo[FlightValidationFields.SERVICES].Add("La descripcion de servicios no puede superar 100 caracteres");
                 hasError = true;
             }
 

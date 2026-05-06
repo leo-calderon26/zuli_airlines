@@ -18,13 +18,18 @@ namespace zuli_Business
         private readonly FlightValidator _validator;
         private readonly FlightSearchValidator _searchValidator;
         private readonly IUserRepository _userRepository;
+        private readonly IServiceRepository _serviceRepository;
 
-        public FlightService(IFlightRepository repository, IUserRepository userRepository)
+        public FlightService(
+            IFlightRepository repository,
+            IUserRepository userRepository,
+            IServiceRepository serviceRepository)
         {
             _repository = repository;
             _validator = new FlightValidator();
             _searchValidator = new FlightSearchValidator();
             _userRepository = userRepository;
+            _serviceRepository = serviceRepository;
         }
 
         public async Task<BasicResponseDTO> CreateFlight(FlightDTO flight)
@@ -53,20 +58,20 @@ namespace zuli_Business
                 AvailableSeats = flight.AvailableSeats,
                 AdminId = adminId,
                 FlightRouteId = flight.FlightRouteId,
-                Monday = flight.Monday,
-                Tuesday = flight.Tuesday,
-                Wednesday = flight.Wednesday,
-                Thursday = flight.Thursday,
-                Friday = flight.Friday,
-                Saturday = flight.Saturday,
-                Sunday = flight.Sunday,
-                Wifi = flight.Wifi,
-                Entertainment = flight.Entertainment,
-                Food = flight.Food,
-                SeatSelection = flight.SeatSelection,
             };
 
             await _repository.CreateFlight(newFlight);
+
+            if (!string.IsNullOrWhiteSpace(flight.ServiceDescription))
+            {
+                var newService = new ServiceEntity
+                {
+                    FlightId = newFlight.Id,
+                    Description = flight.ServiceDescription.Trim()
+                };
+
+                await _serviceRepository.CreateService(newService);
+            }
 
             return new BasicResponseDTO
             {
@@ -82,6 +87,11 @@ namespace zuli_Business
             var businessIds = await Task.WhenAll(
                 flightList.Select(f => _userRepository.GetBusinessId(f.AdminId))
             );
+
+            var serviceDescriptions = await Task.WhenAll(
+                flightList.Select(f => _serviceRepository.GetServiceByFlightId(f.Id))
+            );
+
             return flightList.Select((f, index) => new FlightDTO
             {
                 Id = f.Id,
@@ -102,17 +112,7 @@ namespace zuli_Business
                 AvailableSeats = f.AvailableSeats,
                 BusinessId = businessIds[index],
                 FlightRouteId = f.FlightRouteId,
-                Monday = f.Monday,
-                Tuesday = f.Tuesday,
-                Wednesday = f.Wednesday,
-                Thursday = f.Thursday,
-                Friday = f.Friday,
-                Saturday = f.Saturday,
-                Sunday = f.Sunday,
-                Wifi = f.Wifi,
-                Entertainment = f.Entertainment,
-                Food = f.Food,
-                SeatSelection = f.SeatSelection,
+                ServiceDescription = serviceDescriptions[index]?.Description,
             }).ToList();
         }
 
@@ -124,6 +124,7 @@ namespace zuli_Business
                 return null;
             
             var businessId = await _userRepository.GetBusinessId(flight.AdminId);
+            var service = await _serviceRepository.GetServiceByFlightId(flight.Id);
 
             return new FlightDTO
             {
@@ -145,17 +146,7 @@ namespace zuli_Business
                 AvailableSeats = flight.AvailableSeats,
                 BusinessId = businessId,
                 FlightRouteId = flight.FlightRouteId,
-                Monday = flight.Monday,
-                Tuesday = flight.Tuesday,
-                Wednesday = flight.Wednesday,
-                Thursday = flight.Thursday,
-                Friday = flight.Friday,
-                Saturday = flight.Saturday,
-                Sunday = flight.Sunday,
-                Wifi = flight.Wifi,
-                Entertainment = flight.Entertainment,
-                Food = flight.Food,
-                SeatSelection = flight.SeatSelection,
+                ServiceDescription = service?.Description,
             };
             
         }
