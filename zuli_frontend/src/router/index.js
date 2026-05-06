@@ -11,7 +11,7 @@ import AirportCreate from '../modules/airport/view/AirportCreate.vue'
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
-import Users from '../modules/user/view/Users.vue'
+
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
 
@@ -22,6 +22,9 @@ import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
+import UserList from "../modules/user/view/UserList.vue";
+import UserCreate from "../modules/user/view/UserCreate.vue";
+import UserActivation from "../modules/user/view/UserActivation.vue";
 
 
 const router = createRouter({
@@ -101,9 +104,22 @@ const router = createRouter({
         },
         {
             path: "/admin/users",
-            name: "users",
-            component: Users,
+            name: "user",
+            component: UserList,
             meta: {requiresAuth: true, adminRequired: false}
+
+        },
+        {
+            path: "/admin/users/create",
+            name: "userCreate",
+            meta: {requiresAuth: true, adminRequired: false},
+            component: UserCreate
+            
+        },
+        {
+            path: "/users/activation",
+            name: "userActivation",
+            component: UserActivation
         },
         {
             path: "/admin/reports",

@@ -144,9 +144,6 @@
                 </form>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer class="h-10 bg-[var(--color-primary)]" />
     </main>
 </template>
 
