@@ -254,5 +254,99 @@ namespace zuli_Repository
             var businessId = await connection.ExecuteScalarAsync<string?>(sql, new { UserId = userId });
             return businessId ?? string.Empty;
         }
+        public async Task<(List<AppUser> Users, int TotalItems)> GetUsersAsync(
+            string searchType,
+            string search,
+            int page,
+            int pageSize)
+
+
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            int offset = (page - 1) * pageSize;
+            string normalizedSearch = $"%{search}%";
+
+            string whereClause = searchType switch
+            {
+                "email" => "au.BusinessEmail LIKE @Search",
+
+                "nationalId" => "p.NationalId LIKE @Search",
+
+                "name" => @"
+                    (
+                        p.FirstName LIKE @Search
+                        OR p.FirstLastName LIKE @Search
+                        OR p.SecondLastName LIKE @Search
+                        OR CONCAT(p.FirstName, ' ', p.FirstLastName) LIKE @Search
+                        OR CONCAT(p.FirstName, ' ', p.FirstLastName, ' ', p.SecondLastName) LIKE @Search
+                    )",
+
+                _ => @"
+                    (
+                        au.BusinessEmail LIKE @Search
+                        OR p.NationalId LIKE @Search
+                        OR p.FirstName LIKE @Search
+                        OR p.FirstLastName LIKE @Search
+                        OR p.SecondLastName LIKE @Search
+                        OR CONCAT(p.FirstName, ' ', p.FirstLastName) LIKE @Search
+                        OR CONCAT(p.FirstName, ' ', p.FirstLastName, ' ', p.SecondLastName) LIKE @Search
+                    )"
+            };
+
+            var countSql = $@"
+                SELECT COUNT(*)
+                FROM AirlineUser au
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                WHERE {whereClause};
+            ";
+
+            var usersSql = $@"
+                SELECT
+                    au.UserId,
+                    au.PersonId,
+                    p.NationalId,
+                    p.FirstName,
+                    p.FirstLastName,
+                    p.SecondLastName,
+                    p.Email,
+                    au.BusinessEmail,
+                    au.BusinessId,
+                    au.UserRole,
+                    au.PasswordHash,
+                    au.IsActive,
+                    au.FailedLoginAttempts,
+                    au.LockoutEnd,
+                    au.ManagedByAdminId,
+                    au.ActivationTokenHash
+                FROM AirlineUser au
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                WHERE {whereClause}
+                ORDER BY p.FirstName, p.FirstLastName, p.SecondLastName
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY;
+            ";
+
+            var parameters = new
+            {
+                Search = normalizedSearch,
+                Offset = offset,
+                PageSize = pageSize
+            };
+
+            int totalItems = await connection.ExecuteScalarAsync<int>(
+                countSql,
+                parameters
+            );
+
+            List<AppUser> users = (
+                await connection.QueryAsync<AppUser>(
+                    usersSql,
+                    parameters
+                )
+            ).ToList();
+
+            return (users, totalItems);
+        }
     }
 }
