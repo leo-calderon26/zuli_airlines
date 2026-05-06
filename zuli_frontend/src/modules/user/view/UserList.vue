@@ -61,7 +61,7 @@
                                         Apellidos
                                     </th>
                                     <th class="border-l-4 border-[var(--color-purple)] px-4 py-3">
-                                        Cédula
+                                        Correo
                                     </th>
                                     <th class="border-l-4 border-[var(--color-purple)] px-4 py-3">
                                         Rol
@@ -87,7 +87,7 @@
                                     </td>
 
                                     <td class="border-l-4 border-[var(--color-purple)] px-4 py-3">
-                                        {{ user.nationalId }}
+                                        {{ user.businessEmail }}
                                     </td>
 
                                     <td class="border-l-4 border-[var(--color-purple)] px-4 py-3">
