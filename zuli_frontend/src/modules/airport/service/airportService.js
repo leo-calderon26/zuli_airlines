@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "/api/Airport";
+const API_URL = "/api/admin/Airport";
 
 export const createAirport = async (airportData) => {
     try {
