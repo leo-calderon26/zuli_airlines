@@ -25,10 +25,15 @@ namespace zuli_Business
         public async Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRoute)
         {
             _validator.ValidationFlightRoute(flightRoute);
-            //TODO(randy): aqui se deberia de ver si tiene permisos
+            if (!await _flightRouteRepository.IsAdmin(flightRoute.businessId))
+            {
+                throw new ZuliNotFoundException("El usuario no tiene permisos de administrador.");
+            }
+            var userId = await _flightRouteRepository.GetUserId(flightRoute.businessId);
+
             var newFlightRoute = new FlightRouteEntity
             {
-                adminId = flightRoute.adminId,
+                adminId = userId,
                 airlineId = flightRoute.airlineId,
                 arrivalAirport = flightRoute.arrivalAirport,
                 departureAirport = flightRoute.departureAirport,
@@ -50,7 +55,6 @@ namespace zuli_Business
                 StatusCode = 200,
                 Message = "Se realizo la creaccion de la ruta correctamente",
             };
-
         }
     }
 }

@@ -13,5 +13,5 @@ CONSTRAINT FK_Airline_AirlineId FOREIGN KEY(airlineId) REFERENCES Airline(Airlin
 CONSTRAINT FK_Airport_ArrivalAirport FOREIGN KEY(arrivalAirport) REFERENCES Airport(AirportCode),
 CONSTRAINT FK_Airport_DepartureAirport FOREIGN KEY(departureAirport) REFERENCES Airport(AirportCode),
 CONSTRAINT FK_User_AdminId FOREIGN KEY(adminId) REFERENCES [User](UserId),
-CONSTRAINT CK_Frequency CHECK(frequency > 0);
+CONSTRAINT CK_Frequency CHECK(frequency > 0)
 )

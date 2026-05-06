@@ -9,5 +9,7 @@ namespace zuli_Repository.Interface
     {
         Task<int> CreateFlightRouter(FlightRouteEntity flightRouter);
         Task<bool> AlreadyExistFlightRoute(FlightRouteEntity flightRoute);
+        Task<bool> IsAdmin(string businessId); 
+        Task<Guid> GetUserId(string businessId);
     }
 }
