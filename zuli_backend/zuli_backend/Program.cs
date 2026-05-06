@@ -128,8 +128,13 @@ builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
 // Servicios y repositorios de login
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 builder.Services.AddSingleton<LoginValidator>();
+builder.Services.AddSingleton<RegisterUserValidator>();
+builder.Services.AddSingleton<ActivateAccountValidator>();
 
 var app = builder.Build();
 
