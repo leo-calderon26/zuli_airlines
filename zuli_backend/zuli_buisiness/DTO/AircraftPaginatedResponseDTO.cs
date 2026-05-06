@@ -1,6 +1,6 @@
 namespace zuli_Business.DTO
 {
-    public class PaginatedResponseDTO<T>
+    public class AircraftPaginatedResponseDTO<T>
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
