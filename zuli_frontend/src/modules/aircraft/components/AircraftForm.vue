@@ -68,7 +68,6 @@ async function handleSubmit() {
     const baggageCapacity = Number((Number(form.weight) * 0.3).toFixed(4));
 
     var data = await authService.me();
-    console.log(data.businessId);
 
     const aircraft = {
         model: form.model,

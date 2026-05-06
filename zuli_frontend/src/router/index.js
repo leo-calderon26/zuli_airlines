@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Flights from "../modules/flight/view/FlightList.vue"
+import authService from "../modules/auth/services/authService";
 
 import FlightList from "../modules/flight/view/FlightList.vue"
 
