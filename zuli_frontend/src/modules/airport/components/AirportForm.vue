@@ -6,7 +6,7 @@ import { useAirport } from '../composable/useAirport';
 const router = useRouter();
 const { addAirport } = useAirport();
 
-const ADMIN_ID = 'AB593452-0C96-496E-B168-46D1D7BBBBB4';
+//const ADMIN_ID = 'AB593452-0C96-496E-B168-46D1D7BBBBB4';
 
 const form = reactive({
     airportCode: '',
@@ -45,13 +45,14 @@ async function handleSubmit() {
         if (errors.global) alert(errors.global);
         return;
     }
+    var data = await authService.me();
 
     const airportPayload = {
         airportCode: form.airportCode.toUpperCase(),
         name: form.name,
         country: form.country,
         city: form.city,
-        adminId: ADMIN_ID,
+        businessId: data.businessId,
     };
 
     try {

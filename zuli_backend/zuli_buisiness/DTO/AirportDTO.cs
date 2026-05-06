@@ -10,6 +10,6 @@ namespace zuli_Business.DTO
         public string name { get; set; }
         public string country { get; set; }
         public string city { get; set; }
-        public Guid adminId { get; set; }
+        public string businessId { get; set; }
     }
 }

@@ -60,7 +60,7 @@ namespace zuli_Business.Validation
             }
 
             // Validar que el adminId no venga vacio
-            if (airport.adminId == Guid.Empty)
+            if (airport.businessId == string.Empty)
             {
                 errorInfo[AirportAtributes.ADMINID].Add("El adminId no puede venir vacio");
                 IsEmptyInfo = true;
