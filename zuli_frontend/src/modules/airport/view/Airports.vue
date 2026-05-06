@@ -2,26 +2,21 @@
   <div class="landing-page">
     <PublicNavBar />
     <h1 class = "message">Airports en mantenimiento</h1>
-    <PublicBottomBar />
   </div>
-  <PublicBottomBar />
 </template>
 
 <script>
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
 
 export default {
   components: {
-    PublicNavBar,
-    PublicBottomBar
+    PublicNavBar
   }
 }
 </script>
 
 <style scoped>
 .landing-page {
-  min-height: 100svh;
   display: flex;
   flex-direction: column;
 }

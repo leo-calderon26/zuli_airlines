@@ -2,20 +2,16 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
-using zuli_Business.Validation;
+
 using zuli_Business;
 using zuli_Business.Interface;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
-using zuli_Business.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,21 +121,8 @@ builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>(
 
 builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationService>();
 
-builder.Services.AddScoped<IAirportService, AirportService>();
-builder.Services.AddScoped<IAirportRepository, AirportRepository>();
-
 builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
 builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
-
-builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
-builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
-
-builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
-builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
-builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
-builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
-
-builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationService>();
 
 // Servicios y repositorios de login
 builder.Services.AddScoped<IUserRepository, UserRepository>();
