@@ -6,6 +6,7 @@ using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 using Dapper;
+using System.Linq;
 
 namespace zuli_Repository
 {
@@ -92,11 +93,23 @@ namespace zuli_Repository
             return airports;
         }
 
-        public async Task<IEnumerable<AirportEntity>> GetAll()
+        public async Task<(IEnumerable<AirportEntity> airports, int totalCount)> GetAirportsPaginated(int pageNumber, int pageSize)
         {
             using var connection = _context.CreateConnection();
-            var sql = "SELECT * FROM Airport";
-            return (await connection.QueryAsync<AirportEntity>(sql)).ToList();
+
+            var countSql = "SELECT COUNT(1) FROM Airport";
+            var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
+
+            var offset = (pageNumber - 1) * pageSize;
+
+            var sql = @"
+                SELECT * FROM Airport
+                ORDER BY AirportCode
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY";
+
+            var airports = (await connection.QueryAsync<AirportEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
+            return (airports, totalCount);
         }
 
     }
