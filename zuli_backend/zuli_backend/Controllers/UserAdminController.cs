@@ -43,5 +43,21 @@ namespace zuli_backend.Controllers
 
             return Ok(response);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetUsers(
+            [FromQuery] string? searchType,
+            [FromQuery] string? search,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            UserSearchResponseDTO response = await _userRegistrationService.GetUsersAsync(
+                searchType,
+                search,
+                page,
+                pageSize
+            );
+            
+            return Ok(response);
+}
     }
 }
