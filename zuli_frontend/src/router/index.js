@@ -97,10 +97,10 @@ const router = createRouter({
         },
         {
             path: "/admin/users",
-            name: "users",
-            component: Users,
-            meta: {requiresAuth: true, adminRequired: false},
-            component: UserList
+            name: "user",
+            component: UserList,
+            meta: {requiresAuth: true, adminRequired: false}
+
         },
         {
             path: "/admin/users/create",
@@ -110,7 +110,7 @@ const router = createRouter({
             
         },
         {
-            path: "/user/activation",
+            path: "/users/activation",
             name: "userActivation",
             component: UserActivation
         },
