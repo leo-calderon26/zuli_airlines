@@ -1,5 +1,5 @@
 import { ref } from "vue"
-import { getAirports, createAirport } from "../service/airportService"
+import { getAirports, getAirportsPaginated, createAirport } from "../service/airportService"
 import { useAirportStore } from "../store/airportStore";
 
 export function useAirport() {
@@ -37,7 +37,6 @@ export function useAirport() {
         fetchAirports,
         addAirport,
         fetchAirportsPaginated,
-        changePage,
-        airports: store.airports
+        changePage
     };
 }
