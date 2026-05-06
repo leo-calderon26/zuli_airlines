@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
@@ -83,6 +84,31 @@ namespace zuli_Business
             }).ToList();
 
             return suggestions;
+        }
+
+        public async Task<AirportPaginatedResponseDTO> GetAirportsPaginated(int pageNumber, int pageSize)
+        {
+            var (airports, totalCount) = await _repository.GetAirportsPaginated(pageNumber, pageSize);
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var airportDTOs = airports.Select(item => new AirportDTO
+            {
+                airportCode = item.AirportCode,
+                name = item.Name,
+                country = item.Country,
+                city = item.City,
+                businessId = item.AdminId.ToString()
+            }).ToList();
+
+            return new AirportPaginatedResponseDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalCount,
+                TotalPages = totalPages,
+                Data = airportDTOs
+            };
         }
     }
 }
