@@ -2,11 +2,10 @@
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
+import authService from "../../auth/services/authService";
 
 const router = useRouter();
 const { addAirport } = useAirport();
-
-//const ADMIN_ID = 'AB593452-0C96-496E-B168-46D1D7BBBBB4';
 
 const form = reactive({
     airportCode: '',
@@ -24,7 +23,7 @@ function validate() {
     errors.global = '';
     errors.fields = {};
     
-    if (!form.airportCode || form.airportCode.length < 3) {
+    if (!form.airportCode || form.airportCode.trim().length < 3) {
         errors.fields.airportCode = 'El código debe tener al menos 3 caracteres';
     }
     if (!form.name.trim()) {
@@ -45,20 +44,22 @@ async function handleSubmit() {
         if (errors.global) alert(errors.global);
         return;
     }
-    var data = await authService.me();
-
-    const airportPayload = {
-        airportCode: form.airportCode.toUpperCase(),
-        name: form.name,
-        country: form.country,
-        city: form.city,
-        businessId: data.businessId,
-    };
 
     try {
+        const data = await authService.me();
+
+        const airportPayload = {
+            airportCode: form.airportCode.toUpperCase().trim(),
+            name: form.name.trim(),
+            country: form.country.trim(),
+            city: form.city.trim(),
+            businessId: data.businessId,
+        };
+
         await addAirport(airportPayload);
         alert('El aeropuerto se ha creado correctamente');
-        router.push({ name: 'create-airport' });
+        
+        router.push({ path: '/admin/airports' }); 
     } catch (error) {
         errors.global = error.response?.data?.message || 'Error al crear el aeropuerto';
         alert(errors.global);
@@ -67,7 +68,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-    <form class="form-card mt-8" @submit.prevent="handleSubmit">
+    <form class="form-card" @submit.prevent="handleSubmit">
         <div class="form-grid">
             <div class="form-field group">
                 <input id="airportCode" v-model="form.airportCode" name="airportCode" type="text" class="form-input peer" placeholder=" " maxlength="10" />
@@ -94,7 +95,7 @@ async function handleSubmit() {
             </div>
         </div>
 
-        <div class="mt-8">
+        <div class="mt-4">
             <button type="submit" class="submit-btn">Guardar Aeropuerto</button>
         </div>
     </form>
@@ -104,7 +105,7 @@ async function handleSubmit() {
 @reference "../../../style.css";
 
 .form-card {
-    @apply mx-auto w-full max-w-3xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm;
+    @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
 }
 
 .form-grid {
@@ -116,18 +117,18 @@ async function handleSubmit() {
 }
 
 .form-input {
-    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm
+    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 text-base
      text-gray-900 focus:border-gold focus:outline-none focus:ring-0;
 }
 
 .form-label {
-    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm
-     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 
-     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-gold;
+    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
+     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
+     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
 }
 
 .submit-btn {
-    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-4 py-2.5 text-sm font-medium
+    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-5 py-3 text-base font-medium
      text-white hover:bg-select focus:outline-none focus:ring-2 focus:ring-gold;
 }
 </style>

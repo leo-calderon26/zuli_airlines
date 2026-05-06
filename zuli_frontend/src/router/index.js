@@ -20,6 +20,9 @@ import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 
+import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
+
+
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -50,7 +53,8 @@ const router = createRouter({
         {
             path: "/admin/create-airport",
             name: "createAirport",
-            component: AirportCreate
+            component: AirportCreate,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/check-in",
