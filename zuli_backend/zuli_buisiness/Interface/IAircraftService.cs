@@ -6,6 +6,6 @@ namespace zuli_Business.Interface
     {
         Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft);
         Task<IEnumerable<AircraftDTO>> GetAll();
-        Task<PaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize);
+        Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize);
     }
 }
