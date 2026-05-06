@@ -6,6 +6,7 @@ import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import AirportCreate from '../modules/airport/view/AirportCreate.vue'
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Airports from '../modules/airport/view/Airports.vue'
 import Routes from '../modules/route/view/Routes.vue'
@@ -20,6 +21,7 @@ import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
+
 
 const router = createRouter({
     history: createWebHistory(),
@@ -47,6 +49,12 @@ const router = createRouter({
             name: "createAircraft",
             component: AircraftCreate,
             meta: {requiresAuth: true, adminRequired: true}
+        },
+        {
+            path: "/admin/create-airport",
+            name: "createAirport",
+            component: AirportCreate,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/check-in",
