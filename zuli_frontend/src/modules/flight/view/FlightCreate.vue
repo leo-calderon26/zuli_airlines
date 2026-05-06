@@ -22,7 +22,7 @@ const form = reactive({
   duration: 0,
   airlineId: 1,
   aircraftId: '',
-  itineraryId: 0,
+  itineraryId: 1,
   flightRouteId: 0,
   availableSeats: 0,
   carryOnPrice: null,
@@ -36,10 +36,7 @@ const form = reactive({
   friday: false,
   saturday: false,
   sunday: false,
-  wifi: false,
-  entertainment: false,
-  food: false,
-  seatSelection: false,
+  serviceDescription: '',
 })
 
 const message = ref('')
@@ -194,10 +191,6 @@ function validate() {
   if (!form.departureAirportCode) return 'La ruta seleccionada no tiene aeropuerto de salida'
   if (!form.arrivalAirportCode) return 'La ruta seleccionada no tiene aeropuerto de llegada'
   if (form.departureAirportCode === form.arrivalAirportCode) return 'La salida y la llegada no pueden ser el mismo aeropuerto'
-  if (!form.monday && !form.tuesday && !form.wednesday && !form.thursday && !form.friday && !form.saturday && !form.sunday) {
-    return 'La ruta seleccionada no tiene dias de disponibilidad'
-  }
-  
   console.log('✅ Validación pasada')
   return ''
 }
@@ -237,17 +230,7 @@ async function submit() {
     CheckedPrice: form.checkedPrice ? Number(form.checkedPrice) : null,
     DepartureAirportCode: form.departureAirportCode,
     ArrivalAirportCode: form.arrivalAirportCode,
-    Monday: form.monday,
-    Tuesday: form.tuesday,
-    Wednesday: form.wednesday,
-    Thursday: form.thursday,
-    Friday: form.friday,
-    Saturday: form.saturday,
-    Sunday: form.sunday,
-    Wifi: form.wifi,
-    Entertainment: form.entertainment,
-    Food: form.food,
-    SeatSelection: form.seatSelection,
+    ServiceDescription: form.serviceDescription?.trim() || null,
   }
   
   console.log('📦 Payload enviado:', JSON.stringify(payload, null, 2))
@@ -315,6 +298,16 @@ async function submit() {
             :options="statusOptions"
             button-label="Mostrar estados"
           />
+
+          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Aerolinea
+            <input
+              :value="form.airlineId"
+              type="text"
+              readonly
+              class="rounded-xl border border-slate-300 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 outline-none"
+            />
+            <span class="text-xs text-slate-500">La aerolinea se fija automaticamente en 1.</span>
+          </label>
 
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Aeropuerto salida
             <input
@@ -385,32 +378,25 @@ async function submit() {
           </label>
 
 
-          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Itinerario (id)
-            <input v-model.number="form.itineraryId" type="number" min="1" step="1" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
+          <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Itinerario
+            <input
+              :value="form.itineraryId"
+              type="text"
+              readonly
+              class="rounded-xl border border-slate-300 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 outline-none"
+            />
+            <span class="text-xs text-slate-500">El itinerario se fija automaticamente en 1.</span>
           </label>
 
 
-          <fieldset class="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p class="text-sm font-semibold text-slate-800 mb-3">Servicios incluidos en el vuelo</p>
-            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.wifi" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                WiFi
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.entertainment" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Entretenimiento
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.food" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Alimentación
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input v-model="form.seatSelection" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
-                Selección de asiento
-              </label>
-            </div>
-          </fieldset>
+          <label class="lg:col-span-2 flex flex-col gap-1 text-sm font-medium text-slate-700">Servicios incluidos
+            <textarea
+              v-model="form.serviceDescription"
+              rows="3"
+              placeholder="Ej: Wifi, entretenimiento, comida, selección de asiento"
+              class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+            ></textarea>
+          </label>
         </div>
 
         <div>
