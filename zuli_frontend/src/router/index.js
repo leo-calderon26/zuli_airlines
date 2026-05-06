@@ -36,7 +36,7 @@ const router = createRouter({
         {
             path: "/buscar-vuelos",
             name: "buscarVuelos",
-            component: PublicFlightList,
+            component: FlightSearchResults,
             meta: {requiresAuth: false, adminRequired: false}
         },
         {

@@ -4,7 +4,6 @@
         
         <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
             
-            <!-- Header Busqueda -->
             <div class="bg-primary rounded-xl p-6 text-white mb-8 shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold flex items-center gap-2">
@@ -21,17 +20,14 @@
                 </router-link>
             </div>
 
-            <!-- Loader -->
             <div v-if="searchStore.isLoading" class="flex justify-center items-center py-20">
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
             </div>
 
-            <!-- Error -->
             <div v-else-if="searchStore.error" class="bg-red-50 text-error p-6 rounded-xl border border-red-200 text-center font-semibold text-lg">
                 {{ searchStore.error }}
             </div>
 
-            <!-- Resultados -->
             <div v-else-if="searchStore.flightResults">
                 
                 <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Vuelos de Salida</h3>
@@ -46,7 +42,6 @@
                     :flight="flight" 
                 />
 
-                <!-- Paginación (Ejemplo simple) -->
                 <div v-if="searchStore.flightResults.totalPagesOutbound > 1" class="flex justify-center gap-2 mt-8">
                     <button 
                         @click="changePage(searchStore.flightResults.currentPage - 1)"

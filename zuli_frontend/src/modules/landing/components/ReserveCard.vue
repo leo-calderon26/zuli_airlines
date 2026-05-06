@@ -185,7 +185,7 @@ const validateAndSearch = () => {
     }
 
     router.push({
-        name: 'flightResults',
+        name: 'buscarVuelos',
         query: {
             origin: originCode.value,
             destination: destinationCode.value,
