@@ -22,5 +22,16 @@ namespace zuli_Data.Entities
         public int AvailableSeats { get; set; }
         public Guid AdminId { get; set; }
         public int FlightRouteId { get; set; }
+        public bool Monday { get; set; }
+        public bool Tuesday { get; set; }
+        public bool Wednesday { get; set; }
+        public bool Thursday { get; set; }
+        public bool Friday { get; set; }
+        public bool Saturday { get; set; }
+        public bool Sunday { get; set; }
+        public bool Wifi { get; set; }
+        public bool Entertainment { get; set; }
+        public bool Food { get; set; }
+        public bool SeatSelection { get; set; }
     }
 }

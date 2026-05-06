@@ -41,6 +41,17 @@ namespace zuli_Buisiness
                 AvailableSeats = flight.AvailableSeats,
                 AdminId = flight.AdminId,
                 FlightRouteId = flight.FlightRouteId,
+                Monday = flight.Monday,
+                Tuesday = flight.Tuesday,
+                Wednesday = flight.Wednesday,
+                Thursday = flight.Thursday,
+                Friday = flight.Friday,
+                Saturday = flight.Saturday,
+                Sunday = flight.Sunday,
+                Wifi = flight.Wifi,
+                Entertainment = flight.Entertainment,
+                Food = flight.Food,
+                SeatSelection = flight.SeatSelection,
             };
 
             await _repository.CreateFlight(newFlight);
@@ -76,6 +87,17 @@ namespace zuli_Buisiness
                 AvailableSeats = f.AvailableSeats,
                 AdminId = f.AdminId,
                 FlightRouteId = f.FlightRouteId,
+                Monday = f.Monday,
+                Tuesday = f.Tuesday,
+                Wednesday = f.Wednesday,
+                Thursday = f.Thursday,
+                Friday = f.Friday,
+                Saturday = f.Saturday,
+                Sunday = f.Sunday,
+                Wifi = f.Wifi,
+                Entertainment = f.Entertainment,
+                Food = f.Food,
+                SeatSelection = f.SeatSelection,
             }).ToList();
         }
 
@@ -106,6 +128,17 @@ namespace zuli_Buisiness
                 AvailableSeats = flight.AvailableSeats,
                 AdminId = flight.AdminId,
                 FlightRouteId = flight.FlightRouteId,
+                Monday = flight.Monday,
+                Tuesday = flight.Tuesday,
+                Wednesday = flight.Wednesday,
+                Thursday = flight.Thursday,
+                Friday = flight.Friday,
+                Saturday = flight.Saturday,
+                Sunday = flight.Sunday,
+                Wifi = flight.Wifi,
+                Entertainment = flight.Entertainment,
+                Food = flight.Food,
+                SeatSelection = flight.SeatSelection,
             };
         }
     }

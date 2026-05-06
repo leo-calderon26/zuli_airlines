@@ -30,6 +30,17 @@ const form = reactive({
   checkedPrice: null,
   departureAirportCode: '',
   arrivalAirportCode: '',
+  monday: false,
+  tuesday: false,
+  wednesday: false,
+  thursday: false,
+  friday: false,
+  saturday: false,
+  sunday: false,
+  wifi: false,
+  entertainment: false,
+  food: false,
+  seatSelection: false,
 })
 
 const message = ref('')
@@ -108,6 +119,7 @@ function validate() {
   }
   
   if (form.itineraryId <= 0) return 'El itinerario es requerido'
+
   if (!form.adminId) return 'El id del administrador es requerido'
   
   console.log('👤 Validando adminId:', form.adminId, 'Tipo:', typeof form.adminId)
@@ -121,6 +133,9 @@ function validate() {
   if (!form.departureAirportCode) return 'El aeropuerto de salida es requerido'
   if (!form.arrivalAirportCode) return 'El aeropuerto de llegada es requerido'
   if (form.departureAirportCode === form.arrivalAirportCode) return 'La salida y la llegada no pueden ser el mismo aeropuerto'
+  if (!form.monday && !form.tuesday && !form.wednesday && !form.thursday && !form.friday && !form.saturday && !form.sunday) {
+    return 'Debes seleccionar al menos un día de disponibilidad'
+  }
   
   console.log('✅ Validación pasada')
   return ''
@@ -155,6 +170,17 @@ async function submit() {
     CheckedPrice: form.checkedPrice ? Number(form.checkedPrice) : null,
     DepartureAirportCode: form.departureAirportCode,
     ArrivalAirportCode: form.arrivalAirportCode,
+    Monday: form.monday,
+    Tuesday: form.tuesday,
+    Wednesday: form.wednesday,
+    Thursday: form.thursday,
+    Friday: form.friday,
+    Saturday: form.saturday,
+    Sunday: form.sunday,
+    Wifi: form.wifi,
+    Entertainment: form.entertainment,
+    Food: form.food,
+    SeatSelection: form.seatSelection,
   }
   
   console.log('📦 Payload enviado:', JSON.stringify(payload, null, 2))
@@ -188,9 +214,6 @@ async function submit() {
         <h2 class="mt-2 text-3xl font-semibold text-slate-900">Crear vuelo</h2>
 
       </div>
-
-      <div v-if="message" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ message }}</div>
-      <div v-if="error" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 wrap-break-word">{{ error }}</div>
 
       <form @submit.prevent="submit" class="grid gap-6">
         
@@ -286,11 +309,67 @@ async function submit() {
           <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">Id administrador (GUID)
             <input v-model="form.adminId" type="text" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15" />
           </label>
+
+          <fieldset class="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p class="text-sm font-semibold text-slate-800 mb-3">Días disponibles del vuelo</p>
+            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.monday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Lunes
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.tuesday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Martes
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.wednesday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Miércoles
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.thursday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Jueves
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.friday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Viernes
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.saturday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Sábado
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.sunday" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Domingo
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p class="text-sm font-semibold text-slate-800 mb-3">Servicios incluidos en el vuelo</p>
+            <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.wifi" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                WiFi
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.entertainment" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Entretenimiento
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.food" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Alimentación
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input v-model="form.seatSelection" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                Selección de asiento
+              </label>
+            </div>
+          </fieldset>
         </div>
 
-        <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 ring-1 ring-slate-200">
-          <p class="font-semibold text-slate-700">Notas</p>
-          <p class="mt-1">Aeropuerto salida y llegada muestran código + ciudad. La aeronave se toma del listado de aeronaves disponibles.</p>
+        <div>
+          <div v-if="message" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ message }}</div>
+          <div v-if="error" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 wrap-break-word">{{ error }}</div>
         </div>
 
         <div class="flex justify-end">

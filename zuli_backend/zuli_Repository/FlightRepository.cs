@@ -37,7 +37,18 @@ namespace zuli_Repository
                     CheckedPrice,
                     AvailableSeats,
                     AdminId,
-                    FlightRouteId
+                    FlightRouteId,
+                    Monday,
+                    Tuesday,
+                    Wednesday,
+                    Thursday,
+                    Friday,
+                    Saturday,
+                    Sunday,
+                    Wifi,
+                    Entertainment,
+                    Food,
+                    SeatSelection
                 ) VALUES (
                     @Id,
                     @Status,
@@ -56,7 +67,18 @@ namespace zuli_Repository
                     @CheckedPrice,
                     @AvailableSeats,
                     @AdminId,
-                    @FlightRouteId
+                    @FlightRouteId,
+                    @Monday,
+                    @Tuesday,
+                    @Wednesday,
+                    @Thursday,
+                    @Friday,
+                    @Saturday,
+                    @Sunday,
+                    @Wifi,
+                    @Entertainment,
+                    @Food,
+                    @SeatSelection
                 )";
 
             return await connection.ExecuteAsync(sql, new
@@ -78,7 +100,18 @@ namespace zuli_Repository
                 flight.CheckedPrice,
                 flight.AvailableSeats,
                 flight.AdminId,
-                flight.FlightRouteId
+                flight.FlightRouteId,
+                flight.Monday,
+                flight.Tuesday,
+                flight.Wednesday,
+                flight.Thursday,
+                flight.Friday,
+                flight.Saturday,
+                flight.Sunday,
+                flight.Wifi,
+                flight.Entertainment,
+                flight.Food,
+                flight.SeatSelection
             });
         }
 
@@ -105,7 +138,18 @@ namespace zuli_Repository
                     CheckedPrice,
                     AvailableSeats,
                     AdminId,
-                    FlightRouteId
+                    FlightRouteId,
+                    Monday,
+                    Tuesday,
+                    Wednesday,
+                    Thursday,
+                    Friday,
+                    Saturday,
+                    Sunday,
+                    Wifi,
+                    Entertainment,
+                    Food,
+                    SeatSelection
                 FROM Flight";
 
             return await connection.QueryAsync<FlightEntity>(sql);
@@ -134,7 +178,18 @@ namespace zuli_Repository
                     CheckedPrice,
                     AvailableSeats,
                     AdminId,
-                    FlightRouteId
+                    FlightRouteId,
+                    Monday,
+                    Tuesday,
+                    Wednesday,
+                    Thursday,
+                    Friday,
+                    Saturday,
+                    Sunday,
+                    Wifi,
+                    Entertainment,
+                    Food,
+                    SeatSelection
                 FROM Flight
                 WHERE Id = @Id";
 

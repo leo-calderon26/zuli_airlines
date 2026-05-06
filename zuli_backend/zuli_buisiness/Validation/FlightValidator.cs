@@ -14,6 +14,7 @@ namespace zuli_Buisiness.Validation
         public const string PRICES = "Prices";
         public const string ENTITIES = "Entities";
         public const string ROUTE = "FlightRouteId";
+        public const string AVAILABILITY = "Availability";
     }
 
     public class FlightValidator
@@ -28,6 +29,7 @@ namespace zuli_Buisiness.Validation
                 { FlightAtributes.PRICES, new List<string>() },
                 { FlightAtributes.ENTITIES, new List<string>() },
                 { FlightAtributes.ROUTE, new List<string>() },
+                { FlightAtributes.AVAILABILITY, new List<string>() },
             };
 
             var hasError = false;
@@ -89,6 +91,18 @@ namespace zuli_Buisiness.Validation
             if (flight.FirstClassPrice < 0 || flight.TouristPrice < 0 || (flight.CarryOnPrice.HasValue && flight.CarryOnPrice < 0) || (flight.CheckedPrice.HasValue && flight.CheckedPrice < 0))
             {
                 errorInfo[FlightAtributes.PRICES].Add("Los precios no pueden ser negativos");
+                hasError = true;
+            }
+
+            if (flight.AvailableSeats < 0)
+            {
+                errorInfo[FlightAtributes.ENTITIES].Add("AvailableSeats no puede ser negativo");
+                hasError = true;
+            }
+
+            if (!flight.Monday && !flight.Tuesday && !flight.Wednesday && !flight.Thursday && !flight.Friday && !flight.Saturday && !flight.Sunday)
+            {
+                errorInfo[FlightAtributes.AVAILABILITY].Add("Debe seleccionar al menos un dia de disponibilidad");
                 hasError = true;
             }
 
