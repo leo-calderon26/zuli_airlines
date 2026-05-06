@@ -154,7 +154,7 @@ namespace zuli_Business
 
         public async Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request)
         {
-            _validator.ValidateSearch(request);
+            _searchValidator.ValidateSearch(request);
 
             DateTime endDate;
             if (request.IsRoundTrip && request.ReturnDate.HasValue)

@@ -92,7 +92,6 @@ namespace zuli_Repository
             var airports = await connection.QueryAsync<AirportEntity>(sql, parameters);
             return airports;
         }
-
         public async Task<(IEnumerable<AirportEntity> airports, int totalCount)> GetAirportsPaginated(int pageNumber, int pageSize)
         {
             using var connection = _context.CreateConnection();

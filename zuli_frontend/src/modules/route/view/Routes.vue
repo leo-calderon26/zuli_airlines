@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createFlightRoute, searchAirportSuggestionsByName } from '../service/routeService';
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import RouteNavBar from '../components/RouteNavBar.vue';
 
 const router = useRouter();
 
@@ -294,7 +295,7 @@ async function handleSubmit() {
 
     await createFlightRoute(routePayload);
     alert('La ruta de vuelo se ha creado correctamente');
-    router.go(0);
+    router.push({name: 'routes'});
   } catch (error) {
     errors.global = error.response?.data?.message || 'Error al crear la ruta';
     alert(errors.global);
@@ -305,6 +306,7 @@ async function handleSubmit() {
 <template>
   <div class="flex flex-col">
     <PublicNavBar />
+    <RouteNavBar/>
     <main class="flex-1 pb-8">
       <div class="page-shell">
         <form class="form-card" @submit.prevent="handleSubmit">

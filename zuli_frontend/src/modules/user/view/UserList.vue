@@ -1,7 +1,7 @@
 <template>
     <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
         <PublicNavBar />
-
+        <UserNavBar/>
         <main class="flex flex-1 flex-col bg-[var(--color-secondary)] px-8 pb-32 pt-14">
             <section class="mx-auto flex w-full max-w-[1280px] flex-col gap-10">
                 <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -165,8 +165,6 @@
                 </section>
             </section>
         </main>
-
-        <PublicBottomBar />
     </div>
 </template>
 
@@ -174,13 +172,14 @@
 import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import PublicBottomBar from "../../../shared/PublicBottomBar.vue";
 import userService from "../services/userService";
+import UserNavBar from "../components/UserNavBar.vue";
 
 export default {
     name: "UserList",
 
     components: {
         PublicNavBar,
-        PublicBottomBar
+        UserNavBar
     },
 
     data() {

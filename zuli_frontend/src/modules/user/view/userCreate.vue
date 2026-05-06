@@ -110,13 +110,6 @@
 
                     <div class="mt-7 border-t border-[var(--color-secondary)] pt-9">
                         <div class="flex justify-center gap-4">
-                            <button
-                                class="h-11 w-[136px] rounded-full border border-[var(--color-primary)] bg-white font-medium text-[var(--color-primary)] transition hover:cursor-pointer hover:brightness-75"
-                                type="button"
-                                @click="cancel"
-                            >
-                                Cancelar
-                            </button>
 
                             <button
                                 class="h-11 w-[168px] rounded-full bg-[var(--color-primary)] font-medium text-white shadow-md transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-60"
@@ -230,10 +223,6 @@ export default {
                 userRole: ""
             };
         },
-
-        cancel() {
-            this.$router.push({ name: "users" });
-        }
     }
 };
 </script>

@@ -29,7 +29,7 @@ namespace zuli_Repository
                     VALUES (NEWID(),@Model, @Weight, @BaggageCapacity, @AdminId, @NumberEconomyClassRows, @NumberSeatingRowsEconomy, 
                         @NumberFirstClassRows, @NumberSeatingRowsFirst)";
 
-            return await connection.ExecuteScalarAsync<int>(insertSql, new
+            return await connection.ExecuteAsync(insertSql, new
             {
                 adminId = aircraft.AdminId,
                 model = aircraft.model,

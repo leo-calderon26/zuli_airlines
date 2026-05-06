@@ -56,7 +56,7 @@ const aircraftOptions = computed(() => {
       value: aircraft.aircraftId ?? aircraft.id ?? aircraft.model ?? ''
     }))
     .filter((aircraft) => aircraft.value !== '')
-  console.log('🛩️ Aircraft options computed:', options)
+  console.log('Aircraft options computed:', options)
   return options
 })
 
@@ -92,9 +92,9 @@ function formatDuration(value) {
 }
 
 onMounted(async () => {
-  console.log('🚀 FlightCreate mounted')
+  console.log('FlightCreate mounted')
   await fetchAircrafts()
-  console.log('✈️ Aircrafts loaded:', aircrafts.value)
+  console.log('Aircrafts loaded:', aircrafts.value)
 })
 
 watch(
@@ -167,10 +167,10 @@ function getBusinessId() {
 
 function validate() {
   error.value = ''
-  console.log('🔍 Validando formulario...', form)
+  console.log('Validando formulario...', form)
   
   if (!form.status) {
-    console.warn('❌ Estado no seleccionado')
+    console.warn('Estado no seleccionado')
     return 'El estado es requerido'
   }
   if (!form.flightDate) return 'La fecha del vuelo es requerida'
@@ -180,9 +180,9 @@ function validate() {
   if (!form.checkInDeadline) return 'La hora límite de check-in es requerida'
   if (form.duration <= 0) return 'La duración debe ser mayor a 0'
   
-  console.log('🛩️ Validando aircraftId:', form.aircraftId, 'Tipo:', typeof form.aircraftId)
+  console.log('Validando aircraftId:', form.aircraftId, 'Tipo:', typeof form.aircraftId)
   if (!form.aircraftId) {
-    console.warn('❌ AircraftId está vacío')
+    console.warn('AircraftId está vacío')
     return 'El id de la aeronave es requerido'
   }
   if (form.itineraryId <= 0) return 'El itinerario es requerido'
@@ -191,15 +191,15 @@ function validate() {
   if (!form.departureAirportCode) return 'La ruta seleccionada no tiene aeropuerto de salida'
   if (!form.arrivalAirportCode) return 'La ruta seleccionada no tiene aeropuerto de llegada'
   if (form.departureAirportCode === form.arrivalAirportCode) return 'La salida y la llegada no pueden ser el mismo aeropuerto'
-  console.log('✅ Validación pasada')
+  console.log('Validación pasada')
   return ''
 }
 
 async function submit() {
-  console.log('📋 Submit iniciado')
+  console.log('Submit iniciado')
   const v = validate()
   if (v) {
-    console.error('❌ Validación falló:', v)
+    console.error('Validación falló:', v)
     error.value = v
     return
   }
@@ -233,17 +233,17 @@ async function submit() {
     ServiceDescription: form.serviceDescription?.trim() || null,
   }
   
-  console.log('📦 Payload enviado:', JSON.stringify(payload, null, 2))
-  console.log('🔎 BusinessId en payload:', payload.BusinessId)
+  console.log('Payload enviado:', JSON.stringify(payload, null, 2))
+  console.log('BusinessId en payload:', payload.BusinessId)
 
   try {
-    console.log('🔄 Enviando POST a:', flightCreateUrl)
+    console.log('Enviando POST a:', flightCreateUrl)
     const res = await axios.post(flightCreateUrl, payload)
-    console.log('✅ Respuesta exitosa:', res.data)
+    console.log('Respuesta exitosa:', res.data)
     message.value = res?.data?.message || 'Vuelo creado correctamente'
     error.value = ''
   } catch (e) {
-    console.error('❌ Error en POST:', e)
+    console.error('Error en POST:', e)
     console.error('Status:', e?.response?.status)
     console.error('Datos error:', e?.response?.data)
     if (e?.response?.data) {
