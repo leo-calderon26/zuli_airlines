@@ -19,9 +19,9 @@
             </div>
 
             <!-- Salir -->
-            <button
-                type="button"
-                class="flex h-full w-36 cursor-pointer flex-col items-center justify-center border-l border-white/25 transition duration-200 hover:bg-[var(--color-select)] active:scale-95"
+            <AppButton
+                variant="ghost"
+                class="flex h-full w-36 flex-col items-center justify-center border-l border-white/25 !rounded-none !text-white !p-0 hover:!bg-[var(--color-select)]"
                 @click="goBack"
             >
                 <img
@@ -33,7 +33,7 @@
                 <span class="mt-1 text-sm font-semibold">
                     Salir
                 </span>
-            </button>
+            </AppButton>
         </header>
 
         <!-- Contenido -->
@@ -112,37 +112,32 @@
                         </div>
                     </div>
 
-                    <!-- Mensaje de error -->
-                    <div
-                        v-if="errorMessage"
-                        class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700"
-                    >
-                        {{ errorMessage }}
-                    </div>
-
                     <!-- Botón -->
                     <div class="mt-10 flex justify-center">
-                        <button
+                        <AppButton
+                            :loading="isLoading"
                             type="submit"
-                            :disabled="isLoading"
-                            class="cursor-pointer rounded-xl bg-[var(--color-primary)] px-12 py-3 text-lg font-bold text-white transition duration-200 hover:bg-[var(--color-select)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                            variant="primary"
+                            size="lg"
                         >
-                            {{ isLoading ? "Validando..." : "Iniciar sesión" }}
-                        </button>
+                            Iniciar sesión
+                        </AppButton>
                     </div>
 
                     <!-- Recuperar contraseña -->
                     <div class="mt-12 text-center">
-                        <button
-                            type="button"
-                            class="cursor-pointer text-xs font-bold text-black transition duration-200 hover:text-[var(--color-primary)] hover:underline"
+                        <AppButton
+                            variant="ghost"
+                            class="!text-xs !font-bold !text-black hover:!text-[var(--color-primary)] hover:underline"
                             @click="recoverPassword"
                         >
                             Recuperar contraseña
-                        </button>
+                        </AppButton>
                     </div>
                 </form>
             </div>
+
+            <ErrorModal v-model="showErrorModal" :message="errorMessage" />
         </section>
     </main>
 </template>
@@ -150,10 +145,16 @@
 <script>
 import logoZuli from "../../../assets/logoZuli.svg";
 import arrowDown from "../../../assets/ArrowDown.svg";
+import ErrorModal from "../../../shared/ErrorModal.vue";
+import AppButton from "../../../shared/AppButton.vue";
 import authService from "../services/authService";
 
 export default {
     name: "Login",
+    components: {
+        ErrorModal,
+        AppButton
+    },
     data() {
         return {
             logoZuli,
@@ -161,6 +162,7 @@ export default {
             businessEmail: "",
             password: "",
             errorMessage: "",
+            showErrorModal: false,
             isLoading: false
         };
     },
@@ -190,6 +192,7 @@ export default {
                 this.$router.push({ name: "mainMenu" });
             } catch (error) {
                 this.errorMessage = error.message || "No se pudo iniciar sesión.";
+                this.showErrorModal = true;
             } finally {
                 this.isLoading = false;
             }

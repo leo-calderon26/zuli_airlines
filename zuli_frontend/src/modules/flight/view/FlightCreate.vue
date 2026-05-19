@@ -1,6 +1,9 @@
 <script setup>
 import PublicNavBar from '../../../shared/PublicNavBar.vue'
 import LandingDropdownField from '../../landing/components/LandingDropdownField.vue'
+import ErrorModal from '../../../shared/ErrorModal.vue'
+import SuccessModal from '../../../shared/SuccessModal.vue'
+import AppButton from '../../../shared/AppButton.vue'
 import axios from 'axios'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -41,6 +44,8 @@ const form = reactive({
 
 const message = ref('')
 const error = ref('')
+const showSuccessModal = ref(false)
+const showErrorModal = ref(false)
 
 const statusOptions = [
   { label: 'Programado', value: 'Programado' },
@@ -242,15 +247,13 @@ async function submit() {
     console.log('Respuesta exitosa:', res.data)
     message.value = res?.data?.message || 'Vuelo creado correctamente'
     error.value = ''
+    showSuccessModal.value = true
   } catch (e) {
     console.error('Error en POST:', e)
     console.error('Status:', e?.response?.status)
     console.error('Datos error:', e?.response?.data)
-    if (e?.response?.data) {
-      error.value = JSON.stringify(e.response.data)
-    } else {
-      error.value = 'Error al crear el vuelo'
-    }
+    error.value = e?.response?.data?.message || e?.response?.data?.detail || JSON.stringify(e.response?.data?.errors) || 'Error al crear el vuelo'
+    showErrorModal.value = true
   }
 }
 </script>
@@ -399,17 +402,13 @@ async function submit() {
           </label>
         </div>
 
-        <div>
-          <div v-if="message" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ message }}</div>
-          <div v-if="error" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 wrap-break-word">{{ error }}</div>
-        </div>
-
         <div class="flex justify-end">
-          <button type="submit" class="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(113,23,23,0.28)] transition hover:bg-select">
-            Crear vuelo
-          </button>
+          <AppButton type="submit" variant="primary">Crear vuelo</AppButton>
         </div>
       </form>
     </section>
   </main>
+
+  <SuccessModal v-model="showSuccessModal" :message="message" />
+  <ErrorModal v-model="showErrorModal" :message="error" />
 </template>

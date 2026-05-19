@@ -4,6 +4,9 @@ import { useRouter } from 'vue-router';
 import { createFlightRoute, searchAirportSuggestionsByName } from '../service/routeService';
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
 import RouteNavBar from '../components/RouteNavBar.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import AppButton from '../../../shared/AppButton.vue';
 
 const router = useRouter();
 
@@ -24,6 +27,11 @@ const errors = reactive({
   global: '',
   fields: {},
 });
+
+const showSuccessModal = ref(false);
+const successMessage = ref('');
+const showErrorModal = ref(false);
+const errorMessage = ref('');
 
 const originSuggestions = ref([]);
 const destinationSuggestions = ref([]);
@@ -262,15 +270,18 @@ function validate() {
 
 async function handleSubmit() {
   if (!validate()) {
-    if (errors.global) alert(errors.global);
+    if (errors.global) {
+      errorMessage.value = errors.global;
+      showErrorModal.value = true;
+    }
     return;
   }
 
   const adminId = getAdminId();
 
   if (!adminId) {
-    errors.global = 'No se pudo obtener el adminId desde las cookies.';
-    alert(errors.global);
+    errorMessage.value = 'No se pudo obtener el adminId desde las cookies.';
+    showErrorModal.value = true;
     return;
   }
   try {
@@ -294,12 +305,16 @@ async function handleSubmit() {
     };
 
     await createFlightRoute(routePayload);
-    alert('La ruta de vuelo se ha creado correctamente');
-    router.push({name: 'routes'});
+    successMessage.value = 'La ruta de vuelo se ha creado correctamente';
+    showSuccessModal.value = true;
   } catch (error) {
-    errors.global = error.response?.data?.message || 'Error al crear la ruta';
-    alert(errors.global);
+    errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear la ruta';
+    showErrorModal.value = true;
   }
+}
+
+function onSuccessClose() {
+  router.push({name: 'routes'});
 }
 </script>
 
@@ -483,11 +498,14 @@ async function handleSubmit() {
           </div>
 
           <div class="mt-4">
-            <button type="submit" class="submit-btn">Guardar ruta</button>
+            <AppButton type="submit" variant="primary">Guardar ruta</AppButton>
           </div>
         </form>
       </div>
     </main>
+
+    <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
   </div>
 </template>
 

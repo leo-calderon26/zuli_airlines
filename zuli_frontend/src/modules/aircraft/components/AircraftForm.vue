@@ -1,12 +1,20 @@
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAircraft } from '../composable/useAircraft';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import AppButton from '../../../shared/AppButton.vue';
 
 import authService from "../../auth/services/authService";
 
 const router = useRouter();
 const { addAircraft } = useAircraft();
+
+const showSuccessModal = ref(false);
+const successMessage = ref('');
+const showErrorModal = ref(false);
+const errorMessage = ref('');
 
 const form = reactive({
     model: '',
@@ -58,7 +66,10 @@ function validate() {
 
 async function handleSubmit() {
     if (!validate()) {
-        if (errors.global) alert(errors.global);
+        if (errors.global) {
+            errorMessage.value = errors.global;
+            showErrorModal.value = true;
+        }
         return;
     }
 
@@ -80,12 +91,16 @@ async function handleSubmit() {
 
     try {
         await addAircraft(aircraft);
-        alert('La aeronave se ha creado correctamente');
-        router.push({ name: 'aircraftList' });
+        successMessage.value = 'La aeronave se ha creado correctamente';
+        showSuccessModal.value = true;
     } catch (error) {
-        errors.global = error.response?.data?.message || 'Error al crear la aeronave';
-        alert(errors.global);
+        errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear la aeronave';
+        showErrorModal.value = true;
     }
+}
+
+function onSuccessClose() {
+    router.push({ name: 'aircraftList' });
 }
 </script>
 
@@ -188,10 +203,12 @@ async function handleSubmit() {
         <div v-if="errors.fields.totalSeats" class="mt-2 text-p">{{ errors.fields.totalSeats }}</div>
 
         <div class="mt-4">
-            <button type="submit" class="submit-btn">Guardar aeronave</button>
+            <AppButton type="submit" variant="primary">Guardar aeronave</AppButton>
         </div>
     </form>
-    
+
+    <SuccessModal v-model="showSuccessModal" message="La aeronave se ha creado correctamente" @close="onSuccessClose" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <style scoped>

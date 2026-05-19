@@ -1,11 +1,19 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import AppButton from '../../../shared/AppButton.vue';
 import authService from "../../auth/services/authService";
 
 const router = useRouter();
 const { addAirport } = useAirport();
+
+const showSuccessModal = ref(false);
+const successMessage = ref('');
+const showErrorModal = ref(false);
+const errorMessage = ref('');
 
 const form = reactive({
     airportCode: '',
@@ -41,7 +49,10 @@ function validate() {
 
 async function handleSubmit() {
     if (!validate()) {
-        if (errors.global) alert(errors.global);
+        if (errors.global) {
+            errorMessage.value = errors.global;
+            showErrorModal.value = true;
+        }
         return;
     }
 
@@ -57,13 +68,16 @@ async function handleSubmit() {
         };
 
         await addAirport(airportPayload);
-        alert('El aeropuerto se ha creado correctamente');
-        
-        router.push({ path: '/admin/airports' }); 
+        successMessage.value = 'El aeropuerto se ha creado correctamente';
+        showSuccessModal.value = true;
     } catch (error) {
-        errors.global = error.response?.data?.message || 'Error al crear el aeropuerto';
-        alert(errors.global);
+        errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear el aeropuerto';
+        showErrorModal.value = true;
     }
+}
+
+function onSuccessClose() {
+    router.push({ path: '/admin/airports' });
 }
 </script>
 
@@ -96,9 +110,12 @@ async function handleSubmit() {
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="submit-btn">Guardar Aeropuerto</button>
+            <AppButton type="submit" variant="primary">Guardar Aeropuerto</AppButton>
         </div>
     </form>
+
+    <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
 <style scoped>

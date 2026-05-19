@@ -94,33 +94,21 @@
                         </select>
                     </div>
 
-                    <p
-                        v-if="errorMessage"
-                        class="mt-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700"
-                    >
-                        {{ errorMessage }}
-                    </p>
-
-                    <p
-                        v-if="successMessage"
-                        class="mt-5 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-center text-sm font-bold text-green-700"
-                    >
-                        {{ successMessage }}
-                    </p>
-
                     <div class="mt-7 border-t border-[var(--color-secondary)] pt-9">
                         <div class="flex justify-center gap-4">
-
-                            <button
-                                class="h-11 w-[168px] rounded-full bg-[var(--color-primary)] font-medium text-white shadow-md transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-60"
-                                :disabled="isLoading"
+                            <AppButton
+                                :loading="isLoading"
                                 type="submit"
+                                variant="primary"
                             >
-                                {{ isLoading ? "Creando..." : "Crear Usuario" }}
-                            </button>
+                                Crear Usuario
+                            </AppButton>
                         </div>
                     </div>
                 </form>
+
+                <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+                <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
             </section>
         </main>
     </div>
@@ -129,6 +117,9 @@
 <script>
 import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import UserNavBar from "../components/UserNavBar.vue";
+import ErrorModal from "../../../shared/ErrorModal.vue";
+import SuccessModal from "../../../shared/SuccessModal.vue";
+import AppButton from "../../../shared/AppButton.vue";
 import userService from "../services/userService";
 
 export default {
@@ -136,7 +127,10 @@ export default {
 
     components: {
         PublicNavBar,
-        UserNavBar
+        UserNavBar,
+        ErrorModal,
+        SuccessModal,
+        AppButton
     },
 
     data() {
@@ -151,7 +145,9 @@ export default {
             },
             isLoading: false,
             errorMessage: "",
-            successMessage: ""
+            successMessage: "",
+            showErrorModal: false,
+            showSuccessModal: false,
         };
     },
 
@@ -174,11 +170,17 @@ export default {
 
                 this.successMessage = result.message || "Usuario creado correctamente.";
                 this.clearForm();
+                this.showSuccessModal = true;
             } catch (error) {
                 this.errorMessage = error.message || "No se pudo crear el usuario.";
+                this.showErrorModal = true;
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        onSuccessClose() {
+            this.showSuccessModal = false;
         },
 
         validateForm() {

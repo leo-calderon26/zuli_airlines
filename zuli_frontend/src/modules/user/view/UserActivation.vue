@@ -60,31 +60,21 @@
                         </div>
                     </div>
 
-                    <p
-                        v-if="errorMessage"
-                        class="mb-7 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700"
-                    >
-                        {{ errorMessage }}
-                    </p>
-
-                    <p
-                        v-if="successMessage"
-                        class="mb-7 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-center text-sm font-bold text-green-700"
-                    >
-                        {{ successMessage }}
-                    </p>
-
                     <div class="mt-14 flex justify-center">
-                        <button
-                            class="h-12 w-[240px] rounded-lg bg-[var(--color-primary)] text-[22px] font-bold text-white transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-60"
-                            :disabled="isLoading"
+                        <AppButton
+                            :loading="isLoading"
                             type="submit"
+                            variant="primary"
+                            size="lg"
                         >
-                            {{ isLoading ? "Activando..." : "Activar" }}
-                        </button>
+                            Activar
+                        </AppButton>
                     </div>
                 </div>
             </form>
+
+            <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+            <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
         </main>
 
         <PublicBottomBar />
@@ -94,6 +84,9 @@
 <script>
 import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import PublicBottomBar from "../../../shared/PublicBottomBar.vue";
+import ErrorModal from "../../../shared/ErrorModal.vue";
+import SuccessModal from "../../../shared/SuccessModal.vue";
+import AppButton from "../../../shared/AppButton.vue";
 import userActivationService from "../services/userActivationService";
 
 export default {
@@ -101,7 +94,10 @@ export default {
 
     components: {
         PublicNavBar,
-        PublicBottomBar
+        PublicBottomBar,
+        ErrorModal,
+        SuccessModal,
+        AppButton
     },
 
     data() {
@@ -113,7 +109,9 @@ export default {
             token: "",
             isLoading: false,
             errorMessage: "",
-            successMessage: ""
+            successMessage: "",
+            showErrorModal: false,
+            showSuccessModal: false,
         };
     },
 
@@ -147,15 +145,17 @@ export default {
                 });
 
                 this.successMessage = result.message || "Cuenta activada correctamente.";
-
-                setTimeout(() => {
-                    this.$router.push({ name: "administrativo" });
-                }, 1200);
+                this.showSuccessModal = true;
             } catch (error) {
                 this.errorMessage = error.message || "No se pudo activar la cuenta.";
+                this.showErrorModal = true;
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        onSuccessClose() {
+            this.$router.push({ name: "administrativo" });
         },
 
         validateForm() {

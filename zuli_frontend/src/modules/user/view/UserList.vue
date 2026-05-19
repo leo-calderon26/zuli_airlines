@@ -42,13 +42,12 @@
                         </button>
                     </div>
 
-                    <button
-                        class="h-12 rounded-lg bg-[var(--color-primary)] px-8 text-[18px] font-bold text-white shadow-md transition hover:cursor-pointer hover:brightness-75"
-                        type="button"
+                    <AppButton
+                        variant="primary"
                         @click="goToCreateUser"
                     >
                         Agregar Usuario
-                    </button>
+                    </AppButton>
                 </div>
 
                 <section class="min-h-[520px] rounded-lg border border-gray-300 bg-white px-8 py-4">
@@ -129,13 +128,6 @@
                         </table>
                     </div>
 
-                    <p
-                        v-if="errorMessage"
-                        class="mt-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700"
-                    >
-                        {{ errorMessage }}
-                    </p>
-
                     <div class="mt-6 flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-5 md:flex-row">
                         <p class="text-sm font-semibold text-[var(--color-content)]">
                             Página {{ page }} de {{ totalPages }} —
@@ -143,27 +135,29 @@
                         </p>
 
                         <div class="flex items-center gap-3">
-                            <button
-                                class="h-10 rounded-md border border-[var(--color-primary)] px-4 font-semibold text-[var(--color-primary)] transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-50"
+                            <AppButton
+                                variant="outline"
+                                size="sm"
                                 :disabled="page <= 1 || isLoading"
-                                type="button"
                                 @click="previousPage"
                             >
                                 Anterior
-                            </button>
+                            </AppButton>
 
-                            <button
-                                class="h-10 rounded-md border border-[var(--color-primary)] px-4 font-semibold text-[var(--color-primary)] transition hover:cursor-pointer hover:brightness-75 disabled:cursor-not-allowed disabled:opacity-50"
+                            <AppButton
+                                variant="outline"
+                                size="sm"
                                 :disabled="page >= totalPages || isLoading"
-                                type="button"
                                 @click="nextPage"
                             >
                                 Siguiente
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
                 </section>
             </section>
+
+            <ErrorModal v-model="showErrorModal" :message="errorMessage" />
         </main>
     </div>
 </template>
@@ -171,6 +165,8 @@
 <script>
 import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import PublicBottomBar from "../../../shared/PublicBottomBar.vue";
+import ErrorModal from "../../../shared/ErrorModal.vue";
+import AppButton from "../../../shared/AppButton.vue";
 import userService from "../services/userService";
 import UserNavBar from "../components/UserNavBar.vue";
 
@@ -179,7 +175,9 @@ export default {
 
     components: {
         PublicNavBar,
-        UserNavBar
+        UserNavBar,
+        ErrorModal,
+        AppButton
     },
 
     data() {
@@ -193,6 +191,7 @@ export default {
             totalPages: 1,
             isLoading: false,
             errorMessage: "",
+            showErrorModal: false,
             searchTimeoutId: null
         };
     },
@@ -226,6 +225,7 @@ export default {
                 this.page = result.page || 1;
             } catch (error) {
                 this.errorMessage = error.message || "No se pudieron cargar los usuarios.";
+                this.showErrorModal = true;
             } finally {
                 this.isLoading = false;
             }
