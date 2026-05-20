@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-secondary">
     <RouterView v-slot="{ Component }">
       <component :is="Component" class="flex flex-col flex-1" />
     </RouterView>

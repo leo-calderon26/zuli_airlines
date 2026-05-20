@@ -7,6 +7,9 @@ defineProps({
   error: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
   required: { type: Boolean, default: false },
+  maxlength: { type: [Number, String], default: null },
+  min: { type: [Number, String], default: null },
+  step: { type: [Number, String], default: null },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -17,18 +20,7 @@ function onInput(e) {
 </script>
 
 <template>
-  <div class="form-field group">
-    <input
-      :id="label"
-      :type="type"
-      :value="modelValue"
-      :placeholder="placeholder || ' '"
-      :disabled="disabled"
-      :required="required"
-      class="form-input peer"
-      :class="{ 'border-error': error }"
-      @input="onInput"
-    />
+  <div class="form-field">
     <label
       v-if="label"
       :for="label"
@@ -38,17 +30,33 @@ function onInput(e) {
       {{ label }}
       <span v-if="required" class="text-error">*</span>
     </label>
+    <input
+      :id="label"
+      :type="type"
+      :value="modelValue"
+      :placeholder="placeholder || ' '"
+      :disabled="disabled"
+      :required="required"
+      :maxlength="maxlength"
+      :min="min"
+      :step="step"
+      class="form-input"
+      :class="{ 'border-error text-error': error }"
+      @input="onInput"
+    />
     <p v-if="error" class="mt-1 text-sm text-error">{{ error }}</p>
   </div>
 </template>
 
 <style scoped>
-@reference "../../style.css";
-.form-field { @apply relative; }
+@reference "../style.css";
+.form-field {
+  @apply flex flex-col;
+}
 .form-input {
-  @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-content focus:border-primary focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-body focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
 }
 .form-label {
-  @apply absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-primary;
+  @apply mb-2 block text-sm font-medium text-content;
 }
 </style>
