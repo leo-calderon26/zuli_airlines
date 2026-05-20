@@ -33,7 +33,7 @@ namespace zuli_Business
             }
             if (await _repository.AlreadyExist(airport.airportCode))
             {
-                throw new ZuliNotFoundException($"Se encontro un aeropuerto con el mismo codigo {airport.airportCode}");
+                throw new ZuliValidationException(AirportAtributes.CODE, $"Se encontro un aeropuerto con el mismo codigo {airport.airportCode}");
             }
 
             var userId = await _userRepository.GetUserId(airport.businessId);

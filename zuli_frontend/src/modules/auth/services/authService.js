@@ -61,7 +61,7 @@ async function readResponseBody(response) {
 }
 
 function buildAuthError(response, data) {
-    const error = new Error(data.message || getDefaultErrorMessage(response.status));
+    const error = new Error(data.detail || data.message || getDefaultErrorMessage(response.status));
 
     error.status = response.status;
     error.data = data;

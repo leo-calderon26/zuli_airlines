@@ -6,12 +6,13 @@ import AirportNavBar from '../components/AirportNavBar.vue';
 </script>
 
 <template>
-    <div class="flex flex-col min-h-screen">
+    <div class="flex flex-col">
         <PublicNavBar/>   
         <AirportNavBar/>
-        <div class="flex-grow py-8 px-4">
-            <AirportForm/>
-        </div>
-        <PublicBottomBar />
+        <main class="flex-1 pb-8">
+            <div class="page-shell">
+                <AirportForm/>
+            </div>
+        </main>
     </div>
 </template>
