@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using zuli_Business.DTO.External;
-using zuli_Business.Interface;
-using zuli_Business.Validation;
+using zuli_Buisiness.DTO;
+using zuli_Buisiness.Interface;
+using zuli_Buisiness.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -16,12 +16,12 @@ using zuli_Repository.Interface;
 
 namespace zuli_Business
 {
-    public class ExternalAuthorizationService : IExternalAuthorizationService
+    public class AuthorizationService : IAuthorizationService
     {
         // Inyeccion de dependencias
         private readonly string secretKey;
         private readonly AuthorizationValidator _validator;
-        public ExternalAuthorizationService(IConfiguration config)
+        public AuthorizationService(IConfiguration config)
         {
             secretKey = config.GetSection("settings").GetSection("secretKey").ToString();
             _validator = new AuthorizationValidator();

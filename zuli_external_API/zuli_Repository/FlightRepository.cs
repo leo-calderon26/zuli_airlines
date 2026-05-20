@@ -3,22 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using zuli_Data;
-using zuli_Data.Entities.External;
+using zuli_Data.Entities;
 using zuli_Repository.Interface;
 namespace zuli_Repository
 {
-    public class ExternalFlightRepository : IExternalFlightRepository
+    public class FlightRepository : IFlightRepository
     {
         // Inyeccion de dependencias de la capa Data
         private readonly DapperContext _context;
 
-        public ExternalFlightRepository(DapperContext context) 
+        public FlightRepository(DapperContext context) 
         {
             _context = context;
             
         }
 
-        public async Task<IEnumerable<RetrievedFlightEntity>> RetrieveAvailableFlights(RequestedFlightEntity requestedFlight)
+        public async Task<IEnumerable<BookedFlightEntity>> RetrieveAvailableFlights(RequestedFlightEntity requestedFlight)
         {
             using var connection = _context.CreateConnection();
             // Insertar la nueva aeronave
@@ -40,7 +40,7 @@ namespace zuli_Repository
 	                    FROM flight f INNER JOIN Airport a ON f.DepartureAirport = a.AirportCode INNER JOIN Airport b ON f.ArrivalAirport = b.AirportCode
 	                    WHERE f.DepartureAirport = @origin AND f.ArrivalAirport = @destination AND f.RealDepartureTime between @earliestDeparture AND @latestDeparture";
 
-            var retrievedInformation = await connection.QueryAsync<RetrievedFlightEntity>(selectSql, param:new
+            var retrievedInformation = await connection.QueryAsync<BookedFlightEntity>(selectSql, param:new
             {
                 requestedFlight.origin,
                 requestedFlight.destination,
@@ -49,7 +49,7 @@ namespace zuli_Repository
                 // passengersQuantity = requestedFlight.passengersQuantity,
             });
 
-            return retrievedInformation.Select(item => new RetrievedFlightEntity
+            return retrievedInformation.Select(item => new BookedFlightEntity
             {
                 flightGUID = item.flightGUID,
                 departureTime = item.departureTime,

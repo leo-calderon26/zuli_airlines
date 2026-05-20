@@ -1,28 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Business.DTO;
-using zuli_Business.Interface;
-using zuli_Data.Entities.External;
+using zuli_Buisiness.DTO;
+using zuli_Buisiness.Interface;
+using zuli_Data.Entities;
 using zuli_Repository.Interface;
-using zuli_Data.Exceptions;
 using zuli_Business.Validation;
-using zuli_Business.DTO.External;
 
 namespace zuli_Business
 {
-    public class ExternalFlightService : IExternalFlightService
+    public class FlightService : IFlightService
     {
         // Inyeccion de dependencias
-        private readonly IExternalFlightRepository _repository;
-        private readonly ExternalFlightValidator _validator;
-        public ExternalFlightService(IExternalFlightRepository repository)
+        private readonly IFlightRepository _repository;
+        private readonly FlightValidator _validator;
+        public FlightService(IFlightRepository repository)
         {
             _repository = repository;
-            _validator = new ExternalFlightValidator();
+            _validator = new FlightValidator();
         }
 
-        public async Task<IEnumerable<RetrievedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight)
+        public async Task<IEnumerable<BookedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight)
         {
             // El validate requested flight valida cosas
             _validator.ValidateRequestedFlightInfo(requestedFlight);
@@ -38,7 +36,7 @@ namespace zuli_Business
 
             var flightArray = await _repository.RetrieveAvailableFlights(newRequestedFlight);
 
-            return flightArray.Select(item => new RetrievedFlightDTO
+            return flightArray.Select(item => new BookedFlightDTO
             {
                 flightGUID = item.flightGUID,
                 departureTime = item.departureTime,

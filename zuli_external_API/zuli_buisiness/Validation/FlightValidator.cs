@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Business.DTO.External;
+using zuli_Buisiness.DTO;
 using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
@@ -16,7 +16,7 @@ namespace zuli_Business.Validation
         public const string LATESTDEPARTURE = "LatestDeparture"; // YYYY-MM-DDThh-mm
         public const string PASSENGERSQUANTITY = "PassengersQuantity"; // Cantidad de pasajeros (es un int)
     }
-    public class ExternalFlightValidator
+    public class FlightValidator
     {
         public void ValidateRequestedFlightInfo(RequestedFlightDTO requestedFlight)
         {
@@ -31,13 +31,13 @@ namespace zuli_Business.Validation
 
             var IsEmptyInfo = false;
             //Validar que el código de destino solo pueda traer letras 
-            if (!MiscValidor.ContainsChars(requestedFlight.origin))
+            if (!MiscValidator.ContainsChars(requestedFlight.origin))
             {
                 errorInfo[FlightAtributes.ORIGIN].Add("El código del aeropuerto de origen no puede tener números ni caractes especiales");
                 IsEmptyInfo = true;
             }
             //Validar que el código de destino solo pueda traer letras 
-            if (!MiscValidor.ContainsChars(requestedFlight.destination))
+            if (!MiscValidator.ContainsChars(requestedFlight.destination))
             {
                 errorInfo[FlightAtributes.DESTINATION].Add("El código del aeropuerto de destino no puede tener números ni caractes especiales");
                 IsEmptyInfo = true;

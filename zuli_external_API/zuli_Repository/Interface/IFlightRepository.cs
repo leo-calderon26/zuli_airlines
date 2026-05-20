@@ -7,6 +7,6 @@ namespace zuli_Repository.Interface
 {
     public interface IFlightRepository
     {
-        Task<IEnumerable<RetrievedFlightEntity>> RetrieveAvailableFlights(RequestedFlightEntity requestedFlight);
+        Task<IEnumerable<BookedFlightEntity>> RetrieveAvailableFlights(RequestedFlightEntity requestedFlight);
     }
 }

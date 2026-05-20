@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Business.DTO.External;
+using zuli_Buisiness.DTO;
 
 namespace zuli_Business.Interface
 {
-    public interface IExternalFlightService
+    public interface IFlightService
     {
-        Task<IEnumerable<RetrievedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight);
+        Task<IEnumerable<BookedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight);
     }
 }

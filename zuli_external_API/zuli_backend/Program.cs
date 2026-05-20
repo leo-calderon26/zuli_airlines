@@ -6,8 +6,8 @@ using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
 using zuli_external_API.Middleware;
-using zuli_Business;
-using zuli_Business.Interface;
+using zuli_Buisiness.Interface;
+using zuli_Buisiness;
 
 var builder = WebApplication.CreateBuilder(args);
 

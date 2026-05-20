@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using zuli_Business.DTO.External;
-using zuli_Business.Interface;
+using zuli_Buisiness.DTO;
+using zuli_Buisiness.Interface;
 
 namespace zuli_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExternalAuthorizationController : ControllerBase
+    public class AuthorizationController : ControllerBase
     {
-        private readonly IExternalAuthorizationService _service;
-        public ExternalAuthorizationController(IExternalAuthorizationService service) => _service = service;
+        private readonly IAuthorizationService _service;
+        public AuthorizationController(IAuthorizationService service) => _service = service;
 
         [HttpPost]
         [Route("Validar")]
