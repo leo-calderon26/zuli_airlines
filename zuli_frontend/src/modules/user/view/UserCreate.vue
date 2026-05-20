@@ -20,12 +20,14 @@
                                 Cédula
                             </label>
                             <input
-                                v-model.trim="form.nationalId"
+                                v-model="form.nationalId"
                                 class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
+                                :class="{ 'border-error text-error': errors.fields.nationalId }"
                                 maxlength="9"
                                 placeholder="Ej. 123456789"
                                 type="text"
                             />
+                            <p v-if="errors.fields.nationalId" class="mt-1 text-sm text-error">{{ errors.fields.nationalId }}</p>
                         </div>
 
                         <div class="flex flex-col">
@@ -33,12 +35,14 @@
                                 Primer Nombre
                             </label>
                             <input
-                                v-model.trim="form.firstName"
+                                v-model="form.firstName"
                                 class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
+                                :class="{ 'border-error text-error': errors.fields.firstName }"
                                 maxlength="50"
                                 placeholder="Ej. Jonathan"
                                 type="text"
                             />
+                            <p v-if="errors.fields.firstName" class="mt-1 text-sm text-error">{{ errors.fields.firstName }}</p>
                         </div>
 
                         <div class="flex flex-col">
@@ -46,12 +50,14 @@
                                 Segundo Apellido
                             </label>
                             <input
-                                v-model.trim="form.secondLastName"
+                                v-model="form.secondLastName"
                                 class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
+                                :class="{ 'border-error text-error': errors.fields.secondLastName }"
                                 maxlength="50"
                                 placeholder="Ej. Alexander"
                                 type="text"
                             />
+                            <p v-if="errors.fields.secondLastName" class="mt-1 text-sm text-error">{{ errors.fields.secondLastName }}</p>
                         </div>
 
                         <div class="flex flex-col">
@@ -59,12 +65,14 @@
                                 Primer Apellido
                             </label>
                             <input
-                                v-model.trim="form.firstLastName"
+                                v-model="form.firstLastName"
                                 class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
+                                :class="{ 'border-error text-error': errors.fields.firstLastName }"
                                 maxlength="50"
                                 placeholder="Ej. Smith"
                                 type="text"
                             />
+                            <p v-if="errors.fields.firstLastName" class="mt-1 text-sm text-error">{{ errors.fields.firstLastName }}</p>
                         </div>
                     </div>
 
@@ -73,11 +81,13 @@
                             Correo
                         </label>
                         <input
-                            v-model.trim="form.businessEmail"
+                            v-model="form.businessEmail"
                             class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
+                            :class="{ 'border-error text-error': errors.fields.businessEmail }"
                             placeholder="j.smith@zuliairlines.com"
                             type="email"
                         />
+                        <p v-if="errors.fields.businessEmail" class="mt-1 text-sm text-error">{{ errors.fields.businessEmail }}</p>
                     </div>
 
                     <div class="mt-5 flex flex-col">
@@ -87,11 +97,13 @@
                         <select
                             v-model="form.userRole"
                             class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition hover:cursor-pointer focus:border-[var(--color-primary)]"
+                            :class="{ 'border-error text-error': errors.fields.userRole }"
                         >
                             <option value="" disabled>Asignar Rol de Acceso</option>
                             <option value="Administrator">Administrador</option>
                             <option value="Operator">Operador</option>
                         </select>
+                        <p v-if="errors.fields.userRole" class="mt-1 text-sm text-error">{{ errors.fields.userRole }}</p>
                     </div>
 
                     <div class="mt-7 border-t border-[var(--color-secondary)] pt-9">
@@ -107,124 +119,88 @@
                     </div>
                 </form>
 
-                <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+                <ErrorModal v-model="showErrorModal" :message="errorMessage" :errors="errors.fields" />
                 <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
             </section>
         </main>
     </div>
 </template>
 
-<script>
+<script setup>
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
 import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import UserNavBar from "../components/UserNavBar.vue";
 import ErrorModal from "../../../shared/ErrorModal.vue";
 import SuccessModal from "../../../shared/SuccessModal.vue";
 import AppButton from "../../../shared/AppButton.vue";
+import { useForm } from "../../../shared/useForm.js";
 import userService from "../services/userService";
 
-export default {
-    name: "UserCreate",
+const router = useRouter();
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
-    components: {
-        PublicNavBar,
-        UserNavBar,
-        ErrorModal,
-        SuccessModal,
-        AppButton
-    },
+const form = reactive({
+    nationalId: "",
+    businessEmail: "",
+    firstName: "",
+    firstLastName: "",
+    secondLastName: "",
+    userRole: ""
+});
 
-    data() {
-        return {
-            form: {
-                nationalId: "",
-                businessEmail: "",
-                firstName: "",
-                firstLastName: "",
-                secondLastName: "",
-                userRole: ""
-            },
-            isLoading: false,
-            errorMessage: "",
-            successMessage: "",
-            showErrorModal: false,
-            showSuccessModal: false,
-        };
-    },
+function validateForm() {
+    clearErrors();
 
-    methods: {
-        async createUser() {
-            this.errorMessage = "";
-            this.successMessage = "";
-
-            const validationError = this.validateForm();
-
-            if (validationError) {
-                this.errorMessage = validationError;
-                return;
-            }
-
-            this.isLoading = true;
-
-            try {
-                const result = await userService.createUser(this.form);
-
-                this.successMessage = result.message || "Usuario creado correctamente.";
-                this.clearForm();
-                this.showSuccessModal = true;
-            } catch (error) {
-                this.errorMessage = error.message || "No se pudo crear el usuario.";
-                this.showErrorModal = true;
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        onSuccessClose() {
-            this.showSuccessModal = false;
-        },
-
-        validateForm() {
-            if (!/^\d{9}$/.test(this.form.nationalId)) {
-                return "La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones.";
-            }
-
-            if (!this.form.firstName) {
-                return "El primer nombre es obligatorio.";
-            }
-
-            if (!this.form.firstLastName) {
-                return "El primer apellido es obligatorio.";
-            }
-
-            if (!this.form.secondLastName) {
-                return "El segundo apellido es obligatorio.";
-            }
-
-            if (!this.form.businessEmail) {
-                return "El correo institucional es obligatorio.";
-            }
-
-            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.form.businessEmail)) {
-                return "El correo institucional no tiene un formato válido.";
-            }
-
-            if (!this.form.userRole) {
-                return "Debe seleccionar un rol.";
-            }
-
-            return "";
-        },
-
-        clearForm() {
-            this.form = {
-                nationalId: "",
-                businessEmail: "",
-                firstName: "",
-                firstLastName: "",
-                secondLastName: "",
-                userRole: ""
-            };
-        },
+    if (!/^\d{9}$/.test(form.nationalId)) {
+        errors.fields.nationalId = "La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones.";
     }
-};
+
+    if (!form.firstName) {
+        errors.fields.firstName = "El primer nombre es obligatorio.";
+    }
+
+    if (!form.firstLastName) {
+        errors.fields.firstLastName = "El primer apellido es obligatorio.";
+    }
+
+    if (!form.secondLastName) {
+        errors.fields.secondLastName = "El segundo apellido es obligatorio.";
+    }
+
+    if (!form.businessEmail) {
+        errors.fields.businessEmail = "El correo institucional es obligatorio.";
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.businessEmail)) {
+        errors.fields.businessEmail = "El correo institucional no tiene un formato válido.";
+    }
+
+    if (!form.userRole) {
+        errors.fields.userRole = "Debe seleccionar un rol.";
+    }
+
+    return Object.keys(errors.fields).length === 0 && errors.global === '';
+}
+
+function clearForm() {
+    form.nationalId = "";
+    form.businessEmail = "";
+    form.firstName = "";
+    form.firstLastName = "";
+    form.secondLastName = "";
+    form.userRole = "";
+}
+
+async function createUser() {
+    if (!validateForm()) return;
+
+    await handleSubmit(async () => {
+        const result = await userService.createUser(form);
+        onSuccess(result.message || "Usuario creado correctamente.");
+        clearForm();
+    }, "No se pudo crear el usuario.");
+}
+
+function onSuccessClose() {
+    router.push({ path: '/admin/users' });
+}
 </script>
