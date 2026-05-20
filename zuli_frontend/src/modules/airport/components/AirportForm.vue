@@ -1,19 +1,17 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
+import AppInput from '../../../shared/AppInput.vue';
+import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
 const router = useRouter();
 const { addAirport } = useAirport();
-
-const showSuccessModal = ref(false);
-const successMessage = ref('');
-const showErrorModal = ref(false);
-const errorMessage = ref('');
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
 const form = reactive({
     airportCode: '',
@@ -22,15 +20,9 @@ const form = reactive({
     city: ''
 });
 
-const errors = reactive({
-    global: '',
-    fields: {},
-});
-
 function validate() {
-    errors.global = '';
-    errors.fields = {};
-    
+    clearErrors();
+
     if (!form.airportCode || form.airportCode.trim().length < 3) {
         errors.fields.airportCode = 'El código debe tener al menos 3 caracteres';
     }
@@ -47,16 +39,10 @@ function validate() {
     return Object.keys(errors.fields).length === 0 && errors.global === '';
 }
 
-async function handleSubmit() {
-    if (!validate()) {
-        if (errors.global) {
-            errorMessage.value = errors.global;
-            showErrorModal.value = true;
-        }
-        return;
-    }
+async function submit() {
+    if (!validate()) return;
 
-    try {
+    await handleSubmit(async () => {
         const data = await authService.me();
 
         const airportPayload = {
@@ -68,11 +54,11 @@ async function handleSubmit() {
         };
 
         await addAirport(airportPayload);
-        successMessage.value = 'El aeropuerto se ha creado correctamente';
-        showSuccessModal.value = true;
-    } catch (error) {
-        errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear el aeropuerto';
-        showErrorModal.value = true;
+        onSuccess('El aeropuerto se ha creado correctamente');
+    }, 'Error al crear el aeropuerto');
+
+    if (errors.fields.airportCode) {
+        form.airportCode = ''
     }
 }
 
@@ -82,70 +68,34 @@ function onSuccessClose() {
 </script>
 
 <template>
-    <form class="form-card" @submit.prevent="handleSubmit">
+    <form class="form-card" @submit.prevent="submit">
         <div class="form-grid">
-            <div class="form-field group">
-                <input id="airportCode" v-model="form.airportCode" name="airportCode" type="text" class="form-input peer" placeholder=" " maxlength="10" />
-                <label for="airportCode" class="form-label">Código del Aeropuerto (ej. SJO)</label>
-                <p v-if="errors.fields.airportCode" class="text-sm text-error">{{ errors.fields.airportCode }}</p>
-            </div>
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" />
 
-            <div class="form-field group">
-                <input id="name" v-model="form.name" name="name" type="text" class="form-input peer" placeholder=" " />
-                <label for="name" class="form-label">Nombre del Aeropuerto</label>
-                <p v-if="errors.fields.name" class="text-sm text-error">{{ errors.fields.name }}</p>
-            </div>
+            <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" />
 
-            <div class="form-field group">
-                <input id="country" v-model="form.country" name="country" type="text" class="form-input peer" placeholder=" " />
-                <label for="country" class="form-label">País</label>
-                <p v-if="errors.fields.country" class="text-sm text-error">{{ errors.fields.country }}</p>
-            </div>
+            <AppInput v-model="form.country" label="País" :error="errors.fields.country" />
 
-            <div class="form-field group">
-                <input id="city" v-model="form.city" name="city" type="text" class="form-input peer" placeholder=" " />
-                <label for="city" class="form-label">Ciudad</label>
-                <p v-if="errors.fields.city" class="text-sm text-error">{{ errors.fields.city }}</p>
-            </div>
+            <AppInput v-model="form.city" label="Ciudad" :error="errors.fields.city" />
         </div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary">Guardar Aeropuerto</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">Crear</AppButton>
         </div>
     </form>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
-    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" :errors="errors.fields" />
 </template>
 
 <style scoped>
 @reference "../../../style.css";
 
 .form-card {
-    @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
+    @apply w-full rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
 }
 
 .form-grid {
     @apply grid grid-cols-1 gap-6 md:grid-cols-2;
-}
-
-.form-field {
-    @apply relative z-0 w-full;
-}
-
-.form-input {
-    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 text-base
-     text-gray-900 focus:border-gold focus:outline-none focus:ring-0;
-}
-
-.form-label {
-    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
-     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
-     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
-}
-
-.submit-btn {
-    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-5 py-3 text-base font-medium
-     text-white hover:bg-select focus:outline-none focus:ring-2 focus:ring-gold;
 }
 </style>
