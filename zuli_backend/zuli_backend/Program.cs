@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
@@ -8,8 +6,10 @@ using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
 
 using zuli_Business;
+using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
+using zuli_Business.Validation.Strategies;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
@@ -140,6 +140,11 @@ builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
 builder.Services.AddSingleton<ActivateAccountValidator>();
+
+// FlightRoute strategies
+builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
+builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
+builder.Services.AddScoped<IValidator<FlightRouteDTO>, FlightRouteValidator>();
 
 var app = builder.Build();
 

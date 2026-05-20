@@ -12,19 +12,18 @@ namespace zuli_Business
 {
     public class FlightRouteService: IFlightRouteService
     {
-        //Inyeccion de la capa
         private readonly IFlightRouteRepository _flightRouteRepository;
-        private readonly FlightRouteValidator _validator;
+        private readonly IValidator<FlightRouteDTO> _validator;
 
-        public FlightRouteService(IFlightRouteRepository flightRouterRepository)
+        public FlightRouteService(IFlightRouteRepository flightRouterRepository, IValidator<FlightRouteDTO> validator)
         {
             _flightRouteRepository = flightRouterRepository;
-            _validator = new FlightRouteValidator();
+            _validator = validator;
         }
 
         public async Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRoute)
         {
-            _validator.ValidationFlightRoute(flightRoute);
+            await _validator.ValidateAsync(flightRoute);
             if (!await _flightRouteRepository.IsAdmin(flightRoute.businessId))
             {
                 throw new ZuliNotFoundException("El usuario no tiene permisos de administrador.");
