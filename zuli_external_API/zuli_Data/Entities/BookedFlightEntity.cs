@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Data.Entities.External
+namespace zuli_Data.Entities
 {
-    public class RetrievedFlightEntity
+    public class BookedFlightEntity
     {
         [Key] public Guid flightGUID { get; set; }
         public DateTime departureTime { get; set; }
