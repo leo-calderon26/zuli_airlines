@@ -28,6 +28,8 @@ const errors = reactive({
   fields: {},
 });
 
+const modalErrors = reactive({});
+
 const showSuccessModal = ref(false);
 const successMessage = ref('');
 const showErrorModal = ref(false);
@@ -61,9 +63,7 @@ const dayBits = {
 };
 
 const airportCodePattern = /^[A-Za-z0-9]{3}$/;
-// TODO(Randy) pegar esto con la parte del admin
-const ADMIN_ID_COOKIE = 'adminId';
-const ADMIN_ID = 'ZULI-ADMIN-001';
+const BUSINESS_ID_COOKIE = 'businessId';
 const AIRLINE_ID = 1;
 
 function normalizeCode(value) {
@@ -166,8 +166,8 @@ function getCookieValue(name) {
   return matches ? decodeURIComponent(matches[1]) : '';
 }
 
-function getAdminId() {
-  return getCookieValue(ADMIN_ID_COOKIE) || sessionStorage.getItem('businessId') || ADMIN_ID;
+function getBusinessId() {
+  return getCookieValue(BUSINESS_ID_COOKIE) || sessionStorage.getItem('businessId') || '';
 }
 
 function isValidDateTime(value) {
@@ -196,19 +196,6 @@ function buildDateTimeFromParts(day, month, time) {
 function encodeDays(selectedDays) {
   if (!Array.isArray(selectedDays)) return 0;
   return selectedDays.reduce((acc, day) => acc | (dayBits[day] || 0), 0);
-}
-
-function decodeDays(mask) {
-  return Object.keys(dayBits).filter((day) => (mask & dayBits[day]) !== 0);
-}
-
-function formatFrequencyFromMask(mask) {
-  const selected = decodeDays(mask);
-  if (selected.length === 0) return 'Sin frecuencia';
-  return daysOfWeek
-    .filter((day) => selected.includes(day.value))
-    .map((day) => day.label)
-    .join(', ');
 }
 
 function validate() {
@@ -268,19 +255,89 @@ function validate() {
   return Object.keys(errors.fields).length === 0 && errors.global === '';
 }
 
+function clearModalErrors() {
+  Object.keys(modalErrors).forEach((key) => {
+    delete modalErrors[key];
+  });
+}
+
+function syncModalErrors(fieldLabels) {
+  clearModalErrors();
+
+  if (errors.global) {
+    modalErrors.global = errors.global;
+  }
+
+  Object.entries(errors.fields).forEach(([field, message]) => {
+    modalErrors[fieldLabels[field] || field] = message;
+  });
+}
+
+function getBackendErrorMessages(value) {
+  if (Array.isArray(value)) return value.map((message) => String(message)).filter(Boolean);
+  if (value === null || value === undefined) return [];
+  return [String(value)];
+}
+
+function mapBackendFieldToFormField(rawField) {
+  const normalized = String(rawField || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
+  const mapping = {
+    departureairport: 'origin',
+    arrivalairport: 'destination',
+    scheduleddeparturetime: 'scheduledDepartureTime',
+    scheduledarrivaltime: 'scheduledArrivalTime',
+    estimatedduration: 'duration',
+    frequency: 'frequency',
+  };
+
+  return mapping[normalized] || '';
+}
+
+function applyBackendValidationErrors(errorPayload) {
+  const backendErrors = errorPayload?.errors;
+  if (!backendErrors || typeof backendErrors !== 'object') return false;
+
+  errors.fields = {};
+  const globalMessages = [];
+
+  Object.entries(backendErrors).forEach(([field, messages]) => {
+    const parsedMessages = getBackendErrorMessages(messages);
+    if (parsedMessages.length === 0) return;
+
+    const formField = mapBackendFieldToFormField(field);
+    if (formField) {
+      errors.fields[formField] = parsedMessages[0];
+      return;
+    }
+
+    globalMessages.push(...parsedMessages);
+  });
+
+  errors.global = globalMessages.join(' ');
+  return Object.keys(errors.fields).length > 0 || Boolean(errors.global);
+}
+
+const modalFieldLabels = {
+  origin: 'Aeropuerto origen',
+  destination: 'Aeropuerto destino',
+  scheduledDepartureTime: 'Salida programada',
+  scheduledArrivalTime: 'Llegada programada',
+  duration: 'Duracion',
+  frequency: 'Frecuencia',
+};
+
 async function handleSubmit() {
   if (!validate()) {
-    if (errors.global) {
-      errorMessage.value = errors.global;
-      showErrorModal.value = true;
-    }
+    syncModalErrors(modalFieldLabels);
+    errorMessage.value = errors.global || 'Corrige los campos marcados.';
+    showErrorModal.value = true;
     return;
   }
 
-  const adminId = getAdminId();
+  const businessId = getBusinessId();
 
-  if (!adminId) {
-    errorMessage.value = 'No se pudo obtener el adminId desde las cookies.';
+  if (!businessId) {
+    errorMessage.value = 'No se pudo obtener el businessId desde las cookies.';
     showErrorModal.value = true;
     return;
   }
@@ -298,7 +355,7 @@ async function handleSubmit() {
         )
       ),
       estimatedDuration: Number(form.duration) * 60,
-      businessId: adminId,
+      businessId,
       airlineId: AIRLINE_ID,
       arrivalAirport: normalizeCode(form.destination),
       departureAirport: normalizeCode(form.origin),
@@ -308,7 +365,16 @@ async function handleSubmit() {
     successMessage.value = 'La ruta de vuelo se ha creado correctamente';
     showSuccessModal.value = true;
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear la ruta';
+    const backendPayload = error?.response?.data;
+    const hasAppliedBackendErrors = applyBackendValidationErrors(backendPayload);
+    syncModalErrors(modalFieldLabels);
+
+    if (hasAppliedBackendErrors) {
+      errorMessage.value = backendPayload?.detail || backendPayload?.message || 'Revisa los campos marcados.';
+    } else {
+      errorMessage.value = backendPayload?.detail || backendPayload?.message || 'Error al crear la ruta';
+    }
+
     showErrorModal.value = true;
   }
 }
@@ -505,7 +571,7 @@ function onSuccessClose() {
     </main>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
-    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" :errors="modalErrors" />
   </div>
 </template>
 

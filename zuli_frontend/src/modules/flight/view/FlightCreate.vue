@@ -4,6 +4,7 @@ import LandingDropdownField from '../../landing/components/LandingDropdownField.
 import ErrorModal from '../../../shared/ErrorModal.vue'
 import SuccessModal from '../../../shared/SuccessModal.vue'
 import AppButton from '../../../shared/AppButton.vue'
+import { useForm } from '../../../shared/useForm.js'
 import axios from 'axios'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -12,6 +13,7 @@ import { useAircraft } from '../../aircraft/composable/useAircraft'
 const flightCreateUrl = '/api/Flight/Create'
 const route = useRoute()
 const { fetchAircrafts, aircrafts } = useAircraft()
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, clearErrors, onSuccess, handleSubmit } = useForm()
 
 const form = reactive({
   status: '',
@@ -41,11 +43,6 @@ const form = reactive({
   sunday: false,
   serviceDescription: '',
 })
-
-const message = ref('')
-const error = ref('')
-const showSuccessModal = ref(false)
-const showErrorModal = ref(false)
 
 const statusOptions = [
   { label: 'Programado', value: 'Programado' },
@@ -171,9 +168,9 @@ function getBusinessId() {
 }
 
 function validate() {
-  error.value = ''
+  clearErrors()
   console.log('Validando formulario...', form)
-  
+
   if (!form.status) {
     console.warn('Estado no seleccionado')
     return 'El estado es requerido'
@@ -184,7 +181,7 @@ function validate() {
   if (!form.checkInStartTime) return 'La hora de inicio de check-in es requerida'
   if (!form.checkInDeadline) return 'La hora límite de check-in es requerida'
   if (form.duration <= 0) return 'La duración debe ser mayor a 0'
-  
+
   console.log('Validando aircraftId:', form.aircraftId, 'Tipo:', typeof form.aircraftId)
   if (!form.aircraftId) {
     console.warn('AircraftId está vacío')
@@ -205,13 +202,15 @@ async function submit() {
   const v = validate()
   if (v) {
     console.error('Validación falló:', v)
-    error.value = v
+    errorMessage.value = v
+    showErrorModal.value = true
     return
   }
 
   const businessId = getBusinessId()
   if (!businessId) {
-    error.value = 'No se pudo obtener el businessId desde las cookies.'
+    errorMessage.value = 'No se pudo obtener el businessId desde las cookies.'
+    showErrorModal.value = true
     return
   }
 
@@ -237,24 +236,16 @@ async function submit() {
     ArrivalAirportCode: form.arrivalAirportCode,
     ServiceDescription: form.serviceDescription?.trim() || null,
   }
-  
+
   console.log('Payload enviado:', JSON.stringify(payload, null, 2))
   console.log('BusinessId en payload:', payload.BusinessId)
 
-  try {
+  await handleSubmit(async () => {
     console.log('Enviando POST a:', flightCreateUrl)
     const res = await axios.post(flightCreateUrl, payload)
     console.log('Respuesta exitosa:', res.data)
-    message.value = res?.data?.message || 'Vuelo creado correctamente'
-    error.value = ''
-    showSuccessModal.value = true
-  } catch (e) {
-    console.error('Error en POST:', e)
-    console.error('Status:', e?.response?.status)
-    console.error('Datos error:', e?.response?.data)
-    error.value = e?.response?.data?.message || e?.response?.data?.detail || JSON.stringify(e.response?.data?.errors) || 'Error al crear el vuelo'
-    showErrorModal.value = true
-  }
+    onSuccess(res?.data?.message || 'Vuelo creado correctamente')
+  }, 'Error al crear el vuelo')
 }
 </script>
 
@@ -403,12 +394,12 @@ async function submit() {
         </div>
 
         <div class="flex justify-end">
-          <AppButton type="submit" variant="primary">Crear vuelo</AppButton>
+          <AppButton type="submit" variant="primary" :loading="isLoading">Crear vuelo</AppButton>
         </div>
       </form>
     </section>
   </main>
 
-  <SuccessModal v-model="showSuccessModal" :message="message" />
-  <ErrorModal v-model="showErrorModal" :message="error" />
+  <SuccessModal v-model="showSuccessModal" :message="successMessage" />
+  <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
