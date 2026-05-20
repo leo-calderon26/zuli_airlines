@@ -12,10 +12,18 @@ defineProps({
   step: { type: [Number, String], default: null },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'focus', 'blur'])
 
 function onInput(e) {
   emit('update:modelValue', e.target.value)
+}
+
+function onFocus(e) {
+  emit('focus', e)
+}
+
+function onBlur(e) {
+  emit('blur', e)
 }
 </script>
 
@@ -43,6 +51,8 @@ function onInput(e) {
       class="form-input"
       :class="{ 'border-error text-error': error }"
       @input="onInput"
+      @focus="onFocus"
+      @blur="onBlur"
     />
     <p v-if="error" class="mt-1 text-sm text-error">{{ error }}</p>
   </div>

@@ -88,20 +88,26 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
-        <div class="form-grid">
-            <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" />
+        <div class="grid grid-cols-1 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" />
+                <AppInput :model-value="totalSeats" label="Capacidad (Calculada)" disabled />
+            </div>
 
-            <AppInput :model-value="totalSeats" label="Capacidad (Calculada)" disabled />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" />
+                <div></div>
+            </div>
 
-            <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
+                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
+            </div>
 
-            <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
-
-            <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
-
-            <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
-
-            <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
+                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
+            </div>
         </div>
 
         <div v-if="errors.fields.totalSeats" class="mt-2 text-sm text-error">{{ errors.fields.totalSeats }}</div>

@@ -15,85 +15,25 @@
                     </h2>
 
                     <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
-                        <div class="flex flex-col">
-                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                                Cédula
-                            </label>
-                            <input
-                                v-model="form.nationalId"
-                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
-                                :class="{ 'border-error text-error': errors.fields.nationalId }"
-                                maxlength="9"
-                                placeholder="Ej. 123456789"
-                                type="text"
-                            />
-                            <p v-if="errors.fields.nationalId" class="mt-1 text-sm text-error">{{ errors.fields.nationalId }}</p>
+                        <div class="md:col-span-2">
+                            <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" />
                         </div>
 
-                        <div class="flex flex-col">
-                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                                Primer Nombre
-                            </label>
-                            <input
-                                v-model="form.firstName"
-                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
-                                :class="{ 'border-error text-error': errors.fields.firstName }"
-                                maxlength="50"
-                                placeholder="Ej. Jonathan"
-                                type="text"
-                            />
-                            <p v-if="errors.fields.firstName" class="mt-1 text-sm text-error">{{ errors.fields.firstName }}</p>
-                        </div>
+                        <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" />
 
-                        <div class="flex flex-col">
-                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                                Segundo Apellido
-                            </label>
-                            <input
-                                v-model="form.secondLastName"
-                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
-                                :class="{ 'border-error text-error': errors.fields.secondLastName }"
-                                maxlength="50"
-                                placeholder="Ej. Alexander"
-                                type="text"
-                            />
-                            <p v-if="errors.fields.secondLastName" class="mt-1 text-sm text-error">{{ errors.fields.secondLastName }}</p>
-                        </div>
+                        <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" />
 
-                        <div class="flex flex-col">
-                            <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                                Primer Apellido
-                            </label>
-                            <input
-                                v-model="form.firstLastName"
-                                class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
-                                :class="{ 'border-error text-error': errors.fields.firstLastName }"
-                                maxlength="50"
-                                placeholder="Ej. Smith"
-                                type="text"
-                            />
-                            <p v-if="errors.fields.firstLastName" class="mt-1 text-sm text-error">{{ errors.fields.firstLastName }}</p>
+                        <div class="md:col-span-2">
+                            <AppInput v-model="form.secondLastName" label="Segundo Apellido" maxlength="50" placeholder="Ej. Alexander" :error="errors.fields.secondLastName" />
                         </div>
                     </div>
 
-                    <div class="mt-5 flex flex-col">
-                        <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                            Correo
-                        </label>
-                        <input
-                            v-model="form.businessEmail"
-                            class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition focus:border-[var(--color-primary)]"
-                            :class="{ 'border-error text-error': errors.fields.businessEmail }"
-                            placeholder="j.smith@zuliairlines.com"
-                            type="email"
-                        />
-                        <p v-if="errors.fields.businessEmail" class="mt-1 text-sm text-error">{{ errors.fields.businessEmail }}</p>
+                    <div class="mt-5">
+                        <AppInput v-model="form.businessEmail" label="Correo" placeholder="j.smith@zuliairlines.com" type="email" :error="errors.fields.businessEmail" />
                     </div>
 
-                    <div class="mt-5 flex flex-col">
-                        <label class="mb-2 text-[15px] text-[var(--color-content)]">
-                            rol
-                        </label>
+                    <div class="mt-5">
+                        <label class="mb-2 block text-sm font-medium text-[var(--color-content)]">rol</label>
                         <select
                             v-model="form.userRole"
                             class="h-10 w-full rounded-md border border-[var(--color-secondary)] bg-[var(--color-body)] px-4 text-[15px] text-[var(--color-content)] outline-none transition hover:cursor-pointer focus:border-[var(--color-primary)]"
@@ -134,6 +74,7 @@ import UserNavBar from "../components/UserNavBar.vue";
 import ErrorModal from "../../../shared/ErrorModal.vue";
 import SuccessModal from "../../../shared/SuccessModal.vue";
 import AppButton from "../../../shared/AppButton.vue";
+import AppInput from "../../../shared/AppInput.vue";
 import { useForm } from "../../../shared/useForm.js";
 import userService from "../services/userService";
 

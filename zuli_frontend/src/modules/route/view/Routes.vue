@@ -7,6 +7,9 @@ import RouteNavBar from '../components/RouteNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
+import AppInput from '../../../shared/AppInput.vue';
+import AppAutocomplete from '../../../shared/AppAutocomplete.vue';
+import { useForm } from '../../../shared/useForm.js';
 
 const router = useRouter();
 
@@ -23,17 +26,9 @@ const form = reactive({
   frequency: [],
 });
 
-const errors = reactive({
-  global: '',
-  fields: {},
-});
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess } = useForm();
 
 const modalErrors = reactive({});
-
-const showSuccessModal = ref(false);
-const successMessage = ref('');
-const showErrorModal = ref(false);
-const errorMessage = ref('');
 
 const originSuggestions = ref([]);
 const destinationSuggestions = ref([]);
@@ -95,10 +90,6 @@ function clearSuggestionList(field) {
     return;
   }
   destinationSuggestions.value = [];
-}
-
-function clearSuggestionListOnBlur(field) {
-  setTimeout(() => clearSuggestionList(field), 150);
 }
 
 function cancelSearchTimer(field) {
@@ -199,8 +190,7 @@ function encodeDays(selectedDays) {
 }
 
 function validate() {
-  errors.global = '';
-  errors.fields = {};
+  clearErrors();
 
   const origin = normalizeCode(form.origin);
   const destination = normalizeCode(form.destination);
@@ -326,7 +316,9 @@ const modalFieldLabels = {
   frequency: 'Frecuencia',
 };
 
-async function handleSubmit() {
+async function submit() {
+  if (isLoading.value) return;
+
   if (!validate()) {
     syncModalErrors(modalFieldLabels);
     errorMessage.value = errors.global || 'Corrige los campos marcados.';
@@ -341,6 +333,9 @@ async function handleSubmit() {
     showErrorModal.value = true;
     return;
   }
+
+  isLoading.value = true;
+
   try {
     const routePayload = {
       frequency: encodeDays(form.frequency),
@@ -362,8 +357,7 @@ async function handleSubmit() {
     };
 
     await createFlightRoute(routePayload);
-    successMessage.value = 'La ruta de vuelo se ha creado correctamente';
-    showSuccessModal.value = true;
+    onSuccess('La ruta de vuelo se ha creado correctamente');
   } catch (error) {
     const backendPayload = error?.response?.data;
     const hasAppliedBackendErrors = applyBackendValidationErrors(backendPayload);
@@ -376,6 +370,8 @@ async function handleSubmit() {
     }
 
     showErrorModal.value = true;
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -390,65 +386,37 @@ function onSuccessClose() {
     <RouteNavBar/>
     <main class="flex-1 pb-8">
       <div class="page-shell">
-        <form class="form-card" @submit.prevent="handleSubmit">
+        <form class="form-card" @submit.prevent="submit">
           <div class="form-grid">
-            <div class="form-field group" :class="{ 'has-suggestions': originSuggestions.length }">
-              <input
-                id="origin"
-                v-model="form.origin"
-                name="origin"
-                type="text"
-                maxlength="40"
-                class="form-input peer"
-                placeholder=" "
-                autocomplete="off"
-                @input="handleAirportInput('origin')"
-                @blur="clearSuggestionListOnBlur('origin')"
-              />
-              <label for="origin" class="form-label">Aeropuerto origen</label>
-              <div v-if="originSuggestions.length" class="suggestion-list">
-                <button
-                  v-for="suggestion in originSuggestions"
-                  :key="getSuggestionCode(suggestion)"
-                  type="button"
-                  class="suggestion-item"
-                  @mousedown.prevent="applySuggestion('origin', suggestion)"
-                >
-                  <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
-                  <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
-                </button>
-              </div>
-              <p v-if="errors.fields.origin" class="text-sm text-error">{{ errors.fields.origin }}</p>
-            </div>
+            <AppAutocomplete
+              v-model="form.origin"
+              label="Aeropuerto origen"
+              :error="errors.fields.origin"
+              :suggestions="originSuggestions"
+              maxlength="40"
+              @update:model-value="handleAirportInput('origin')"
+              @select="applySuggestion('origin', $event)"
+            >
+              <template #suggestion="{ suggestion }">
+                <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
+                <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
+              </template>
+            </AppAutocomplete>
 
-            <div class="form-field group" :class="{ 'has-suggestions': destinationSuggestions.length }">
-              <input
-                id="destination"
-                v-model="form.destination"
-                name="destination"
-                type="text"
-                maxlength="40"
-                class="form-input peer"
-                placeholder=" "
-                autocomplete="off"
-                @input="handleAirportInput('destination')"
-                @blur="clearSuggestionListOnBlur('destination')"
-              />
-              <label for="destination" class="form-label">Aeropuerto destino</label>
-              <div v-if="destinationSuggestions.length" class="suggestion-list">
-                <button
-                  v-for="suggestion in destinationSuggestions"
-                  :key="getSuggestionCode(suggestion)"
-                  type="button"
-                  class="suggestion-item"
-                  @mousedown.prevent="applySuggestion('destination', suggestion)"
-                >
-                  <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
-                  <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
-                </button>
-              </div>
-              <p v-if="errors.fields.destination" class="text-sm text-error">{{ errors.fields.destination }}</p>
-            </div>
+            <AppAutocomplete
+              v-model="form.destination"
+              label="Aeropuerto destino"
+              :error="errors.fields.destination"
+              :suggestions="destinationSuggestions"
+              maxlength="40"
+              @update:model-value="handleAirportInput('destination')"
+              @select="applySuggestion('destination', $event)"
+            >
+              <template #suggestion="{ suggestion }">
+                <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
+                <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
+              </template>
+            </AppAutocomplete>
 
             <div class="form-field group">
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -530,21 +498,15 @@ function onSuccessClose() {
               </p>
             </div>
 
-            <div class="form-field group">
-              <input
-                id="duration"
-                v-model="form.duration"
-                name="duration"
-                type="number"
-                min="1"
-                max="1140"
-                step="1"
-                class="form-input peer"
-                placeholder=" "
-              />
-              <label for="duration" class="form-label">Duracion del vuelo (min)</label>
-              <p v-if="errors.fields.duration" class="text-sm text-error">{{ errors.fields.duration }}</p>
-            </div>
+            <AppInput
+              v-model="form.duration"
+              label="Duracion del vuelo (min)"
+              type="number"
+              min="1"
+              max="1140"
+              step="1"
+              :error="errors.fields.duration"
+            />
 
             <div class="form-field group">
               <div class="frequency-label">Frecuencia semanal</div>
@@ -564,7 +526,7 @@ function onSuccessClose() {
           </div>
 
           <div class="mt-4">
-            <AppButton type="submit" variant="primary">Guardar ruta</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">Guardar ruta</AppButton>
           </div>
         </form>
       </div>
@@ -607,18 +569,6 @@ function onSuccessClose() {
 
 .frequency-label {
   @apply text-base text-gray-700;
-}
-
-.has-suggestions {
-  @apply pb-44;
-}
-
-.suggestion-list {
-  @apply absolute z-20 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg;
-}
-
-.suggestion-item {
-  @apply flex w-full items-start gap-2 px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100;
 }
 
 .suggestion-code {
