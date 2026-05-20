@@ -1,33 +1,25 @@
 <script setup>
-import { reactive, computed, ref } from 'vue';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAircraft } from '../composable/useAircraft';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
-
+import AppInput from '../../../shared/AppInput.vue';
+import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
 const router = useRouter();
 const { addAircraft } = useAircraft();
-
-const showSuccessModal = ref(false);
-const successMessage = ref('');
-const showErrorModal = ref(false);
-const errorMessage = ref('');
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
 const form = reactive({
     model: '',
-    weight: null,
+    weight: '',
     numberEconomyClassRows: 0,
     numberSeatingRowsEconomy: 0,
     numberFirstClassRows: 0,
     numberSeatingRowsFirst: 0,
-});
-
-const errors = reactive({
-    global: '',
-    fields: {},
 });
 
 const modelPattern = /^[A-Za-z0-9-]{1,15}$/;
@@ -43,12 +35,12 @@ function isIntegerLike(value) {
 }
 
 function validate() {
-    errors.global = '';
-    errors.fields = {};
+    clearErrors();
+
     if (!form.model || !modelPattern.test(form.model)) {
         errors.fields.model = 'Modelo inválido (máx 15 letras/números o guion)';
     }
-    if (form.weight === null || form.weight === '' || Number(form.weight) <= 0 || isNaN(Number(form.weight))) {
+    if (form.weight === '' || Number(form.weight) <= 0 || isNaN(Number(form.weight))) {
         errors.fields.weight = 'Peso inválido';
     }
     const countFields = ['numberEconomyClassRows', 'numberSeatingRowsEconomy', 'numberFirstClassRows', 'numberSeatingRowsFirst'];
@@ -61,42 +53,32 @@ function validate() {
     if (totalSeats.value >= 1000) {
         errors.fields.totalSeats = 'El número total de asientos debe ser menor a 1000';
     }
-    return Object.keys(errors.fields).length === 0 && errors.global === '';
+    return Object.keys(errors.fields).length === 0;
 }
 
-async function handleSubmit() {
-    if (!validate()) {
-        if (errors.global) {
-            errorMessage.value = errors.global;
-            showErrorModal.value = true;
-        }
-        return;
-    }
+async function submit() {
+    if (!validate()) return;
 
-    const baggageCapacity = Number((Number(form.weight) * 0.3).toFixed(4));
+    await handleSubmit(async () => {
+        const baggageCapacity = Number((Number(form.weight) * 0.3).toFixed(4));
 
-    var data = await authService.me();
+        const data = await authService.me();
 
-    const aircraft = {
-        model: form.model,
-        capacity: totalSeats.value,
-        weight: Number(form.weight),
-        numberEconomyClassRows: Number(form.numberEconomyClassRows),
-        numberSeatingRowsEconomy: Number(form.numberSeatingRowsEconomy),
-        numberFirstClassRows: Number(form.numberFirstClassRows),
-        numberSeatingRowsFirst: Number(form.numberSeatingRowsFirst),
-        baggageCapacity,
-        businessId: data.businessId,
-    };
+        const aircraft = {
+            model: form.model,
+            capacity: totalSeats.value,
+            weight: Number(form.weight),
+            numberEconomyClassRows: Number(form.numberEconomyClassRows),
+            numberSeatingRowsEconomy: Number(form.numberSeatingRowsEconomy),
+            numberFirstClassRows: Number(form.numberFirstClassRows),
+            numberSeatingRowsFirst: Number(form.numberSeatingRowsFirst),
+            baggageCapacity,
+            businessId: data.businessId,
+        };
 
-    try {
         await addAircraft(aircraft);
-        successMessage.value = 'La aeronave se ha creado correctamente';
-        showSuccessModal.value = true;
-    } catch (error) {
-        errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Error al crear la aeronave';
-        showErrorModal.value = true;
-    }
+        onSuccess('La aeronave se ha creado correctamente');
+    }, 'Error al crear la aeronave');
 }
 
 function onSuccessClose() {
@@ -105,109 +87,31 @@ function onSuccessClose() {
 </script>
 
 <template>
-    <form class="form-card" @submit.prevent="handleSubmit">
+    <form class="form-card" @submit.prevent="submit">
         <div class="form-grid">
-            <div class="form-field group">
-                <input 
-                    id="model" 
-                    v-model="form.model" 
-                    name="model" 
-                    type="text" 
-                    class="form-input peer" 
-                    placeholder=" " />
-                <label for="model" class="form-label">Modelo</label>
-                <p v-if="errors.fields.model" class="text-sm text-error">{{ errors.fields.model }}</p>
-            </div>
+            <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" />
 
-            <div class="form-field group">
-                <input 
-                    id="capacity" 
-                    v-model="totalSeats" 
-                    name="capacity"
-                    type="number"
-                    disabled 
-                    class="form-input peer" 
-                    placeholder=" " />
-                <label for="capacity" class="form-label">Capacidad (Calculada)</label>
-            </div>
+            <AppInput :model-value="totalSeats" label="Capacidad (Calculada)" disabled />
 
-            <div class="form-field group">
-                <input 
-                    id="weight"
-                    v-model="form.weight"
-                    name="weight"
-                    type="number"
-                    min="1"
-                    step="1"
-                    class="form-input peer"
-                    placeholder=" " />
-                <label for="weight" class="form-label">Peso soportado por la aeronave(kg)</label>
-                <p v-if="errors.fields.weight" class="text-sm text-error">{{ errors.fields.weight }}</p>
-            </div>
+            <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" />
 
-            <div class="form-field group">
-                <input 
-                    id="numberEconomyClassRows"
-                    v-model="form.numberEconomyClassRows" 
-                    name="numberEconomyClassRows" type="number"
-                    min="0"
-                    step="1" 
-                    class="form-input peer"
-                    placeholder=" " />
-                <label for="numberEconomyClassRows" class="form-label">Filas clase económica</label>
-                <p v-if="errors.fields.numberEconomyClassRows" class="text-sm text-error">{{ errors.fields.numberEconomyClassRows }}</p>
-            </div>
+            <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
 
-            <div class="form-field group">
-                <input 
-                    id="numberSeatingRowsEconomy" 
-                    v-model="form.numberSeatingRowsEconomy"
-                    name="numberSeatingRowsEconomy" type="number"
-                    min="0" 
-                    step="1" 
-                    class="form-input peer"
-                    placeholder=" " />
-                <label for="numberSeatingRowsEconomy" class="form-label">Asientos por fila económica</label>
-                <p v-if="errors.fields.numberSeatingRowsEconomy" class="text-sm text-error">{{ errors.fields.numberSeatingRowsEconomy }}</p>
-            </div>
+            <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
 
-            <div class="form-field group">
-                <input 
-                    id="numberFirstClassRows" 
-                    v-model="form.numberFirstClassRows"
-                    name="numberFirstClassRows" 
-                    type="number" 
-                    min="0" 
-                    step="1" 
-                    class="form-input peer" 
-                    placeholder=" " />
-                <label for="numberFirstClassRows" class="form-label">Filas primera clase</label>
-                <p v-if="errors.fields.numberFirstClassRows" class="text-sm text-error">{{ errors.fields.numberFirstClassRows }}</p>
-            </div>
+            <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
 
-            <div class="form-field group">
-                <input 
-                    id="numberSeatingRowsFirst" 
-                    v-model="form.numberSeatingRowsFirst" 
-                    name="numberSeatingRowsFirst" 
-                    type="number" 
-                    min="0" 
-                    step="1" 
-                    class="form-input peer" 
-                    placeholder=" " />
-                <label for="numberSeatingRowsFirst" class="form-label">Asientos por fila primera clase</label>
-                <p v-if="errors.fields.numberSeatingRowsFirst" class="text-sm text-error">{{ errors.fields.numberSeatingRowsFirst }}</p>
-            </div>
+            <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
         </div>
 
-        <div v-if="errors.fields.totalSeats" class="mt-2 text-p">{{ errors.fields.totalSeats }}</div>
+        <div v-if="errors.fields.totalSeats" class="mt-2 text-sm text-error">{{ errors.fields.totalSeats }}</div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary">Guardar aeronave</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">Guardar aeronave</AppButton>
         </div>
     </form>
 
-    <SuccessModal v-model="showSuccessModal" message="La aeronave se ha creado correctamente" @close="onSuccessClose" />
+    <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
     <ErrorModal v-model="showErrorModal" :message="errorMessage" />
 </template>
 
@@ -220,25 +124,5 @@ function onSuccessClose() {
 
 .form-grid {
     @apply grid grid-cols-1 gap-6 md:grid-cols-2;
-}
-
-.form-field {
-    @apply relative z-0 w-full;
-}
-
-.form-input {
-    @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 text-base
-     text-gray-900 focus:border-gold focus:outline-none focus:ring-0;
-}
-
-.form-label {
-    @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
-     text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
-     peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
-}
-
-.submit-btn {
-    @apply mt-2 inline-flex rounded-md border border-transparent bg-primary px-5 py-3 text-base font-medium
-     text-white hover:bg-select focus:outline-none focus:ring-2 focus:ring-gold;
 }
 </style>
