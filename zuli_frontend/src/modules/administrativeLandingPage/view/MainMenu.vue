@@ -24,11 +24,6 @@
                                 </router-link>
                             </li>
                             <li class="hover:bg-purple">
-                                <router-link to="/admin/flights" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="flightIcon" alt="User Icon" class="menuIcons" />
-                                    <div class="font-semibold text-gold text-center">Vuelos</div>
-                                </router-link>
-                            </li>
-                            <li class="hover:bg-purple">
                                 <router-link to="/admin/users" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="userIcon" alt="User Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Usuarios</div>
                                 </router-link>
