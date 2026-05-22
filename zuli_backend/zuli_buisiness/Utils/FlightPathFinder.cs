@@ -14,7 +14,8 @@ namespace zuli_Business.Utils
             string origin,
             string destination,
             DateTime targetDate,
-            bool directFlightsOnly)
+            bool directFlightsOnly,
+            int maxLayovers)
         {
             var allPaths = new List<List<RawFlightEntity>>();
             var currentPath = new List<RawFlightEntity>();
@@ -39,7 +40,7 @@ namespace zuli_Business.Utils
                     return;
                 }
 
-                if (currentPath.Count >= 4)
+                if (currentPath.Count >= maxLayovers + 1)
                 {
                     return;
                 }

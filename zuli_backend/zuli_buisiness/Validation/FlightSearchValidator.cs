@@ -24,7 +24,9 @@ namespace zuli_Business.Validation
 
             //if (request.Date.Date < DateTime.Now.Date) Solo busca vuelos despues de hoy, cuidado.
                 //AddError(errors, "Date", "La fecha de búsqueda no puede ser en el pasado.");
-
+            if (request.MaxLayovers < 0)
+                AddError(errors, "MaxLayovers", "La cantidad máxima de escalas no puede ser menor a 0.");
+                
             if (request.Seats <= 0)
                 AddError(errors, "Seats", "Debe buscar al menos 1 asiento.");
 

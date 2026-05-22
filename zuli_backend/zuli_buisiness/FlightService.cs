@@ -181,7 +181,7 @@ namespace zuli_Business
 
             var rawFlights = day1Flights.Concat(day2Flights).ToList();
 
-            var paths = _pathFinder.FindPaths(rawFlights, origin, destination, targetDate, request.DirectFlightsOnly);
+            var paths = _pathFinder.FindPaths(rawFlights, origin, destination, targetDate, request.DirectFlightsOnly, request.MaxLayovers);
 
             var formattedOptions = _mapper.MapToOptions(paths, request.FlightClass);
 
