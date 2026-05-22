@@ -83,19 +83,20 @@
                 </div>
             </div>
 
-            <div v-if="activeTab === 'roundTrip'" class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_10rem_7rem_minmax(0,1.8fr)] lg:items-end">
-                <div class="flex min-w-0 flex-col gap-1 lg:col-start-2">
+            <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_10rem_7rem_minmax(0,1.8fr)] lg:items-end">
+                <div class="flex min-w-0 flex-col gap-1 lg:col-start-3 transition-all duration-300"
+                     :class="activeTab === 'roundTrip' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'">
                     <label class="text-xs font-semibold text-slate-700">Regreso</label>
                     <input v-model="returnDate" type="date"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold"
+                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold transition"
                         :class="errors.returnDate ? 'border-red-500' : 'border-slate-200'" />
                 </div>
             </div>
 
             <div class="mt-8 flex justify-end">
-                <button type="button" @click="validateAndSearch" class="rounded-lg bg-primary px-8 py-3 text-base font-bold text-white transition hover:bg-select shadow-md active:scale-95">
+                <AppButton @click="validateAndSearch" variant="primary" size="lg">
                     Buscar vuelos
-                </button>
+                </AppButton>
             </div>
         </div>
     </div>
@@ -105,6 +106,7 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { searchAirportSuggestions } from '../service/flightSearchService';
+import AppButton from '../../../shared/AppButton.vue';
 
 const router = useRouter();
 
@@ -175,6 +177,16 @@ const clearSuggestions = (field) => {
 };
 
 const validateAndSearch = () => {
+    const iataRegex = /^[A-Za-z]{3}$/;
+
+    if (!originCode.value && iataRegex.test(fromCitySearch.value.trim())) {
+        originCode.value = fromCitySearch.value.trim().toUpperCase();
+    }
+    
+    if (!destinationCode.value && iataRegex.test(toCitySearch.value.trim())) {
+        destinationCode.value = toCitySearch.value.trim().toUpperCase();
+    }
+
     errors.fromCity = !originCode.value;
     errors.toCity = !destinationCode.value;
     errors.departureDate = !departureDate.value;

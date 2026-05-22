@@ -50,10 +50,10 @@
         </div>
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-500 mb-1">Desde</p>
-            <p class="text-3xl font-bold text-primary mb-4">${{ flight.totalPrice }}</p>
-            <button class="w-full py-2 bg-primary text-white font-semibold rounded-lg hover:bg-select transition shadow-sm active:scale-95">
+            <p class="text-3xl font-bold text-primary mb-4">${{ flight.totalTouristPrice.toFixed(2) }}</p>
+            <AppButton variant="primary" class="w-full" @click="selectFlight('Turista', flight.totalTouristPrice.toFixed(2))">
                 Seleccionar
-            </button>
+            </AppButton>
         </div>
       </div>
 
@@ -64,10 +64,10 @@
         </div>
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-500 mb-1">Desde</p>
-            <p class="text-3xl font-bold text-primary mb-4">${{ (flight.totalPrice * 1.8).toFixed(2) }}</p>
-            <button class="w-full py-2 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition shadow-sm active:scale-95">
+            <p class="text-3xl font-bold text-primary mb-4">${{ flight.totalFirstClassPrice.toFixed(2) }}</p>
+            <AppButton variant="outline" class="w-full" @click="selectFlight('Primera Clase', flight.totalFirstClassPrice.toFixed(2))">
                 Seleccionar
-            </button>
+            </AppButton>
         </div>
       </div>
 
@@ -80,7 +80,7 @@
                 <div class="absolute w-3 h-3 bg-primary rounded-full -left-[1.65rem] top-1.5 border-2 border-white"></div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p class="text-sm font-bold text-gray-800 mb-2">Vuelo {{ segment.flightId }}</p>
+                    <p class="text-sm font-bold text-gray-800 mb-2">ZU {{ segment.flightId }} | {{ segment.departureDateText }} </p>
                     <div class="flex justify-between items-center text-sm">
                         <div>
                             <p class="font-semibold">{{ segment.departureTimeText }} - {{ segment.origin }}</p>
@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import AppButton from '../../../shared/AppButton.vue';
 
 const props = defineProps({
   flight: {
@@ -116,9 +117,19 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['selectFlight']);
+
 const showDetails = ref(false);
 
 const toggleDetails = () => {
     showDetails.value = !showDetails.value;
+};
+
+const selectFlight = (travelClass, price) => {
+    emit('selectFlight', {
+        flight: props.flight,
+        travelClass,
+        price
+    });
 };
 </script>

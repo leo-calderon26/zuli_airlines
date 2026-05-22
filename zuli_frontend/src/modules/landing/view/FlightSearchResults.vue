@@ -7,15 +7,17 @@
             <div class="bg-primary rounded-xl p-6 text-white mb-8 shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold flex items-center gap-2">
-                        {{ route.query.origin }} 
+                        {{ searchStore.searchParams.Origin || route.query.origin }} 
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        {{ route.query.destination }}
+                        {{ searchStore.searchParams.Destination || route.query.destination }}
                     </h2>
                     <p class="text-white/80 mt-1 font-medium">
-                        Fecha: {{ route.query.date }} | Pasajeros: {{ route.query.seats }} | Clase: {{ route.query.flightClass }}
+                        Fecha: {{ searchStore.searchParams.Date || route.query.date }} 
+                        <span v-if="searchStore.searchParams.IsRoundTrip"> | Regreso: {{ searchStore.searchParams.ReturnDate || route.query.returnDate }}</span>
+                        | Pasajeros: {{ searchStore.searchParams.Seats || route.query.seats }} 
                     </p>
                 </div>
-                <router-link to="/" class="bg-white/20 hover:bg-white/30 px-6 py-2 rounded-lg font-semibold transition border border-white/40">
+               <router-link to="/" class="inline-block rounded-md bg-white/5 px-4 py-2 font-semibold text-white transition hover:bg-black/15">
                     Modificar Búsqueda
                 </router-link>
             </div>
@@ -30,52 +32,135 @@
 
             <div v-else-if="searchStore.flightResults">
                 
-                <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Vuelos de Salida</h3>
-                
-                <div v-if="searchStore.flightResults.outboundFlights.length === 0" class="text-center py-12 text-gray-500 font-medium">
-                    No se encontraron vuelos para esta fecha y ruta.
+                <div v-if="!selectedDepartureFlight">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                        Selecciona tu vuelo de salida ({{ searchStore.searchParams.Origin }} a {{ searchStore.searchParams.Destination }})
+                    </h3>
+                    
+                    <div v-if="searchStore.flightResults.departureFlights?.length === 0" class="text-center py-12 text-gray-500 font-medium">
+                        No se encontraron vuelos de salida para esta fecha y ruta.
+                    </div>
+
+                    <FlightCard 
+                        v-for="flight in searchStore.flightResults.departureFlights" 
+                        :key="'out-'+flight.pathIds" 
+                        :flight="flight"
+                        @selectFlight="handleSelectDeparture" 
+                    />
+
+                    <div v-if="searchStore.flightResults.totalPagesDeparture > 1" class="flex justify-center items-center gap-4 mt-8">
+                        <AppButton 
+                            @click="changePage(searchStore.flightResults.currentPage - 1)"
+                            :disabled="searchStore.flightResults.currentPage === 1"
+                            variant="outline"
+                            size="sm">
+                            Anterior
+                        </AppButton>
+                        <span class="text-sm font-semibold text-gray-700">
+                            Página {{ searchStore.flightResults.currentPage }} de {{ searchStore.flightResults.totalPagesDeparture }}
+                        </span>
+                        <AppButton 
+                            @click="changePage(searchStore.flightResults.currentPage + 1)"
+                            :disabled="searchStore.flightResults.currentPage === searchStore.flightResults.totalPagesDeparture"
+                            variant="outline"
+                            size="sm">
+                            Siguiente
+                        </AppButton>
+                    </div>
                 </div>
 
-                <FlightCard 
-                    v-for="flight in searchStore.flightResults.outboundFlights" 
-                    :key="flight.pathIds" 
-                    :flight="flight" 
-                />
+                <div v-else-if="searchStore.searchParams.IsRoundTrip">
+                    
+                    <div class="bg-slate-50 border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                        
+                        <div class="flex-1 w-full md:w-auto text-center md:text-left">
+                            <p class="text-sm text-gray-600 font-medium">Su viaje a:</p>
+                            <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ selectedDepartureFlight.flight.destination }}</h3>
+                        </div>
+                        
+                        <div class="flex-[2] flex flex-col items-center w-full md:w-auto">
+                            <span class="text-sm font-medium text-gray-700 mb-1">
+                                {{ selectedDepartureFlight.flight.stops === 0 ? 'Directo' : selectedDepartureFlight.flight.stops + ' escala(s)' }}
+                            </span>
+                            <div class="flex items-center gap-4 text-xl font-bold text-gray-900 w-full justify-center">
+                                <span>{{ selectedDepartureFlight.flight.departureTimeText }}</span>
+                                <div class="flex flex-col items-center w-24 md:w-40 relative">
+                                    <div class="absolute top-1/2 w-full border-t-[1.5px] border-dashed border-gray-400 -translate-y-1/2"></div>
+                                    <span class="text-xs text-gray-500 font-medium bg-slate-50 px-2 relative z-10">
+                                        {{ selectedDepartureFlight.flight.totalDurationText }}
+                                    </span>
+                                </div>
+                                <span>{{ selectedDepartureFlight.flight.arrivalTimeText }}</span>
+                            </div>
+                            <div class="flex justify-between w-full md:w-64 text-sm text-gray-600 mt-1 font-bold">
+                                <span>{{ selectedDepartureFlight.flight.origin }}</span>
+                                <span>{{ selectedDepartureFlight.flight.destination }}</span>
+                            </div>
+                        </div>
 
-                <div v-if="searchStore.flightResults.totalPagesOutbound > 1" class="flex justify-center gap-2 mt-8">
-                    <button 
-                        @click="changePage(searchStore.flightResults.currentPage - 1)"
-                        :disabled="searchStore.flightResults.currentPage === 1"
-                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                        Anterior
-                    </button>
-                    <span class="px-4 py-2 text-sm font-semibold text-gray-700">
-                        Página {{ searchStore.flightResults.currentPage }} de {{ searchStore.flightResults.totalPagesOutbound }}
-                    </span>
-                    <button 
-                        @click="changePage(searchStore.flightResults.currentPage + 1)"
-                        :disabled="searchStore.flightResults.currentPage === searchStore.flightResults.totalPagesOutbound"
-                        class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                        Siguiente
-                    </button>
+                        <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                            <p class="text-base font-semibold text-gray-800">{{ searchStore.searchParams.Date }}</p>
+                            <p class="text-sm text-gray-600 mt-1">Clase: <span class="font-bold text-content">{{ selectedDepartureFlight.travelClass }}</span></p>
+                            <button @click="clearDepartureSelection" class="text-primary font-bold text-sm mt-3 hover:text-gold hover:underline transition">
+                                Cambiar vuelo
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                        Selecciona tu vuelo de regreso ({{ searchStore.searchParams.Destination }} a {{ searchStore.searchParams.Origin }})
+                    </h3>
+                    
+                    <div v-if="searchStore.flightResults.returnFlights?.length === 0" class="text-center py-12 text-gray-500 font-medium">
+                        No se encontraron vuelos de regreso para esta fecha y ruta.
+                    </div>
+
+                    <FlightCard 
+                        v-for="flight in searchStore.flightResults.returnFlights" 
+                        :key="'ret-'+flight.pathIds" 
+                        :flight="flight"
+                        @selectFlight="handleSelectReturn" 
+                    />
+
+                    <div v-if="searchStore.flightResults.totalPagesReturn > 1" class="flex justify-center items-center gap-4 mt-8">
+                        <AppButton 
+                            @click="changePage(searchStore.flightResults.currentPage - 1)"
+                            :disabled="searchStore.flightResults.currentPage === 1"
+                            variant="outline"
+                            size="sm">
+                            Anterior
+                        </AppButton>
+                        <span class="text-sm font-semibold text-gray-700">
+                            Página {{ searchStore.flightResults.currentPage }} de {{ searchStore.flightResults.totalPagesReturn }}
+                        </span>
+                        <AppButton 
+                            @click="changePage(searchStore.flightResults.currentPage + 1)"
+                            :disabled="searchStore.flightResults.currentPage === searchStore.flightResults.totalPagesReturn"
+                            variant="outline"
+                            size="sm">
+                            Siguiente
+                        </AppButton>
+                    </div>
                 </div>
             </div>
 
         </main>
-        
-        <PublicBottomBar />
     </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import PublicNavBar from '../components/PublicNavBar.vue';
 import FlightCard from '../components/FlightCard.vue';
+import AppButton from '../../../shared/AppButton.vue';
 import { useFlightSearchStore } from '../store/flightSearchStore';
 
 const route = useRoute();
+const router = useRouter();
 const searchStore = useFlightSearchStore();
+
+const selectedDepartureFlight = ref(null);
 
 onMounted(() => {
     const params = {
@@ -88,11 +173,30 @@ onMounted(() => {
         DirectFlightsOnly: route.query.directOnly === 'true',
         FlightClass: route.query.flightClass || 'Turista',
         Page: 1,
-        //PageSize: 10 Revisar paginacion
+        PageSize: 2
     };
     
     searchStore.performSearch(params);
 });
+
+const handleSelectDeparture = (selection) => {
+    if (!searchStore.searchParams.IsRoundTrip) {
+        alert(`Viaje de ida seleccionado con éxito.\nRuta ID: ${selection.flight.pathIds}\n\n(Pendiente: Redirigir a información de pasajeros)`);
+        return;
+    }
+    
+    selectedDepartureFlight.value = selection;
+    changePage(1);
+};
+
+const clearDepartureSelection = () => {
+    selectedDepartureFlight.value = null;
+    changePage(1);
+};
+
+const handleSelectReturn = (selection) => {
+    alert(`Viaje ida y vuelta seleccionado:\nIda ID: ${selectedDepartureFlight.value.flight.pathIds}\nRegreso ID: ${selection.flight.pathIds}\n\n(Pendiente: Redirigir a información de pasajeros)`);
+};
 
 const changePage = (page) => {
     searchStore.changePage(page);

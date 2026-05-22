@@ -11,11 +11,9 @@ namespace zuli_Data.Entities
         public decimal FirstClassPrice { get; set; }
         public DateTime? RealDepartureTime { get; set; }
         public DateTime? RealArrivalTime { get; set; }
-        public DateTime? CheckInStartTime { get; set; }
-        public DateTime? CheckInDeadline { get; set; }
-        public int AirlineId { get; set; }
         public Guid AircraftId { get; set; }
-        public int ItineraryId { get; set; }
+        public string? RealArrivalAirport { get; set; }
+        public string? RealDepartureAirport { get; set; }
         public int Duration { get; set; }
         public decimal? CarryOnPrice { get; set; }
         public decimal? CheckedPrice { get; set; }
