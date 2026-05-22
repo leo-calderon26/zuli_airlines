@@ -1,15 +1,15 @@
-// ARCHIVO: zuli_Business/Utils/FlightPathFinder.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using zuli_Business.Interface;
 using zuli_Data.Entities;
 
 namespace zuli_Business.Utils
 {
     // Adapted from: https://www.geeksforgeeks.org/dsa/find-paths-given-source-destination/
-    public static class FlightPathFinder
+    public class FlightPathFinder : IFlightPathFinder
     {
-        public static List<List<RawFlightEntity>> FindPaths(
+        public List<List<RawFlightEntity>> FindPaths(
             IEnumerable<RawFlightEntity> allFlights,
             string origin,
             string destination,
@@ -18,8 +18,6 @@ namespace zuli_Business.Utils
         {
             var allPaths = new List<List<RawFlightEntity>>();
             var currentPath = new List<RawFlightEntity>();
-
-
             var flightPool = allFlights.ToList();
 
             if (directFlightsOnly)
@@ -46,9 +44,9 @@ namespace zuli_Business.Utils
                     return;
                 }
 
-                var adyacentes = flightPool.Where(f => f.Origin == currentAirport);
+                var adjacentFlights = flightPool.Where(f => f.Origin == currentAirport);
 
-                foreach (var nextFlight in adyacentes)
+                foreach (var nextFlight in adjacentFlights)
                 {
                     if (currentPath.Any(p => p.Origin == nextFlight.Destination))
                     {
@@ -57,21 +55,15 @@ namespace zuli_Business.Utils
 
                     if (currentPath.Count > 0)
                     {
-                        if (nextFlight.DepartureTime < currentArrivalTime.AddHours(1))
-                        {
-                            continue;
-                        }
-
-                        if (nextFlight.DepartureTime > currentArrivalTime.AddHours(12))
+                        if (nextFlight.DepartureTime < currentArrivalTime.AddHours(1) ||
+                            nextFlight.DepartureTime > currentArrivalTime.AddHours(12))
                         {
                             continue;
                         }
                     }
 
                     currentPath.Add(nextFlight);
-
                     DFS(nextFlight.Destination, nextFlight.ArrivalTime);
-
                     currentPath.RemoveAt(currentPath.Count - 1);
                 }
             }
