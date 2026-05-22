@@ -52,21 +52,20 @@ namespace zuli_Business.Validation
                 hasError = true;
             }
 
-            if (flight.AirlineId <= 0)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar una aerolinea valida");
-                hasError = true;
-            }
-
             if (flight.AircraftId == Guid.Empty)
             {
                 errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar una aeronave valida");
                 hasError = true;
             }
-
-            if (flight.ItineraryId <= 0)
+            if (!string.IsNullOrWhiteSpace(flight.RealArrivalAirport) && flight.RealArrivalAirport.Length != 3)
             {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar un itinerario valido");
+                errorInfo[FlightValidationFields.ENTITIES].Add("El aeropuerto real de llegada debe tener 3 caracteres");
+                hasError = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(flight.RealDepartureAirport) && flight.RealDepartureAirport.Length != 3)
+            {
+                errorInfo[FlightValidationFields.ENTITIES].Add("El aeropuerto real de salida debe tener 3 caracteres");
                 hasError = true;
             }
 
