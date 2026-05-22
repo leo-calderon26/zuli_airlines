@@ -8,6 +8,7 @@ using zuli_backend.Middleware;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
 using zuli_Data;
@@ -147,6 +148,10 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
 builder.Services.AddScoped<IValidator<FlightRouteDTO>, FlightRouteValidator>();
+
+// Flight search utils
+builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
+builder.Services.AddScoped<IFlightSearchMapper, FlightSearchMapper>();
 
 // AutoMapper
 builder.Services.AddSingleton<IMapper>(sp =>
