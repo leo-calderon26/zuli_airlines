@@ -19,17 +19,23 @@ namespace zuli_Business
         private readonly FlightSearchValidator _searchValidator;
         private readonly IUserRepository _userRepository;
         private readonly IServiceRepository _serviceRepository;
+        private readonly IFlightPathFinder _pathFinder;
+        private readonly IFlightSearchMapper _mapper;
 
         public FlightService(
             IFlightRepository repository,
             IUserRepository userRepository,
-            IServiceRepository serviceRepository)
+            IServiceRepository serviceRepository,
+            IFlightPathFinder pathFinder,
+            IFlightSearchMapper mapper)
         {
             _repository = repository;
             _validator = new FlightValidator();
             _searchValidator = new FlightSearchValidator();
             _userRepository = userRepository;
             _serviceRepository = serviceRepository;
+            _pathFinder = pathFinder;
+            _mapper = mapper;
         }
 
         public async Task<BasicResponseDTO> CreateFlight(FlightDTO flight)
@@ -47,11 +53,9 @@ namespace zuli_Business
                 FirstClassPrice = flight.FirstClassPrice,
                 RealDepartureTime = flight.RealDepartureTime,
                 RealArrivalTime = flight.RealArrivalTime,
-                CheckInStartTime = flight.CheckInStartTime,
-                CheckInDeadline = flight.CheckInDeadline,
-                AirlineId = flight.AirlineId,
                 AircraftId = flight.AircraftId,
-                ItineraryId = flight.ItineraryId,
+                RealArrivalAirport = flight.RealArrivalAirport,
+                RealDepartureAirport = flight.RealDepartureAirport,
                 Duration = flight.Duration,
                 CarryOnPrice = flight.CarryOnPrice,
                 CheckedPrice = flight.CheckedPrice,
@@ -101,11 +105,9 @@ namespace zuli_Business
                 FirstClassPrice = f.FirstClassPrice,
                 RealDepartureTime = f.RealDepartureTime,
                 RealArrivalTime = f.RealArrivalTime,
-                CheckInStartTime = f.CheckInStartTime,
-                CheckInDeadline = f.CheckInDeadline,
-                AirlineId = f.AirlineId,
                 AircraftId = f.AircraftId,
-                ItineraryId = f.ItineraryId,
+                RealArrivalAirport = f.RealArrivalAirport,
+                RealDepartureAirport = f.RealDepartureAirport,
                 Duration = f.Duration,
                 CarryOnPrice = f.CarryOnPrice,
                 CheckedPrice = f.CheckedPrice,
@@ -135,11 +137,8 @@ namespace zuli_Business
                 FirstClassPrice = flight.FirstClassPrice,
                 RealDepartureTime = flight.RealDepartureTime,
                 RealArrivalTime = flight.RealArrivalTime,
-                CheckInStartTime = flight.CheckInStartTime,
-                CheckInDeadline = flight.CheckInDeadline,
-                AirlineId = flight.AirlineId,
-                AircraftId = flight.AircraftId,
-                ItineraryId = flight.ItineraryId,
+                RealArrivalAirport = flight.RealArrivalAirport,
+                RealDepartureAirport = flight.RealDepartureAirport,
                 Duration = flight.Duration,
                 CarryOnPrice = flight.CarryOnPrice,
                 CheckedPrice = flight.CheckedPrice,
@@ -151,130 +150,52 @@ namespace zuli_Business
             
         }
 
-
+        
         public async Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request)
         {
             _searchValidator.ValidateSearch(request);
 
-            DateTime endDate;
-            if (request.IsRoundTrip && request.ReturnDate.HasValue)
-            {
-                endDate = request.ReturnDate.Value.AddDays(1);
-            }
-            else
-            {
-                endDate = request.Date.AddDays(1);
-            }
+            var response = new FlightPaginatedResponseDTO { CurrentPage = request.Page };
 
-            var rawFlights = await _repository.GetAvailableFlights(request.Date, endDate, request.Seats);
-
-            var outboundPaths = FlightPathFinder.FindPaths(
-                rawFlights, request.Origin, request.Destination, request.Date, request.DirectFlightsOnly);
-
-            var response = new FlightPaginatedResponseDTO();
-            response.CurrentPage = request.Page;
-
-            var formattedOutbound = MapToOptions(outboundPaths, request.FlightClass);
-            response.TotalRecordsOutbound = formattedOutbound.Count;
-            response.TotalPagesOutbound = (int)Math.Ceiling(response.TotalRecordsOutbound / (double)request.PageSize);
-            response.OutboundFlights = Paginate(formattedOutbound, request.Page, request.PageSize);
+            var outboundResult = await ProcessFlightRoutesAsync(request.Origin, request.Destination, request.Date, request);
+            response.TotalRecordsOutbound = outboundResult.TotalRecords;
+            response.TotalPagesOutbound = outboundResult.TotalPages;
+            response.OutboundFlights = outboundResult.Flights;
 
             if (request.IsRoundTrip && request.ReturnDate.HasValue)
             {
-                var returnPaths = FlightPathFinder.FindPaths(
-                    rawFlights, request.Destination, request.Origin, request.ReturnDate.Value, request.DirectFlightsOnly);
-                
-                var formattedReturn = MapToOptions(returnPaths, request.FlightClass);
-                response.TotalRecordsReturn = formattedReturn.Count;
-                response.TotalPagesReturn = (int)Math.Ceiling(response.TotalRecordsReturn / (double)request.PageSize);
-                response.ReturnFlights = Paginate(formattedReturn, request.Page, request.PageSize);
+                var returnResult = await ProcessFlightRoutesAsync(request.Destination, request.Origin, request.ReturnDate.Value, request);
+                response.TotalRecordsReturn = returnResult.TotalRecords;
+                response.TotalPagesReturn = returnResult.TotalPages;
+                response.ReturnFlights = returnResult.Flights;
             }
 
             return response;
         }
 
-        private List<FlightSearchResponseDTO> Paginate(List<FlightSearchResponseDTO> source, int page, int pageSize)
+        private async Task<(List<FlightSearchResponseDTO> Flights, int TotalRecords, int TotalPages)> ProcessFlightRoutesAsync(
+            string origin, string destination, DateTime targetDate, FlightSearchRequestDTO request)
         {
-            return source
+            var day1Flights = await _repository.GetAvailableFlights(targetDate, request.Seats, targetDate.ToDayOfWeekMask());
+            var day2Flights = await _repository.GetAvailableFlights(targetDate.AddDays(1), request.Seats, targetDate.AddDays(1).ToDayOfWeekMask());
+
+            var rawFlights = day1Flights.Concat(day2Flights).ToList();
+
+            var paths = _pathFinder.FindPaths(rawFlights, origin, destination, targetDate, request.DirectFlightsOnly);
+
+            var formattedOptions = _mapper.MapToOptions(paths, request.FlightClass);
+
+            int totalRecords = formattedOptions.Count;
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)request.PageSize);
+
+            var paginatedFlights = formattedOptions
                 .OrderBy(x => x.TotalPrice)
                 .ThenBy(x => x.Stops)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .ToList();
-        }
 
-        private List<FlightSearchResponseDTO> MapToOptions(List<List<RawFlightEntity>> paths, string flightClass)
-        {
-            var result = new List<FlightSearchResponseDTO>();
-            var culture = new CultureInfo("es-ES");
-
-            foreach (var path in paths)
-            {
-                var firstFlight = path.First();
-                var lastFlight = path.Last();
-                int totalSeconds = (int)(lastFlight.ArrivalTime - firstFlight.DepartureTime).TotalSeconds;
-
-                string arrivalDateText = "";
-                if (lastFlight.ArrivalTime.Date > firstFlight.DepartureTime.Date)
-                {
-                    arrivalDateText = $"Llega el {lastFlight.ArrivalTime.ToString("dd MMM", culture)}";
-                }
-
-                decimal totalPrice = 0;
-                if (flightClass == "Primera Clase")
-                {
-                    totalPrice = path.Sum(f => f.FirstClassPrice);
-                }
-                else
-                {
-                    totalPrice = path.Sum(f => f.TouristPrice);
-                }
-
-                var option = new FlightSearchResponseDTO();
-                option.PathIds = string.Join(",", path.Select(p => p.FlightId));
-                option.Origin = firstFlight.Origin;
-                option.Destination = lastFlight.Destination;
-                option.DepartureTimeText = firstFlight.DepartureTime.ToString("h:mm tt", culture).ToLower();
-                option.ArrivalTimeText = lastFlight.ArrivalTime.ToString("h:mm tt", culture).ToLower();
-                option.ArrivalDateText = arrivalDateText;
-                option.TotalDurationText = FormatDuration(totalSeconds);
-                option.Stops = path.Count - 1;
-                option.TotalPrice = totalPrice;
-                option.Segments = new List<FlightSegmentDTO>();
-
-                for (int i = 0; i < path.Count; i++)
-                {
-                    var flight = path[i];
-                    string layoverTime = "";
-
-                    if (i > 0)
-                    {
-                        var previousFlight = path[i - 1];
-                        int layoverSeconds = (int)(flight.DepartureTime - previousFlight.ArrivalTime).TotalSeconds;
-                        layoverTime = FormatDuration(layoverSeconds);
-                    }
-
-                    var segment = new FlightSegmentDTO();
-                    segment.FlightId = flight.FlightId;
-                    segment.Origin = flight.Origin;
-                    segment.Destination = flight.Destination;
-                    segment.DepartureTimeText = flight.DepartureTime.ToString("h:mm tt", culture).ToLower();
-                    segment.ArrivalTimeText = flight.ArrivalTime.ToString("h:mm tt", culture).ToLower();
-                    segment.DurationText = FormatDuration(flight.EstimatedDuration);
-                    segment.LayoverTimeText = layoverTime;
-
-                    option.Segments.Add(segment);
-                }
-                result.Add(option);
-            }
-            return result;
-        }
-
-        private string FormatDuration(int totalSeconds)
-        {
-            TimeSpan time = TimeSpan.FromSeconds(totalSeconds);
-            int totalHours = (int)time.TotalHours;
-            return $"{totalHours}H, {time.Minutes}M";
+            return (paginatedFlights, totalRecords, totalPages);
         }
     }
 }
