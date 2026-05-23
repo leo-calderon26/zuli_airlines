@@ -26,5 +26,9 @@ namespace zuli_Data.Entities
         public decimal touristPrice {get; set; }
 
         public decimal firstClassPrice { get; set; }
+
+        public decimal checkedBagMultiplier { get; set; }
+
+        public decimal maxWeightPerBag { get; set; }
     }
 }

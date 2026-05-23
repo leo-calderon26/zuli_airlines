@@ -36,6 +36,8 @@ export const modalFieldLabels = {
   firstClassPrice: 'Precio Primera Clase',
   carryOnPrice: 'Precio Equipaje de Mano',
   checkedPrice: 'Precio Equipaje Documentado',
+  checkedBagMultiplier: 'Multiplicador Equipaje Documentado',
+  maxWeightPerBag: 'Peso Maximo por Maleta',
 };
 
 export function normalizeCode(value) {
@@ -100,6 +102,8 @@ export function mapBackendFieldToFormField(rawField) {
     firstclassprice: 'firstClassPrice',
     carryonprice: 'carryOnPrice',
     checkedprice: 'checkedPrice',
+    checkedbagmultiplier: 'checkedBagMultiplier',
+    maxweightperbag: 'maxWeightPerBag',
   };
 
   return mapping[normalized] || '';

@@ -16,5 +16,7 @@ namespace zuli_Business.DTO
         public decimal CheckedPrice { get; set; }
         public decimal TouristPrice { get; set; }
         public decimal FirstClassPrice { get; set; }
+        public decimal CheckedBagMultiplier { get; set; }
+        public decimal MaxWeightPerBag { get; set; }
     }
 }

@@ -71,6 +71,8 @@ namespace zuli_Business
                 CheckedPrice = item.checkedPrice,
                 TouristPrice = item.touristPrice,
                 FirstClassPrice = item.firstClassPrice,
+                CheckedBagMultiplier = item.checkedBagMultiplier,
+                MaxWeightPerBag = item.maxWeightPerBag,
             }).ToList();
 
             return new FlightRoutePaginatedResponseDTO
