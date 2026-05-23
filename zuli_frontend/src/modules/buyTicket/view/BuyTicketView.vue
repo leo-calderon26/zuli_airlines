@@ -91,6 +91,8 @@ const handlePurchase = async () => {
                         :payment-method="store.paymentMethod"
                         :checked-price="store.selectedFlight?.checkedPrice || 0"
                         :carry-on-price="store.selectedFlight?.carryOnPrice || 0"
+                        :carry-on-weight="store.selectedFlight?.carryOnWeight || 0"
+                        :checked-max-weight="store.selectedFlight?.checkedMaxWeight || 0"
                         :errors="passengerErrors"
                         :contactErrors="contactErrors"
                         @update:passengers="store.passengers = $event"
@@ -113,6 +115,10 @@ const handlePurchase = async () => {
                         :total="store.totalPrice.toFixed(2)"
                         :loading="store.isLoading"
                         :valid="isFormValid"
+                        :carry-on-price="store.selectedFlight?.carryOnPrice || 0"
+                        :carry-on-weight="store.selectedFlight?.carryOnWeight || 0"
+                        :checked-price="store.selectedFlight?.checkedPrice || 0"
+                        :checked-max-weight="store.selectedFlight?.checkedMaxWeight || 0"
                         @purchase="handlePurchase"
                     />
                 </div>

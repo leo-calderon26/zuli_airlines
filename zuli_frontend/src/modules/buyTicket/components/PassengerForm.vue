@@ -18,6 +18,8 @@ const props = defineProps({
     paymentMethod: { type: String, default: 'card' },
     carryOnPrice: { type: Number, default: 0 },
     checkedPrice: { type: Number, default: 0 },
+    carryOnWeight: { type: Number, default: 0 },
+    checkedMaxWeight: { type: Number, default: 0 },
     errors: { type: Array, default: () => [] },
     contactErrors: { type: Object, default: () => ({}) }
 });
@@ -146,7 +148,7 @@ function updatePassenger(index, field, value) {
                 <div class="flex justify-between items-center">
                     <div>
                         <span class="text-sm text-font">Maleta documentada</span>
-                        <p v-if="checkedPrice" class="text-xs text-sumary mt-0.5">${{ checkedPrice }} c/u</p>
+                        <p v-if="checkedPrice" class="text-xs text-sumary mt-0.5">${{ checkedPrice }} c/u <span v-if="checkedMaxWeight">(hasta {{ checkedMaxWeight }} kg)</span></p>
                     </div>
                     <div class="flex items-center gap-3">
                         <button
@@ -165,7 +167,7 @@ function updatePassenger(index, field, value) {
                 <div class="flex justify-between items-center mt-4 pt-4 border-t border-border-soft/50">
                     <div>
                         <span class="text-sm text-font">Equipaje de mano</span>
-                        <p v-if="carryOnPrice" class="text-xs text-sumary mt-0.5">${{ carryOnPrice }} c/u</p>
+                        <p v-if="carryOnPrice" class="text-xs text-sumary mt-0.5">${{ carryOnPrice }} c/u <span v-if="carryOnWeight">(hasta {{ carryOnWeight }} kg)</span></p>
                     </div>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input

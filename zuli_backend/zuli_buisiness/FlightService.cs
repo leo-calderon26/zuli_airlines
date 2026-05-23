@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Utils;
@@ -17,14 +12,12 @@ namespace zuli_Business
         private readonly IFlightRepository _repository;
         private readonly FlightValidator _validator;
         private readonly FlightSearchValidator _searchValidator;
-        private readonly IUserRepository _userRepository;
         private readonly IServiceRepository _serviceRepository;
         private readonly IFlightPathFinder _pathFinder;
         private readonly IFlightSearchMapper _mapper;
 
         public FlightService(
             IFlightRepository repository,
-            IUserRepository userRepository,
             IServiceRepository serviceRepository,
             IFlightPathFinder pathFinder,
             IFlightSearchMapper mapper)
@@ -32,17 +25,14 @@ namespace zuli_Business
             _repository = repository;
             _validator = new FlightValidator();
             _searchValidator = new FlightSearchValidator();
-            _userRepository = userRepository;
             _serviceRepository = serviceRepository;
             _pathFinder = pathFinder;
             _mapper = mapper;
         }
-
+        // TODO(any): este metodo ya no se usa en ningun lado
         public async Task<BasicResponseDTO> CreateFlight(FlightDTO flight)
         {
             _validator.ValidateFlight(flight);
-            // TOD(you); tiene que validar el compa tiene permisos
-            var adminId = await _userRepository.GetUserId(flight.BusinessId);
 
             var newFlight = new FlightEntity
             {
@@ -54,13 +44,15 @@ namespace zuli_Business
                 RealDepartureTime = flight.RealDepartureTime,
                 RealArrivalTime = flight.RealArrivalTime,
                 AircraftId = flight.AircraftId,
-                RealArrivalAirport = flight.RealArrivalAirport,
-                RealDepartureAirport = flight.RealDepartureAirport,
                 Duration = flight.Duration,
                 CarryOnPrice = flight.CarryOnPrice,
+                CarryOnWeight = flight.CarryOnWeight,
                 CheckedPrice = flight.CheckedPrice,
+                CheckedMaxWeight = flight.CheckedMaxWeight,
+                CheckedWeightMultiplier = flight.CheckedWeightMultiplier,
                 AvailableSeats = flight.AvailableSeats,
-                AdminId = adminId,
+                RealArrivalAirport = flight.RealArrivalAirport,
+                RealDepartureAirport = flight.RealDepartureAirport,
                 FlightRouteId = flight.FlightRouteId,
             };
 
@@ -83,14 +75,11 @@ namespace zuli_Business
                 Message = "Se realizo la creacion del vuelo correctamente",
             };
         }
-
+        /*
         public async Task<IEnumerable<FlightDTO>> GetAllFlights()
         {
             var flights = await _repository.GetAllFlights();
             var flightList = flights.ToList();
-            var businessIds = await Task.WhenAll(
-                flightList.Select(f => _userRepository.GetBusinessId(f.AdminId))
-            );
 
             var serviceDescriptions = await Task.WhenAll(
                 flightList.Select(f => _serviceRepository.GetServiceByFlightId(f.Id))
@@ -106,26 +95,28 @@ namespace zuli_Business
                 RealDepartureTime = f.RealDepartureTime,
                 RealArrivalTime = f.RealArrivalTime,
                 AircraftId = f.AircraftId,
-                RealArrivalAirport = f.RealArrivalAirport,
-                RealDepartureAirport = f.RealDepartureAirport,
                 Duration = f.Duration,
                 CarryOnPrice = f.CarryOnPrice,
+                CarryOnWeight = f.CarryOnWeight,
                 CheckedPrice = f.CheckedPrice,
+                CheckedMaxWeight = f.CheckedMaxWeight,
+                CheckedWeightMultiplier = f.CheckedWeightMultiplier,
                 AvailableSeats = f.AvailableSeats,
-                BusinessId = businessIds[index],
+                RealArrivalAirport = f.RealArrivalAirport,
+                RealDepartureAirport = f.RealDepartureAirport,
                 FlightRouteId = f.FlightRouteId,
                 ServiceDescription = serviceDescriptions[index]?.Description,
             }).ToList();
         }
-
+        */
+        
         public async Task<FlightDTO?> GetFlightById(Guid id)
         {
             var flight = await _repository.GetFlightById(id);
 
             if (flight == null)
                 return null;
-            
-            var businessId = await _userRepository.GetBusinessId(flight.AdminId);
+
             var service = await _serviceRepository.GetServiceByFlightId(flight.Id);
 
             return new FlightDTO
@@ -137,19 +128,22 @@ namespace zuli_Business
                 FirstClassPrice = flight.FirstClassPrice,
                 RealDepartureTime = flight.RealDepartureTime,
                 RealArrivalTime = flight.RealArrivalTime,
-                RealArrivalAirport = flight.RealArrivalAirport,
-                RealDepartureAirport = flight.RealDepartureAirport,
+                AircraftId = flight.AircraftId,
                 Duration = flight.Duration,
                 CarryOnPrice = flight.CarryOnPrice,
+                CarryOnWeight = flight.CarryOnWeight,
                 CheckedPrice = flight.CheckedPrice,
+                CheckedMaxWeight = flight.CheckedMaxWeight,
+                CheckedWeightMultiplier = flight.CheckedWeightMultiplier,
                 AvailableSeats = flight.AvailableSeats,
-                BusinessId = businessId,
+                RealArrivalAirport = flight.RealArrivalAirport,
+                RealDepartureAirport = flight.RealDepartureAirport,
                 FlightRouteId = flight.FlightRouteId,
                 ServiceDescription = service?.Description,
             };
-            
-        }
 
+        }
+        
         
         public async Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request)
         {
