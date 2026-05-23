@@ -37,8 +37,6 @@ export function useRouteForm() {
     firstClassPrice: '',
     carryOnPrice: '',
     checkedPrice: '',
-    checkedBagMultiplier: '1.00',
-    maxWeightPerBag: '23.00',
   });
 
   const modalErrors = reactive({});
@@ -188,14 +186,6 @@ export function useRouteForm() {
       errors.fields.checkedPrice = 'Precio invalido';
     }
 
-    if (form.checkedBagMultiplier === '' || isNaN(Number(form.checkedBagMultiplier)) || Number(form.checkedBagMultiplier) <= 0) {
-      errors.fields.checkedBagMultiplier = 'Multiplicador invalido';
-    }
-
-    if (form.maxWeightPerBag === '' || isNaN(Number(form.maxWeightPerBag)) || Number(form.maxWeightPerBag) <= 0) {
-      errors.fields.maxWeightPerBag = 'Peso maximo invalido';
-    }
-
     return Object.keys(errors.fields).length === 0 && errors.global === '';
   }
 
@@ -276,8 +266,6 @@ export function useRouteForm() {
         firstClassPrice: Number(form.firstClassPrice),
         carryOnPrice: form.carryOnPrice !== '' ? Number(form.carryOnPrice) : null,
         checkedPrice: form.checkedPrice !== '' ? Number(form.checkedPrice) : null,
-        checkedBagMultiplier: Number(form.checkedBagMultiplier),
-        maxWeightPerBag: Number(form.maxWeightPerBag),
       };
 
       await createFlightRoute(routePayload);

@@ -189,24 +189,6 @@ onMounted(() => {
               placeholder="0.00"
               :error="errors.fields.checkedPrice"
             />
-            <AppInput
-              v-model="form.checkedBagMultiplier"
-              label="Multiplicador Equipaje Documentado"
-              type="number"
-              min="0.01"
-              step="0.01"
-              placeholder="1.00"
-              :error="errors.fields.checkedBagMultiplier"
-            />
-            <AppInput
-              v-model="form.maxWeightPerBag"
-              label="Peso Maximo por Maleta (kg)"
-              type="number"
-              min="1"
-              step="0.5"
-              placeholder="23.00"
-              :error="errors.fields.maxWeightPerBag"
-            />
           </div>
         </div>
 

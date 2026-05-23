@@ -17,13 +17,11 @@ namespace zuli_Repository
                   INSERT INTO FlightRoute
                     (adminId, airlineId, arrivalAirport, departureAirport,
                      scheduledArrivalTime, scheduledDepartureTime, frequency, estimatedDuration,
-                     aircraftId, carryOnPrice, checkedPrice, touristPrice, firstClassPrice,
-                     checkedBagMultiplier, maxWeightPerBag)
+                     aircraftId, carryOnPrice, checkedPrice, touristPrice, firstClassPrice)
                   VALUES
                     (@AdminId, @AirlineId, @ArrivalAirport, @DepartureAirport,
                      @ScheduledArrivalTime, @ScheduledDepartureTime, @Frequency, @EstimatedDuration,
-                     CONVERT(uniqueidentifier, @AircraftId), @CarryOnPrice, @CheckedPrice, @TouristPrice, @FirstClassPrice,
-                     @CheckedBagMultiplier, @MaxWeightPerBag);
+                     CONVERT(uniqueidentifier, @AircraftId), @CarryOnPrice, @CheckedPrice, @TouristPrice, @FirstClassPrice);
             ";
 
             var newId = await connection.ExecuteScalarAsync<int>(sql, new
@@ -40,9 +38,7 @@ namespace zuli_Repository
                 flightRoute.carryOnPrice,
                 flightRoute.checkedPrice,
                 flightRoute.touristPrice,
-                flightRoute.firstClassPrice,
-                flightRoute.checkedBagMultiplier,
-                flightRoute.maxWeightPerBag
+                flightRoute.firstClassPrice
             });
             return newId;
         }
@@ -64,9 +60,7 @@ namespace zuli_Repository
                 AND carryOnPrice = @carryOnPrice
                 AND checkedPrice = @checkedPrice
                 AND touristPrice = @touristPrice
-                AND firstClassPrice = @firstClassPrice
-                AND checkedBagMultiplier = @checkedBagMultiplier
-                AND maxWeightPerBag = @maxWeightPerBag";
+                AND firstClassPrice = @firstClassPrice";
 
             var count = await connection.ExecuteScalarAsync<int>(sql, new
             {
@@ -80,9 +74,7 @@ namespace zuli_Repository
                 flightRoute.carryOnPrice,
                 flightRoute.checkedPrice,
                 flightRoute.touristPrice,
-                flightRoute.firstClassPrice,
-                flightRoute.checkedBagMultiplier,
-                flightRoute.maxWeightPerBag
+                flightRoute.firstClassPrice
             });
 
             return count > 0;
@@ -111,9 +103,7 @@ namespace zuli_Repository
                     carryOnPrice,
                     checkedPrice,
                     touristPrice,
-                    firstClassPrice,
-                    checkedBagMultiplier,
-                    maxWeightPerBag
+                    firstClassPrice
                 FROM FlightRoute
                 ORDER BY flightRouteId
                 OFFSET @Offset ROWS
