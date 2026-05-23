@@ -56,7 +56,7 @@ namespace zuli_Business
                 Message = "Se realizo la creacion del aeropuerto correctamente",
             };
         }
-        
+
         public async Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm)
         {
             _validator.ValidateSearchTerm(searchTerm);
@@ -96,5 +96,35 @@ namespace zuli_Business
                 Data = airportDTOs
             };
         }
+
+        public async Task<AirportDTO> GetAirportByCodeAsync(string code)
+        {
+            var normalizedCode = code?.Trim().ToUpperInvariant();
+            var entity = await _repository.GetByCodeAsync(normalizedCode);
+            if (entity == null) throw new ZuliNotFoundException($"No existe aeropuerto {code}");
+            return new AirportDTO { airportCode = entity.AirportCode, name = entity.Name, country = entity.Country, city = entity.City, businessId = entity.AdminId.ToString() };
+        }
+
+        public async Task<BasicResponseDTO> UpdateAirportAsync(string code, AirportDTO airport)
+        {
+            if (!await _userRepository.IsAdmin(airport.businessId))
+                throw new ZuliUnauthorizedException("No tiene permisos.");
+
+            var normalizedCode = code?.Trim().ToUpperInvariant();
+            var existing = await _repository.GetByCodeAsync(normalizedCode);
+            if (existing == null) throw new ZuliNotFoundException($"No existe aeropuerto {code}");
+
+            _validator.ValidateAirportInfo(airport);
+
+            existing.Name = airport.name;
+            existing.Country = airport.country;
+            existing.City = airport.city;
+
+            await _repository.UpdateAirportAsync(existing);
+
+            return new BasicResponseDTO { StatusCode = 200, Message = "Aeropuerto actualizado correctamente" };
+        }
+
+
     }
 }

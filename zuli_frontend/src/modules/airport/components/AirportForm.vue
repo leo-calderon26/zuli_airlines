@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
 import ErrorModal from '../../../shared/ErrorModal.vue';
@@ -9,8 +9,19 @@ import AppInput from '../../../shared/AppInput.vue';
 import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
+const props = defineProps({
+    airport: {
+        type: Object,
+        default: null
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const router = useRouter();
-const { addAirport } = useAirport();
+const { addAirport, updateAirport } = useAirport();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
 const form = reactive({
@@ -19,6 +30,25 @@ const form = reactive({
     country: '',
     city: ''
 });
+
+function syncForm(airport) {
+    if (!airport) {
+        return;
+    }
+
+    form.airportCode = airport.airportCode ?? '';
+    form.name = airport.name ?? '';
+    form.country = airport.country ?? '';
+    form.city = airport.city ?? '';
+}
+
+watch(
+    () => props.airport,
+    (airport) => {
+        syncForm(airport);
+    },
+    { immediate: true, deep: true }
+);
 
 function validate() {
     clearErrors();
@@ -53,9 +83,14 @@ async function submit() {
             businessId: data.businessId,
         };
 
-        await addAirport(airportPayload);
-        onSuccess('El aeropuerto se ha creado correctamente');
-    }, 'Error al crear el aeropuerto');
+        if (props.isEdit) {
+            await updateAirport(props.airport?.airportCode?.toUpperCase().trim() ?? form.airportCode.toUpperCase().trim(), airportPayload);
+            onSuccess('El aeropuerto se ha actualizado correctamente');
+        } else {
+            await addAirport(airportPayload);
+            onSuccess('El aeropuerto se ha creado correctamente');
+        }
+    }, props.isEdit ? 'Error al actualizar el aeropuerto' : 'Error al crear el aeropuerto');
 
     if (errors.fields.airportCode) {
         form.airportCode = ''
@@ -70,7 +105,7 @@ function onSuccessClose() {
 <template>
     <form class="form-card" @submit.prevent="submit">
         <div class="form-grid">
-            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" />
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="props.isEdit" />
 
             <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" />
 
@@ -80,7 +115,7 @@ function onSuccessClose() {
         </div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Crear</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">{{ props.isEdit ? 'Guardar' : 'Crear' }}</AppButton>
         </div>
     </form>
 

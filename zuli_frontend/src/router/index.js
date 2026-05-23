@@ -10,6 +10,7 @@ import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
 
 import AirportList from "../modules/airport/view/AirportList.vue";
 import AirportCreate from '../modules/airport/view/AirportCreate.vue'
+import AirportEdit from '../modules/airport/view/AirportEdit.vue'
 
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Routes from '../modules/route/view/Routes.vue'
@@ -77,6 +78,12 @@ const router = createRouter({
             path: "/admin/create-airport",
             name: "createAirport",
             component: AirportCreate,
+            meta: {requiresAuth: true, adminRequired: true}
+        },
+        {
+            path: "/admin/edit-airport/:airportCode",
+            name: "editAirport",
+            component: AirportEdit,
             meta: {requiresAuth: true, adminRequired: true}
         },
         {
