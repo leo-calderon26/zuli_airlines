@@ -23,26 +23,38 @@ namespace zuli_Repository
 
             var sql = @"
                 INSERT INTO Flight (
-                    Id, Status, FlightDate,
-                    TouristPrice, FirstClassPrice,
-                    RealDepartureTime, RealArrivalTime,
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    AirlineId,
                     AircraftId,
+                    flight.RealArrivalAirport,
+                    flight.RealDepartureAirport,
                     Duration,
-                    CarryOnPrice, CarryOnWeight,
-                    CheckedPrice, CheckedMaxWeight, CheckedWeightMultiplier,
+                    CarryOnPrice,
+                    CheckedPrice,
                     AvailableSeats,
-                    RealArrivalAirport, RealDepartureAirport,
+                    AdminId,
                     FlightRouteId
                 ) VALUES (
-                    @Id, @Status, @FlightDate,
-                    @TouristPrice, @FirstClassPrice,
-                    @RealDepartureTime, @RealArrivalTime,
-                    @AircraftId,
+                    @Id,
+                    @Status,
+                    @FlightDate,
+                    @TouristPrice,
+                    @FirstClassPrice,
+                    @RealDepartureTime,
+                    @RealArrivalTime,
+                    @RealArrivalAirport,
+                    @RealDepartureAirport,
                     @Duration,
-                    @CarryOnPrice, @CarryOnWeight,
-                    @CheckedPrice, @CheckedMaxWeight, @CheckedWeightMultiplier,
+                    @CarryOnPrice,
+                    @CheckedPrice,
                     @AvailableSeats,
-                    @RealArrivalAirport, @RealDepartureAirport,
+                    @AdminId,
                     @FlightRouteId
                 )";
 
@@ -56,15 +68,13 @@ namespace zuli_Repository
                 flight.RealDepartureTime,
                 flight.RealArrivalTime,
                 flight.AircraftId,
-                flight.Duration,
-                flight.CarryOnPrice,
-                flight.CarryOnWeight,
-                flight.CheckedPrice,
-                flight.CheckedMaxWeight,
-                flight.CheckedWeightMultiplier,
-                flight.AvailableSeats,
                 flight.RealArrivalAirport,
                 flight.RealDepartureAirport,
+                flight.Duration,
+                flight.CarryOnPrice,
+                flight.CheckedPrice,
+                flight.AvailableSeats,
+                flight.AdminId,
                 flight.FlightRouteId
             });
         }
@@ -75,15 +85,21 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    Id, Status, FlightDate,
-                    TouristPrice, FirstClassPrice,
-                    RealDepartureTime, RealArrivalTime,
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
                     AircraftId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
-                    CarryOnPrice, CarryOnWeight,
-                    CheckedPrice, CheckedMaxWeight, CheckedWeightMultiplier,
+                    CarryOnPrice,
+                    CheckedPrice,
                     AvailableSeats,
-                    RealArrivalAirport, RealDepartureAirport,
+                    AdminId,
                     FlightRouteId
                 FROM Flight";
 
@@ -96,72 +112,27 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    Id, Status, FlightDate,
-                    TouristPrice, FirstClassPrice,
-                    RealDepartureTime, RealArrivalTime,
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
                     AircraftId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
-                    CarryOnPrice, CarryOnWeight,
-                    CheckedPrice, CheckedMaxWeight, CheckedWeightMultiplier,
+                    CarryOnPrice,
+                    CheckedPrice,
                     AvailableSeats,
-                    RealArrivalAirport, RealDepartureAirport,
+                    AdminId,
                     FlightRouteId
                 FROM Flight
                 WHERE Id = @Id";
 
                 return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
             }
-
-        public async Task<int> EnsureFlightsExist(DateTime targetDate, int seats, int targetDayMask, DateTime currentTime)
-        {
-            using var connection = _context.CreateConnection();
-
-            var sql = @"
-                INSERT INTO Flight (
-                    Id, Status, FlightDate,
-                    TouristPrice, FirstClassPrice,
-                    RealDepartureTime, RealArrivalTime,
-                    AircraftId,
-                    Duration,
-                    CarryOnPrice, CarryOnWeight,
-                    CheckedPrice, CheckedMaxWeight, CheckedWeightMultiplier,
-                    AvailableSeats,
-                    RealArrivalAirport, RealDepartureAirport,
-                    FlightRouteId
-                )
-                SELECT 
-                    NEWID(),
-                    'Programado',
-                    CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME),
-                    fr.TouristPrice,
-                    fr.FirstClassPrice,
-                    NULL,
-                    NULL,
-                    fr.AircraftId,
-                    fr.EstimatedDuration,
-                    fr.CarryOnPrice,
-                    10.00,
-                    fr.CheckedPrice,
-                    fr.MaxWeightPerBag,
-                    fr.CheckedBagMultiplier,
-                    (a.NumberEconomyClassRows * a.NumberSeatingRowsEconomy) + (a.NumberFirstClassRows * a.NumberSeatingRowsFirst),
-                    fr.ArrivalAirport,
-                    fr.DepartureAirport,
-                    fr.FlightRouteId
-                FROM FlightRoute fr
-                INNER JOIN Aircraft a ON fr.AircraftId = a.AircraftId
-                WHERE (fr.Frequency & @TargetDayMask) > 0
-                    AND NOT EXISTS (
-                        SELECT 1 FROM Flight f
-                        WHERE f.FlightRouteId = fr.FlightRouteId
-                        AND CAST(f.FlightDate AS DATE) = CAST(@TargetDate AS DATE)
-                        AND f.Status != 'Cancelado'
-                    )
-                    AND (CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME)) > @CurrentTime
-                    AND ((a.NumberEconomyClassRows * a.NumberSeatingRowsEconomy) + (a.NumberFirstClassRows * a.NumberSeatingRowsFirst)) >= @Seats";
-
-            return await connection.ExecuteAsync(sql, new { TargetDate = targetDate, Seats = seats, TargetDayMask = targetDayMask, CurrentTime = currentTime });
-        }
 
         public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
         {
