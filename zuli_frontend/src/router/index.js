@@ -19,6 +19,8 @@ import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
 import FlightCreate from "../modules/flight/view/FlightCreate.vue"
 import ReserveView from '../modules/landing/view/ReserveView.vue'
+import BuyTicketView from '../modules/buyTicket/view/BuyTicketView.vue'
+import PurchaseConfirmation from '../modules/buyTicket/view/PurchaseConfirmation.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
@@ -95,6 +97,18 @@ const router = createRouter({
             path: "/ayuda",
             name: "help",
             component: HelpView,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/comprar-boleto",
+            name: "buyTicket",
+            component: BuyTicketView,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/confirmacion/:code?",
+            name: "purchaseConfirmation",
+            component: PurchaseConfirmation,
             meta: {requiresAuth: false, adminRequired: false}
         },
         {

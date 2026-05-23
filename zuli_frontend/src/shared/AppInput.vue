@@ -42,7 +42,7 @@ function onBlur(e) {
       :id="label"
       :type="type"
       :value="modelValue"
-      :placeholder="placeholder || ' '"
+      :placeholder="placeholder || undefined"
       :disabled="disabled"
       :required="required"
       :maxlength="maxlength"
@@ -64,7 +64,7 @@ function onBlur(e) {
   @apply flex flex-col;
 }
 .form-input {
-  @apply block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-body focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
+  @apply block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
 }
 .form-label {
   @apply mb-2 block text-sm font-medium text-content;
