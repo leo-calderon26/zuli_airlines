@@ -1,6 +1,6 @@
 <script setup>
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
-import { onMounted } from 'vue';
+import PublicNavBar from '../../../shared/PublicNavBar.vue';
+//import RouteNavBar from '../components/RouteNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';

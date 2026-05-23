@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
 import { getCountries, getCitiesByCountry } from '../service/locationService';
@@ -10,11 +10,19 @@ import AppInput from '../../../shared/AppInput.vue';
 import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
-import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/20/solid';
+const props = defineProps({
+    airport: {
+        type: Object,
+        default: null
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
 
 const router = useRouter();
-const { addAirport } = useAirport();
+const { addAirport, updateAirport } = useAirport();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
 const countries = ref([]);
@@ -29,29 +37,24 @@ const form = reactive({
     city: ''
 });
 
-onMounted(async () => {
-    countries.value = await getCountries();
-});
-
-const onCountryChange = async () => {
-    form.city = '';
-    
-    if (!selectedCountryId.value) {
-        cities.value = [];
-        form.country = '';
+function syncForm(airport) {
+    if (!airport) {
         return;
     }
 
-    const selectedCountry = countries.value.find(c => c.id === selectedCountryId.value);
-    form.country = selectedCountry ? selectedCountry.countryName : '';
+    form.airportCode = airport.airportCode ?? '';
+    form.name = airport.name ?? '';
+    form.country = airport.country ?? '';
+    form.city = airport.city ?? '';
+}
 
-    isCitiesLoading.value = true;
-    try {
-        cities.value = await getCitiesByCountry(selectedCountryId.value);
-    } finally {
-        isCitiesLoading.value = false;
-    }
-};
+watch(
+    () => props.airport,
+    (airport) => {
+        syncForm(airport);
+    },
+    { immediate: true, deep: true }
+);
 
 function validate() {
     clearErrors();
@@ -86,9 +89,14 @@ async function submit() {
             businessId: data.businessId,
         };
 
-        await addAirport(airportPayload);
-        onSuccess('El aeropuerto se ha creado correctamente');
-    }, 'Error al crear el aeropuerto');
+        if (props.isEdit) {
+            await updateAirport(props.airport?.airportCode?.toUpperCase().trim() ?? form.airportCode.toUpperCase().trim(), airportPayload);
+            onSuccess('El aeropuerto se ha actualizado correctamente');
+        } else {
+            await addAirport(airportPayload);
+            onSuccess('El aeropuerto se ha creado correctamente');
+        }
+    }, props.isEdit ? 'Error al actualizar el aeropuerto' : 'Error al crear el aeropuerto');
 
     if (errors.fields.airportCode) {
         form.airportCode = '';
@@ -103,7 +111,7 @@ function onSuccessClose() {
 <template>
     <form class="form-card" @submit.prevent="submit">
         <div class="form-grid">
-            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" />
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="props.isEdit" />
 
             <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" />
 
@@ -195,7 +203,7 @@ function onSuccessClose() {
         </div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Crear</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">{{ props.isEdit ? 'Guardar' : 'Crear' }}</AppButton>
         </div>
     </form>
 

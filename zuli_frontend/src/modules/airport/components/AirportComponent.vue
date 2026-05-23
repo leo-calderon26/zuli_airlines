@@ -7,6 +7,10 @@ import AppTable from '../../../shared/AppTable.vue';
 const airportStore = useAirportStore();
 const { fetchAirportsPaginated, changePage } = useAirport();
 
+const cacheAirportForEdit = (airport) => {
+    sessionStorage.setItem('airportEditData', JSON.stringify(airport));
+};
+
 onMounted(async () => {
     await fetchAirportsPaginated(1, 10);
 })
@@ -57,7 +61,17 @@ onMounted(async () => {
             <p>{{ airport.country }}</p>
         </td>
         <td class="px-8 py-5">
-            <a href="#" class="font-medium text-gold hover:underline">Edit</a>
+            <router-link
+                :to="{
+                    name: 'editAirport',
+                    params: { airportCode: airport.airportCode },
+                    state: { airport }
+                }"
+                @click="cacheAirportForEdit(airport)"
+                class="font-medium text-gold hover:underline"
+            >
+                Edit
+            </router-link>
         </td>
     </tr>
 </AppTable>
