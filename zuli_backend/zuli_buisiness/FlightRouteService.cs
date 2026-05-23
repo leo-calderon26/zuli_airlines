@@ -1,4 +1,5 @@
-﻿using zuli_Business.DTO;
+﻿using AutoMapper;
+using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
@@ -11,33 +12,28 @@ namespace zuli_Business
     {
         private readonly IFlightRouteRepository _flightRouteRepository;
         private readonly IValidator<FlightRouteDTO> _validator;
+        private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
-        public FlightRouteService(IFlightRouteRepository flightRouterRepository, IValidator<FlightRouteDTO> validator)
+        public FlightRouteService(IFlightRouteRepository flightRouterRepository, IValidator<FlightRouteDTO> validator,
+            IMapper mapper, IUserRepository userRepository)
         {
             _flightRouteRepository = flightRouterRepository;
             _validator = validator;
+            _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRoute)
         {
             await _validator.ValidateAsync(flightRoute);
-            if (!await _flightRouteRepository.IsAdmin(flightRoute.businessId))
+            if (!await _userRepository.IsAdmin(flightRoute.businessId))
             {
                 throw new ZuliNotFoundException("El usuario no tiene permisos de administrador.");
             }
-            var userId = await _flightRouteRepository.GetUserId(flightRoute.businessId);
-
-            var newFlightRoute = new FlightRouteEntity
-            {
-                adminId = userId,
-                airlineId = flightRoute.airlineId,
-                arrivalAirport = flightRoute.arrivalAirport,
-                departureAirport = flightRoute.departureAirport,
-                scheduledArrivalTime = flightRoute.scheduledArrivalTime,
-                scheduledDepartureTime = flightRoute.scheduledDepartureTime,
-                frequency = flightRoute.frequency,
-                estimatedDuration = flightRoute.estimatedDuration
-            };
+            var userId = await _userRepository.GetUserId(flightRoute.businessId);
+            var newFlightRoute = _mapper.Map<FlightRouteEntity>(flightRoute);
+            newFlightRoute.adminId = userId;
 
             if (await _flightRouteRepository.AlreadyExistFlightRoute(newFlightRoute))
             {
@@ -70,6 +66,11 @@ namespace zuli_Business
                 AirlineId = item.airlineId,
                 ArrivalAirport = item.arrivalAirport,
                 DepartureAirport = item.departureAirport,
+                AircraftId = item.aircraftId,
+                CarryOnPrice = item.carryOnPrice,
+                CheckedPrice = item.checkedPrice,
+                TouristPrice = item.touristPrice,
+                FirstClassPrice = item.firstClassPrice,
             }).ToList();
 
             return new FlightRoutePaginatedResponseDTO

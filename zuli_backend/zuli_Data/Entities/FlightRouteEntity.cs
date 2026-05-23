@@ -9,13 +9,22 @@ namespace zuli_Data.Entities
     {
         public int flightRouteId { get; set; }
         public int frequency { get; set; }
-        public DateTime scheduledArrivalTime { get; set; }
-        public DateTime scheduledDepartureTime { get; set; }
-        // Este sera calculado por la persona que ingrese las rutas y es en segundos
+        public TimeSpan scheduledArrivalTime { get; set; }
+        public TimeSpan scheduledDepartureTime { get; set; }
         public int estimatedDuration { get; set; }
         public Guid adminId { get; set; }
         public int airlineId { get; set; }
         public string arrivalAirport {  get; set; }
         public string departureAirport { get; set; }
+        
+        public string aircraftId { get; set; }
+
+        public decimal carryOnPrice { get; set; }
+
+        public decimal checkedPrice { get; set; }
+ 
+        public decimal touristPrice {get; set; }
+
+        public decimal firstClassPrice { get; set; }
     }
 }

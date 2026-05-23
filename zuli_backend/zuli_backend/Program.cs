@@ -10,9 +10,10 @@ using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
-using zuli_Business.Validation.Strategies;
 using zuli_Data;
 using zuli_Repository;
+using zuli_Business.Utils;
+using AutoMapper;
 using zuli_Repository.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -146,6 +147,16 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
 builder.Services.AddScoped<IValidator<FlightRouteDTO>, FlightRouteValidator>();
+
+// AutoMapper
+builder.Services.AddSingleton<IMapper>(sp =>
+{
+    var configExpression = new MapperConfigurationExpression();
+    configExpression.AddProfile<MappingProfile>();
+    var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+    var config = new MapperConfiguration(configExpression, loggerFactory);
+    return config.CreateMapper();
+});
 
 var app = builder.Build();
 

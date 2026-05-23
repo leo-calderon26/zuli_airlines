@@ -1,6 +1,7 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createFlightRoute, searchAirportSuggestionsByName } from '../service/routeService';
+import { getAircrafts } from '../../aircraft/service/aircraftService';
 import { useForm } from '../../../shared/useForm.js';
 import {
   daysOfWeek,
@@ -13,9 +14,6 @@ import {
   getSuggestionLabel,
   isIntegerLike,
   getBusinessId,
-  isValidDateTime,
-  toIsoDateTime,
-  buildDateTimeFromParts,
   encodeDays,
   modalFieldLabels,
   getBackendErrorMessages,
@@ -30,24 +28,39 @@ export function useRouteForm() {
   const form = reactive({
     origin: '',
     destination: '',
-    scheduledDepartureDay: '',
-    scheduledDepartureMonth: '',
-    scheduledDepartureTime: '',
-    scheduledArrivalDay: '',
-    scheduledArrivalMonth: '',
-    scheduledArrivalTime: '',
+    departureTime: '',
+    arrivalTime: '',
     duration: '',
     frequency: [],
+    aircraftId: '',
+    touristPrice: '',
+    firstClassPrice: '',
+    carryOnPrice: '',
+    checkedPrice: '',
   });
 
   const modalErrors = reactive({});
 
   const originSuggestions = ref([]);
   const destinationSuggestions = ref([]);
+  const aircraftList = ref([]);
+  const aircraftLoading = ref(false);
   let originSearchTimer = null;
   let destinationSearchTimer = null;
   let latestOriginTerm = '';
   let latestDestinationTerm = '';
+
+  async function fetchAircraftList() {
+    aircraftLoading.value = true;
+    try {
+      const data = await getAircrafts();
+      aircraftList.value = Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error al obtener aeronaves:', error);
+    } finally {
+      aircraftLoading.value = false;
+    }
+  }
 
   function clearSuggestionList(field) {
     if (field === 'origin') {
@@ -130,24 +143,12 @@ export function useRouteForm() {
       errors.fields.destination = 'El origen y el destino no pueden ser iguales';
     }
 
-    const departureDateTime = buildDateTimeFromParts(
-      form.scheduledDepartureDay,
-      form.scheduledDepartureMonth,
-      form.scheduledDepartureTime
-    );
-
-    const arrivalDateTime = buildDateTimeFromParts(
-      form.scheduledArrivalDay,
-      form.scheduledArrivalMonth,
-      form.scheduledArrivalTime
-    );
-
-    if (!isValidDateTime(departureDateTime)) {
-      errors.fields.scheduledDepartureTime = 'Fecha y hora de salida invalidas';
+    if (!form.departureTime) {
+      errors.fields.departureTime = 'Debe seleccionar una hora de salida';
     }
 
-    if (!isValidDateTime(arrivalDateTime)) {
-      errors.fields.scheduledArrivalTime = 'Fecha y hora de llegada invalidas';
+    if (!form.arrivalTime) {
+      errors.fields.arrivalTime = 'Debe seleccionar una hora de llegada';
     }
 
     if (
@@ -163,6 +164,26 @@ export function useRouteForm() {
 
     if (!Array.isArray(form.frequency) || form.frequency.length === 0) {
       errors.fields.frequency = 'Debe seleccionar al menos un dia';
+    }
+
+    if (!form.aircraftId) {
+      errors.fields.aircraftId = 'Debe seleccionar una aeronave';
+    }
+
+    if (form.touristPrice === '' || isNaN(Number(form.touristPrice)) || Number(form.touristPrice) < 0) {
+      errors.fields.touristPrice = 'Precio invalido';
+    }
+
+    if (form.firstClassPrice === '' || isNaN(Number(form.firstClassPrice)) || Number(form.firstClassPrice) < 0) {
+      errors.fields.firstClassPrice = 'Precio invalido';
+    }
+
+    if (form.carryOnPrice !== '' && form.carryOnPrice !== null && (isNaN(Number(form.carryOnPrice)) || Number(form.carryOnPrice) < 0)) {
+      errors.fields.carryOnPrice = 'Precio invalido';
+    }
+
+    if (form.checkedPrice !== '' && form.checkedPrice !== null && (isNaN(Number(form.checkedPrice)) || Number(form.checkedPrice) < 0)) {
+      errors.fields.checkedPrice = 'Precio invalido';
     }
 
     return Object.keys(errors.fields).length === 0 && errors.global === '';
@@ -233,21 +254,18 @@ export function useRouteForm() {
     try {
       const routePayload = {
         frequency: encodeDays(form.frequency),
-        scheduledArrivalTime: toIsoDateTime(
-          buildDateTimeFromParts(form.scheduledArrivalDay, form.scheduledArrivalMonth, form.scheduledArrivalTime)
-        ),
-        scheduledDepartureTime: toIsoDateTime(
-          buildDateTimeFromParts(
-            form.scheduledDepartureDay,
-            form.scheduledDepartureMonth,
-            form.scheduledDepartureTime
-          )
-        ),
+        scheduledArrivalTime: form.arrivalTime + ':00',
+        scheduledDepartureTime: form.departureTime + ':00',
         estimatedDuration: Number(form.duration) * 60,
         businessId,
         airlineId: AIRLINE_ID,
         arrivalAirport: normalizeCode(form.destination),
         departureAirport: normalizeCode(form.origin),
+        aircraftId: form.aircraftId,
+        touristPrice: Number(form.touristPrice),
+        firstClassPrice: Number(form.firstClassPrice),
+        carryOnPrice: form.carryOnPrice !== '' ? Number(form.carryOnPrice) : null,
+        checkedPrice: form.checkedPrice !== '' ? Number(form.checkedPrice) : null,
       };
 
       await createFlightRoute(routePayload);
@@ -285,11 +303,14 @@ export function useRouteForm() {
     modalErrors,
     originSuggestions,
     destinationSuggestions,
+    aircraftList,
+    aircraftLoading,
     getSuggestionCode,
     getSuggestionLabel,
     handleAirportInput,
     applySuggestion,
     submit,
     onSuccessClose,
+    fetchAircraftList,
   };
 }
