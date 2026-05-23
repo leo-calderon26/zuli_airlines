@@ -51,7 +51,7 @@
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-500 mb-1">Desde</p>
             <p class="text-3xl font-bold text-primary mb-4">${{ flight.totalPrice }}</p>
-            <button class="w-full py-2 bg-primary text-white font-semibold rounded-lg hover:bg-select transition shadow-sm active:scale-95">
+            <button @click="selectFlight('Turista')" class="w-full py-2 bg-primary text-white font-semibold rounded-lg hover:bg-select transition shadow-sm active:scale-95">
                 Seleccionar
             </button>
         </div>
@@ -65,7 +65,7 @@
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-500 mb-1">Desde</p>
             <p class="text-3xl font-bold text-primary mb-4">${{ (flight.totalPrice * 1.8).toFixed(2) }}</p>
-            <button class="w-full py-2 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition shadow-sm active:scale-95">
+            <button @click="selectFlight('Primera Clase')" class="w-full py-2 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition shadow-sm active:scale-95">
                 Seleccionar
             </button>
         </div>
@@ -116,9 +116,26 @@ const props = defineProps({
   }
 });
 
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
+
 const showDetails = ref(false);
 
 const toggleDetails = () => {
     showDetails.value = !showDetails.value;
+};
+
+const selectFlight = (flightClass) => {
+    router.push({
+        name: 'buyTicket',
+        query: {
+            flightData: JSON.stringify({ flight: props.flight, flightClass }),
+            seats: route.query.seats || 1,
+            roundTrip: route.query.roundTrip || 'false',
+            returnFlight: route.query.returnFlight || ''
+        }
+    });
 };
 </script>
