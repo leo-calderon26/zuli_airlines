@@ -1,13 +1,9 @@
 <template>
-  <nav class="relative bg-primary after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10">
-    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-      <div class="relative flex h-20 items-center justify-between">
-        <div class="flex items-center justify-center sm:items-stretch sm:justify-start">
-          <div class="flex shrink-0 items-center">
-            <router-link to="/admin/"><img src="../assets/logoZuli.svg" alt="Your Company" class="h-20 w-auto" /></router-link>
-          </div>
-        </div>
-        <nav class="absolute left-1/2 -translate-x-1/2">
+  <header class="w-full bg-primary text-white">
+    <div class="relative flex w-full items-center px-4 py-2 sm:px-6">
+      <router-link to="/admin/"><img src="../assets/logoZuli.svg" alt="Logo" class="h-14 w-auto shrink-0 sm:h-20" /></router-link>
+
+      <nav class="absolute left-1/2 -translate-x-1/2">
         <ul class="flex items-center divide-x divide-white/40 p-0 m-0 list-none">
           <li class="px-4 first:pl-0">
             <router-link
@@ -56,17 +52,16 @@
           </li>
         </ul>
       </nav>
-        <div class="absolute inset-y-0 right-0 flex items-center sm:static sm:inset-auto">
-          <div class="flex shrink-0 items-center">
-            <router-link to="/admin/profile-settings">
-              <img src="../assets/person.svg" alt="Your Company" class="h-12 w-auto" />
-              <span>Panel administrativo</span>
-            </router-link>
-          </div>
-        </div>
-      </div>
+
+      <router-link
+        to="/admin/profile-settings"
+        class="ml-auto inline-flex items-center gap-2 rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
+      >
+        <img src="../assets/person.svg" alt="Admin Icon" class="h-6 w-6 shrink-0" />
+        <span>Panel administrativo</span>
+      </router-link>
     </div>
-  </nav>
+  </header>
 </template>
 
 <script>

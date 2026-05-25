@@ -1,6 +1,5 @@
 <script setup>
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import RouteNavBar from '../components/RouteNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
