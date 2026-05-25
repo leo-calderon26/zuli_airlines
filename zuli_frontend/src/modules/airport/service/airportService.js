@@ -39,11 +39,6 @@ export const createAirport = async (airportData) => {
     }
 };
 
-export const getAirport = async (code) => {
-    const response = await axios.get(`${API_URL}/${code}`, { withCredentials: true });
-  return response.data;
-};
-
 export const updateAirport = async (code, airportData) => {
     const response = await axios.put(`${API_URL}/${code}`, airportData, { withCredentials: true });
   return response.data;

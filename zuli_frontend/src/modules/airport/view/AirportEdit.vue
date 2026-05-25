@@ -1,66 +1,48 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
 import AirportForm from '../components/AirportForm.vue';
 import AirportNavBar from '../components/AirportNavBar.vue';
-import { useAirport } from '../composable/useAirport';
 import { useAirportStore } from '../store/airportStore';
 
 const route = useRoute();
-const { fetchAirport } = useAirport();
 const airportStore = useAirportStore();
 
 const airportCode = computed(() => String(route.params.airportCode ?? ''));
 const readCachedAirport = () => {
+    const historyAirport = window.history.state?.airport;
+
+    if (historyAirport?.airportCode === airportCode.value) {
+        return historyAirport;
+    }
+
     const cachedAirport = sessionStorage.getItem('airportEditData');
 
     if (!cachedAirport) {
-        return null;
+        return airportStore.airports.find((airport) => airport.airportCode === airportCode.value) ?? null;
     }
 
     try {
         const parsedAirport = JSON.parse(cachedAirport);
 
-        return parsedAirport?.airportCode === airportCode.value ? parsedAirport : null;
+        if (parsedAirport?.airportCode === airportCode.value) {
+            return parsedAirport;
+        }
     } catch {
         sessionStorage.removeItem('airportEditData');
-        return null;
     }
+
+    return airportStore.airports.find((airport) => airport.airportCode === airportCode.value) ?? null;
 };
 
 const selectedAirport = ref(readCachedAirport());
-const isLoading = ref(!selectedAirport.value);
+const isLoading = ref(false);
 const notFoundMessage = ref('');
 
-onMounted(async () => {
-    notFoundMessage.value = '';
-
-    if (selectedAirport.value) {
-        return;
-    }
-
-    isLoading.value = true;
-
-    try {
-        const airport = await fetchAirport(airportCode.value);
-
-        selectedAirport.value = airport;
-        sessionStorage.setItem('airportEditData', JSON.stringify(airport));
-    } catch (error) {
-        if (!selectedAirport.value && error?.response?.status === 404) {
-            notFoundMessage.value = 'No se encontró el aeropuerto que deseas editar. Regresa a la lista y abre Edit desde allí.';
-            return;
-        }
-
-        if (!selectedAirport.value) {
-            notFoundMessage.value = 'No se pudo cargar el aeropuerto para editar. Intenta de nuevo desde la lista.';
-        }
-    } finally {
-        isLoading.value = false;
-    }
-});
+if (!selectedAirport.value) {
+    notFoundMessage.value = 'No se encontró el aeropuerto que deseas editar. Regresa a la lista y abre Edit desde allí.';
+}
 </script>
 
 <template>
