@@ -1,6 +1,6 @@
 <template>
     <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
-        <PublicNavBar />
+        <AdminNavBar />
 
         <main class="flex flex-1 items-start justify-center bg-[var(--color-secondary)] px-6 pb-36 pt-[140px]">
             <form
@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import PublicNavBar from "../../../shared/PublicNavBar.vue";
+import AdminNavBar from "../../../shared/AdminNavBar.vue";
 import PublicBottomBar from "../../../shared/PublicBottomBar.vue";
 import ErrorModal from "../../../shared/ErrorModal.vue";
 import SuccessModal from "../../../shared/SuccessModal.vue";
@@ -93,7 +93,7 @@ export default {
     name: "UserActivation",
 
     components: {
-        PublicNavBar,
+        AdminNavBar,
         PublicBottomBar,
         ErrorModal,
         SuccessModal,

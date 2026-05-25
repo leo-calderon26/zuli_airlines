@@ -1,16 +1,16 @@
 <template>
     <div class="landing-page">
-        <PublicNavBar />
+        <AdminNavBar />
                 <h1 class="message">Reportes en mantenimiento</h1>
     </div>
 </template>
 
 <script>
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import AdminNavBar from '../../../shared/AdminNavBar.vue';
 
 export default {
     components: {
-        PublicNavBar
+        AdminNavBar
     }
 }
 </script>
