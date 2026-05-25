@@ -59,5 +59,13 @@ namespace zuli_backend.Controllers
 
             return Ok(response);
         }
+
+        [HttpPut("{userId:guid}")]
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] RegisterUserRequestDTO request)
+        {
+            BasicResponseDTO response = await _userRegistrationService.UpdateUserAsync(userId, request);
+
+            return Ok(response);
+        }
     }
 }
