@@ -25,7 +25,6 @@ namespace zuli_backend.Tests
         private Mock<IUserRepository> _userRepoMock;
         private Mock<IServiceRepository> _serviceRepoMock;
         private Mock<IFlightPathFinder> _pathFinderMock;
-        private Mock<IFlightSearchMapper> _searchMapperMock;
         private Mock<IValidator<FlightDTO>> _flightValidatorMock;
         private Mock<IValidator<FlightSearchRequestDTO>> _searchValidatorMock;
         private Mock<IMapper> _mapperMock;
@@ -39,7 +38,6 @@ namespace zuli_backend.Tests
             _userRepoMock = new Mock<IUserRepository>();
             _serviceRepoMock = new Mock<IServiceRepository>();
             _pathFinderMock = new Mock<IFlightPathFinder>();
-            _searchMapperMock = new Mock<IFlightSearchMapper>();
             _flightValidatorMock = new Mock<IValidator<FlightDTO>>();
             _searchValidatorMock = new Mock<IValidator<FlightSearchRequestDTO>>();
             _mapperMock = new Mock<IMapper>();
@@ -49,7 +47,6 @@ namespace zuli_backend.Tests
                 _userRepoMock.Object,
                 _serviceRepoMock.Object,
                 _pathFinderMock.Object,
-                _searchMapperMock.Object,
                 _flightValidatorMock.Object,
                 _searchValidatorMock.Object,
                 _mapperMock.Object
@@ -104,7 +101,7 @@ namespace zuli_backend.Tests
             _flightRepoMock.Setup(r => r.GetAvailableFlights(It.IsAny<DateTime>(), It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(new List<RawFlightEntity>());
 
             _pathFinderMock.Setup(p => p.FindPaths(It.IsAny<PathFinderParametersDTO>())).Returns(new List<List<RawFlightEntity>>());
-            _searchMapperMock.Setup(m => m.MapToOptions(It.IsAny<List<List<RawFlightEntity>>>(), It.IsAny<string>())).Returns(new List<FlightSearchResponseDTO>());
+            _mapperMock.Setup(m => m.Map<List<FlightSearchResponseDTO>>(It.IsAny<List<List<RawFlightEntity>>>())).Returns(new List<FlightSearchResponseDTO>());
 
             var result = await _flightService.Search(request);
 
@@ -166,8 +163,7 @@ namespace zuli_backend.Tests
                 Stops = 0
             }).ToList();
 
-            _searchMapperMock.Setup(m => m.MapToOptions(It.IsAny<List<List<RawFlightEntity>>>(), It.IsAny<string>())).Returns(mockOptions);
-
+            _mapperMock.Setup(m => m.Map<List<FlightSearchResponseDTO>>(It.IsAny<List<List<RawFlightEntity>>>())).Returns(mockOptions);
 
             var result = await _flightService.Search(request);
 
@@ -194,7 +190,7 @@ namespace zuli_backend.Tests
                 new FlightSearchResponseDTO { TotalTouristPrice = 100, Stops = 0 },
             };
 
-            _searchMapperMock.Setup(m => m.MapToOptions(It.IsAny<List<List<RawFlightEntity>>>(), It.IsAny<string>())).Returns(mockOptions);
+            _mapperMock.Setup(m => m.Map<List<FlightSearchResponseDTO>>(It.IsAny<List<List<RawFlightEntity>>>())).Returns(mockOptions);
 
             var result = await _flightService.Search(request);
             var sortedFlights = result.DepartureFlights;
@@ -246,8 +242,8 @@ namespace zuli_backend.Tests
             {
                 new FlightSearchResponseDTO { TotalTouristPrice = 250, Stops = 0 }
             };
-            _searchMapperMock
-                .Setup(m => m.MapToOptions(It.IsAny<List<List<RawFlightEntity>>>(), It.IsAny<string>()))
+            _mapperMock
+                .Setup(m => m.Map<List<FlightSearchResponseDTO>>(It.IsAny<List<List<RawFlightEntity>>>()))
                 .Returns(mockOptions);
         }
 

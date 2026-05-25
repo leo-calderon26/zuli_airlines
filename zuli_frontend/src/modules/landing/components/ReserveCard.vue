@@ -15,7 +15,7 @@
             </li>
         </ul>
 
-        <div class="flex flex-wrap items-center gap-6 px-8 pt-6 text-sm text-slate-700">
+        <div class="flex flex-wrap items-center gap-6 px-8 pt-6 text-sm text-content-subtle">
             <label class="inline-flex items-center gap-2 cursor-pointer">
                 <input v-model="selectedFlightOption" type="radio" value="direct" class="accent-primary w-4 h-4" />
                 Vuelo directo
@@ -30,53 +30,53 @@
             <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_10rem_7rem_minmax(0,1.8fr)] lg:items-end">
                 
                 <div class="relative flex flex-col gap-1 z-50">
-                    <label class="text-xs font-semibold text-slate-700">Desde</label>
+                    <label class="text-xs font-semibold text-content-subtle">Desde</label>
                     <input v-model="fromCitySearch" type="text" placeholder="Ciudad o Aeropuerto..." autocomplete="off"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold"
-                        :class="errors.fromCity ? 'border-red-500' : 'border-slate-200'"
+                        class="rounded-md border bg-surface-input px-3 py-2 text-sm text-content focus:outline-none focus:border-gold transition"
+                        :class="errors.fromCity ? 'border-error' : 'border-border-light'"
                         @input="handleAirportInput('origin')" @blur="clearSuggestions('origin')" />
                     
-                    <div v-if="originSuggestions.length" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    <div v-if="originSuggestions.length" class="absolute left-0 right-0 top-full mt-1 bg-white border border-border-light rounded-md shadow-lg max-h-48 overflow-y-auto">
                         <button v-for="sug in originSuggestions" :key="sug.airportCode" type="button"
-                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition"
+                            class="w-full text-left px-3 py-2 text-sm hover:bg-body transition"
                             @mousedown.prevent="selectAirport('origin', sug)">
-                            <span class="font-bold">{{ sug.airportCode }}</span> - {{ sug.displayName }}
+                            <span class="font-bold text-heading">{{ sug.airportCode }}</span> - <span class="text-content">{{ sug.displayName }}</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="relative flex flex-col gap-1 z-40">
-                    <label class="text-xs font-semibold text-slate-700">Hacia</label>
+                    <label class="text-xs font-semibold text-content-subtle">Hacia</label>
                     <input v-model="toCitySearch" type="text" placeholder="Ciudad o Aeropuerto..." autocomplete="off"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold"
-                        :class="errors.toCity ? 'border-red-500' : 'border-slate-200'"
+                        class="rounded-md border bg-surface-input px-3 py-2 text-sm text-content focus:outline-none focus:border-gold transition"
+                        :class="errors.toCity ? 'border-error' : 'border-border-light'"
                         @input="handleAirportInput('destination')" @blur="clearSuggestions('destination')" />
                     
-                    <div v-if="destinationSuggestions.length" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    <div v-if="destinationSuggestions.length" class="absolute left-0 right-0 top-full mt-1 bg-white border border-border-light rounded-md shadow-lg max-h-48 overflow-y-auto">
                         <button v-for="sug in destinationSuggestions" :key="sug.airportCode" type="button"
-                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition"
+                            class="w-full text-left px-3 py-2 text-sm hover:bg-body transition"
                             @mousedown.prevent="selectAirport('destination', sug)">
-                            <span class="font-bold">{{ sug.airportCode }}</span> - {{ sug.displayName }}
+                            <span class="font-bold text-heading">{{ sug.airportCode }}</span> - <span class="text-content">{{ sug.displayName }}</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="flex min-w-0 flex-col gap-1">
-                    <label class="text-xs font-semibold text-slate-700">Salida</label>
+                    <label class="text-xs font-semibold text-content-subtle">Salida</label>
                     <input v-model="departureDate" type="date"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold"
-                        :class="errors.departureDate ? 'border-red-500' : 'border-slate-200'" />
+                        class="rounded-md border bg-surface-input px-3 py-2 text-sm text-content focus:outline-none focus:border-gold transition"
+                        :class="errors.departureDate ? 'border-error' : 'border-border-light'" />
                 </div>
 
                 <div class="flex min-w-0 flex-col gap-1">
-                    <label class="text-xs font-semibold text-slate-700">Asientos</label>
+                    <label class="text-xs font-semibold text-content-subtle">Asientos</label>
                     <input v-model="seatsCount" type="number" min="1" max="10"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-center text-sm text-slate-900 focus:outline-none focus:border-gold border-slate-200" />
+                        class="rounded-md border border-border-light bg-surface-input px-3 py-2 text-center text-sm text-content focus:outline-none focus:border-gold transition" />
                 </div>
 
                 <div class="flex min-w-0 flex-col gap-1">
-                    <label class="text-xs font-semibold text-slate-700">Clase</label>
-                    <select v-model="travelClass" class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold border-slate-200">
+                    <label class="text-xs font-semibold text-content-subtle">Clase</label>
+                    <select v-model="travelClass" class="rounded-md border border-border-light bg-surface-input px-3 py-2 text-sm text-content focus:outline-none focus:border-gold transition">
                         <option value="Turista">Turista</option>
                         <option value="Primera Clase">Primera Clase</option>
                     </select>
@@ -86,10 +86,10 @@
             <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)_10rem_7rem_minmax(0,1.8fr)] lg:items-end">
                 <div class="flex min-w-0 flex-col gap-1 lg:col-start-3 transition-all duration-300"
                      :class="activeTab === 'roundTrip' ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'">
-                    <label class="text-xs font-semibold text-slate-700">Regreso</label>
+                    <label class="text-xs font-semibold text-content-subtle">Regreso</label>
                     <input v-model="returnDate" type="date"
-                        class="rounded-md border bg-[#f7f7f7] px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-gold transition"
-                        :class="errors.returnDate ? 'border-red-500' : 'border-slate-200'" />
+                        class="rounded-md border bg-surface-input px-3 py-2 text-sm text-content focus:outline-none focus:border-gold transition"
+                        :class="errors.returnDate ? 'border-error' : 'border-border-light'" />
                 </div>
             </div>
 

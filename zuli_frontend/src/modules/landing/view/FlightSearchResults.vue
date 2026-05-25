@@ -17,7 +17,7 @@
                         | Pasajeros: {{ searchStore.searchParams.Seats || route.query.seats }} 
                     </p>
                 </div>
-               <router-link to="/" class="inline-block rounded-md bg-white/5 px-4 py-2 font-semibold text-white transition hover:bg-black/15">
+            <router-link to="/" class="inline-block rounded-md bg-white/5 px-4 py-2 font-semibold text-white transition hover:bg-black/15">
                     Modificar Búsqueda
                 </router-link>
             </div>
@@ -26,18 +26,18 @@
                 <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
             </div>
 
-            <div v-else-if="searchStore.error" class="bg-red-50 text-error p-6 rounded-xl border border-red-200 text-center font-semibold text-lg">
+            <div v-else-if="searchStore.error" class="bg-error-soft text-error p-6 rounded-xl border border-error-border text-center font-semibold text-lg">
                 {{ searchStore.error }}
             </div>
 
             <div v-else-if="searchStore.flightResults">
                 
                 <div v-if="!selectedDepartureFlight">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                    <h3 class="text-xl font-bold text-content mb-4 border-b border-border-light pb-2">
                         Selecciona tu vuelo de salida ({{ searchStore.searchParams.Origin }} a {{ searchStore.searchParams.Destination }})
                     </h3>
                     
-                    <div v-if="searchStore.flightResults.departureFlights?.length === 0" class="text-center py-12 text-gray-500 font-medium">
+                    <div v-if="searchStore.flightResults.departureFlights?.length === 0" class="text-center py-12 text-content-muted font-medium">
                         No se encontraron vuelos de salida para esta fecha y ruta.
                     </div>
 
@@ -56,7 +56,7 @@
                             size="sm">
                             Anterior
                         </AppButton>
-                        <span class="text-sm font-semibold text-gray-700">
+                        <span class="text-sm font-semibold text-content-subtle">
                             Página {{ searchStore.flightResults.currentPage }} de {{ searchStore.flightResults.totalPagesDeparture }}
                         </span>
                         <AppButton 
@@ -71,47 +71,47 @@
 
                 <div v-else-if="searchStore.searchParams.IsRoundTrip">
                     
-                    <div class="bg-slate-50 border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                    <div class="bg-surface-muted border border-border-light rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
                         
                         <div class="flex-1 w-full md:w-auto text-center md:text-left">
-                            <p class="text-sm text-gray-600 font-medium">Su viaje a:</p>
-                            <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ selectedDepartureFlight.flight.destination }}</h3>
+                            <p class="text-sm text-content-subtle font-medium">Su viaje a:</p>
+                            <h3 class="text-2xl font-bold text-heading mt-1">{{ selectedDepartureFlight.flight.destination }}</h3>
                         </div>
                         
-                        <div class="flex-[2] flex flex-col items-center w-full md:w-auto">
-                            <span class="text-sm font-medium text-gray-700 mb-1">
+                        <div class="flex-2 flex flex-col items-center w-full md:w-auto">
+                            <span class="text-sm font-medium text-content-subtle mb-1">
                                 {{ selectedDepartureFlight.flight.stops === 0 ? 'Directo' : selectedDepartureFlight.flight.stops + ' escala(s)' }}
                             </span>
-                            <div class="flex items-center gap-4 text-xl font-bold text-gray-900 w-full justify-center">
+                            <div class="flex items-center gap-4 text-xl font-bold text-heading w-full justify-center">
                                 <span>{{ selectedDepartureFlight.flight.departureTimeText }}</span>
                                 <div class="flex flex-col items-center w-24 md:w-40 relative">
-                                    <div class="absolute top-1/2 w-full border-t-[1.5px] border-dashed border-gray-400 -translate-y-1/2"></div>
-                                    <span class="text-xs text-gray-500 font-medium bg-slate-50 px-2 relative z-10">
+                                    <div class="absolute top-1/2 w-full border-t-[1.5px] border-dashed border-content-muted -translate-y-1/2"></div>
+                                    <span class="text-xs text-content-muted font-medium bg-surface-muted px-2 relative z-10">
                                         {{ selectedDepartureFlight.flight.totalDurationText }}
                                     </span>
                                 </div>
                                 <span>{{ selectedDepartureFlight.flight.arrivalTimeText }}</span>
                             </div>
-                            <div class="flex justify-between w-full md:w-64 text-sm text-gray-600 mt-1 font-bold">
+                            <div class="flex justify-between w-full md:w-64 text-sm text-content-subtle mt-1 font-bold">
                                 <span>{{ selectedDepartureFlight.flight.origin }}</span>
                                 <span>{{ selectedDepartureFlight.flight.destination }}</span>
                             </div>
                         </div>
 
-                        <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
-                            <p class="text-base font-semibold text-gray-800">{{ searchStore.searchParams.Date }}</p>
-                            <p class="text-sm text-gray-600 mt-1">Clase: <span class="font-bold text-content">{{ selectedDepartureFlight.travelClass }}</span></p>
-                            <button @click="clearDepartureSelection" class="text-primary font-bold text-sm mt-3 hover:text-gold hover:underline transition">
+                        <div class="flex-1 flex flex-col items-center md:items-end text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-border-light pt-4 md:pt-0 md:pl-6">
+                            <p class="text-base font-semibold text-content">{{ searchStore.searchParams.Date }}</p>
+                            <p class="text-sm text-content-subtle mt-1">Clase: <span class="font-bold text-content">{{ selectedDepartureFlight.travelClass }}</span></p>
+                            <AppButton @click="clearDepartureSelection" variant="link" class="mt-3 text-sm font-bold">
                                 Cambiar vuelo
-                            </button>
+                            </AppButton>
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
+                    <h3 class="text-xl font-bold text-content mb-4 border-b border-border-light pb-2">
                         Selecciona tu vuelo de regreso ({{ searchStore.searchParams.Destination }} a {{ searchStore.searchParams.Origin }})
                     </h3>
                     
-                    <div v-if="searchStore.flightResults.returnFlights?.length === 0" class="text-center py-12 text-gray-500 font-medium">
+                    <div v-if="searchStore.flightResults.returnFlights?.length === 0" class="text-center py-12 text-content-muted font-medium">
                         No se encontraron vuelos de regreso para esta fecha y ruta.
                     </div>
 
@@ -130,7 +130,7 @@
                             size="sm">
                             Anterior
                         </AppButton>
-                        <span class="text-sm font-semibold text-gray-700">
+                        <span class="text-sm font-semibold text-content-subtle">
                             Página {{ searchStore.flightResults.currentPage }} de {{ searchStore.flightResults.totalPagesReturn }}
                         </span>
                         <AppButton 

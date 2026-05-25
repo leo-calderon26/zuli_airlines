@@ -11,6 +11,7 @@ using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
+using zuli_Data.Exceptions;
 
 namespace zuli_Business
 {
@@ -23,7 +24,6 @@ namespace zuli_Business
         private readonly IUserRepository _userRepository;
         private readonly IServiceRepository _serviceRepository;
         private readonly IFlightPathFinder _pathFinder;
-        private readonly IFlightSearchMapper _flightSearchMapper;
         private readonly FluentValidation.IValidator<FlightDTO> _validator;
         private readonly FluentValidation.IValidator<FlightSearchRequestDTO> _searchValidator;
         private readonly IMapper _mapper;
@@ -33,7 +33,6 @@ namespace zuli_Business
             IUserRepository userRepository,
             IServiceRepository serviceRepository,
             IFlightPathFinder pathFinder,
-            IFlightSearchMapper flightSearchMapper,
             FluentValidation.IValidator<FlightDTO> validator,
             FluentValidation.IValidator<FlightSearchRequestDTO> searchValidator,
             IMapper mapper)
@@ -42,7 +41,6 @@ namespace zuli_Business
             _userRepository = userRepository; 
             _serviceRepository = serviceRepository;
             _pathFinder = pathFinder; 
-            _flightSearchMapper = flightSearchMapper;
             _validator = validator; 
             _searchValidator = searchValidator; 
             _mapper = mapper;
@@ -94,7 +92,10 @@ namespace zuli_Business
         public async Task<FlightDTO?> GetFlightById(Guid id)
         {
             var flight = await _repository.GetFlightById(id);
-            if (flight == null) return null;
+            if (flight == null)
+            {
+            throw new ZuliNotFoundException($"No se encontró el vuelo con el identificador {id}");
+            }
 
             var dto = _mapper.Map<FlightDTO>(flight);
             dto.BusinessId = await _userRepository.GetBusinessId(flight.AdminId);
@@ -109,40 +110,27 @@ namespace zuli_Business
             var validationResult = await _searchValidator.ValidateAsync(request);
             validationResult.ThrowIfInvalid();
 
-            FlightPaginatedResponseDTO response = new FlightPaginatedResponseDTO { CurrentPage = request.Page };
+            var response = new FlightPaginatedResponseDTO { CurrentPage = request.Page };
 
-            await AssignDepartureFlights(response, request);
+            var departureRoutes = await FindConfiguredRoutes(request.Origin, request.Destination, request.Date, request);
+            
+            response.TotalRecordsDeparture = departureRoutes.TotalRecords;
+            response.TotalPagesDeparture = departureRoutes.TotalPages;
+            response.DepartureFlights = departureRoutes.Flights;
 
             if (request.IsRoundTrip && request.ReturnDate.HasValue)
             {
-                await AssignReturnFlights(response, request);
+                var returnRoutes = await FindConfiguredRoutes(request.Destination, request.Origin, request.ReturnDate.Value, request);
+                
+                response.TotalRecordsReturn = returnRoutes.TotalRecords;
+                response.TotalPagesReturn = returnRoutes.TotalPages;
+                response.ReturnFlights = returnRoutes.Flights;
             }
 
             return response;
         }
 
-        private async Task AssignDepartureFlights(FlightPaginatedResponseDTO response, FlightSearchRequestDTO request)
-        {
-            var result = await FindConfiguredRoutes(request.Origin, request.Destination, request.Date, request);
-            response.TotalRecordsDeparture = result.TotalRecords;
-            response.TotalPagesDeparture = result.TotalPages;
-            response.DepartureFlights = result.Flights;
-        }
-
-        private async Task AssignReturnFlights(FlightPaginatedResponseDTO response, FlightSearchRequestDTO request)
-        {
-            if (request.ReturnDate == null)
-            {
-                return;
-            }
-
-            var result = await FindConfiguredRoutes(request.Destination, request.Origin, request.ReturnDate.Value, request);
-            response.TotalRecordsReturn = result.TotalRecords;
-            response.TotalPagesReturn = result.TotalPages;
-            response.ReturnFlights = result.Flights;
-        }
-
-        private async Task<(List<FlightSearchResponseDTO> Flights, int TotalRecords, int TotalPages)> FindConfiguredRoutes(
+        private async Task<PaginatedFlightListDTO> FindConfiguredRoutes(
             string origin, string destination, DateTime targetDate, FlightSearchRequestDTO request)
         {
             List<RawFlightEntity> rawFlights = await FetchAvailableFlights(targetDate, request.Seats);
@@ -158,8 +146,7 @@ namespace zuli_Business
             };
 
             List<List<RawFlightEntity>> validPaths = _pathFinder.FindPaths(criteria);
-            List<FlightSearchResponseDTO> formattedOptions = _flightSearchMapper.MapToOptions(validPaths, request.FlightClass);
-
+            List<FlightSearchResponseDTO> formattedOptions = _mapper.Map<List<FlightSearchResponseDTO>>(validPaths);
             return PaginateResults(formattedOptions, request.Page, request.PageSize);
         }
 
@@ -171,7 +158,7 @@ namespace zuli_Business
             return dayOneFlights.Concat(dayTwoFlights).ToList();
         }
 
-        private (List<FlightSearchResponseDTO> Flights, int TotalRecords, int TotalPages) PaginateResults(
+        private PaginatedFlightListDTO PaginateResults(
             List<FlightSearchResponseDTO> allOptions, int page, int pageSize)
         {
             int totalRecords = allOptions.Count;
@@ -185,7 +172,12 @@ namespace zuli_Business
                 .Take(pageSize)
                 .ToList();
 
-            return (paginatedFlights, totalRecords, totalPages);
+            return new PaginatedFlightListDTO
+            {
+                Flights = paginatedFlights,
+                TotalRecords = totalRecords,
+                TotalPages = totalPages
+            };
         }
     }
 }

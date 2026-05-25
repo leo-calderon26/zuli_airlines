@@ -153,9 +153,9 @@ builder.Services.AddScoped<zuli_Business.Validation.IValidator<FlightRouteDTO>, 
 
 // Flight search utils
 builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
-builder.Services.AddScoped<IFlightSearchMapper, FlightSearchMapper>();
 
 var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(typeof(FlightService).Assembly); 
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
