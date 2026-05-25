@@ -131,6 +131,41 @@ namespace zuli_Business
             };
         }
 
+        public async Task<BasicResponseDTO> UpdateUserAsync(Guid userId, RegisterUserRequestDTO request)
+        {
+            ValidateUpdateRequest(request);
+
+            AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
+
+            if (existingUser == null)
+            {
+                throw new ZuliNotFoundException($"No existe un usuario con id {userId}.");
+            }
+
+            string businessEmail = request.BusinessEmail.Trim().ToLower();
+            AppUser? userByEmail = await _userRepository.GetByBusinessEmailAsync(businessEmail);
+
+            if (userByEmail != null && userByEmail.UserId != userId)
+            {
+                ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
+            }
+
+            existingUser.FirstName = request.FirstName.Trim();
+            existingUser.FirstLastName = request.FirstLastName.Trim();
+            existingUser.SecondLastName = request.SecondLastName.Trim();
+            existingUser.BusinessEmail = businessEmail;
+            existingUser.Email = businessEmail;
+            existingUser.UserRole = request.UserRole.Trim();
+
+            await _userRepository.UpdateUserAsync(existingUser);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Usuario actualizado correctamente."
+            };
+        }
+
         private async Task ValidateUniqueUserAsync(string nationalId, string businessEmail)
         {
             AppUser? userByNationalId = await _userRepository.GetByNationalIdAsync(nationalId);
@@ -247,6 +282,79 @@ namespace zuli_Business
                 "nationalId" => "nationalId",
                 _ => "all"
             };
+        }
+
+        private static void ValidateUpdateRequest(RegisterUserRequestDTO? request)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            if (request == null)
+            {
+                errors["request"] = new List<string>
+                {
+                    "Solicitud inválida."
+                };
+
+                throw new ZuliValidationException(errors);
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NationalId))
+            {
+                errors["nationalId"] = new List<string> { "La cédula es obligatoria." };
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(request.NationalId.Trim(), @"^\d{9}$"))
+            {
+                errors["nationalId"] = new List<string> { "La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones." };
+            }
+
+            if (string.IsNullOrWhiteSpace(request.BusinessEmail))
+            {
+                errors["businessEmail"] = new List<string> { "El correo institucional es obligatorio." };
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(request.BusinessEmail.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                errors["businessEmail"] = new List<string> { "El correo institucional no tiene un formato válido." };
+            }
+
+            ValidateTextField("firstName", request.FirstName, "El primer nombre", errors);
+            ValidateTextField("firstLastName", request.FirstLastName, "El primer apellido", errors);
+            ValidateTextField("secondLastName", request.SecondLastName, "El segundo apellido", errors);
+            ValidateUserRole(request.UserRole, errors);
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
+
+        private static void ValidateTextField(string fieldName, string value, string displayName, Dictionary<string, List<string>> errors)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                errors[fieldName] = new List<string> { $"{displayName} es obligatorio." };
+                return;
+            }
+
+            if (value.Trim().Length > 50)
+            {
+                errors[fieldName] = new List<string> { $"{displayName} no puede superar los 50 caracteres." };
+            }
+        }
+
+        private static void ValidateUserRole(string userRole, Dictionary<string, List<string>> errors)
+        {
+            if (string.IsNullOrWhiteSpace(userRole))
+            {
+                errors["userRole"] = new List<string> { "El tipo de usuario es obligatorio." };
+                return;
+            }
+
+            string trimmedRole = userRole.Trim();
+
+            if (trimmedRole != "Administrator" && trimmedRole != "Operator")
+            {
+                errors["userRole"] = new List<string> { "El tipo de usuario no es válido." };
+            }
         }
 
     }

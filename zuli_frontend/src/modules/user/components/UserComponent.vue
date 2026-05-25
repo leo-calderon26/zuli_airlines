@@ -8,6 +8,7 @@ import AppTable from '../../../shared/AppTable.vue';
 const router = useRouter();
 const userStore = useUserStore();
 const { fetchUsersPaginated } = useUser();
+const canManageUsers = sessionStorage.getItem('userRole') === 'Administrator';
 
 const search = ref('');
 const searchType = ref('name');
@@ -40,8 +41,17 @@ function goToCreateUser() {
     router.push({ name: 'userCreate' });
 }
 
-function goToUserDetails(userId) {
-    console.log('User details pending:', userId);
+function cacheUserForEdit(user) {
+    sessionStorage.setItem('userEditData', JSON.stringify(user));
+}
+
+function goToUserEdit(user) {
+    cacheUserForEdit(user);
+    router.push({
+        name: 'userEdit',
+        params: { userId: user.userId },
+        state: { user }
+    });
 }
 
 function formatRole(userRole) {
@@ -88,6 +98,7 @@ function formatRole(userRole) {
             </select>
         </div>
         <button
+            v-if="canManageUsers"
             type="button"
             class="bg-primary hover:bg-select text-white font-semibold hover:text-white py-2 px-4 border hover:border-transparent rounded hover:cursor-pointer text-center"
             @click="goToCreateUser"
@@ -101,7 +112,7 @@ function formatRole(userRole) {
         <th scope="col" class="px-8 py-4 font-medium">Apellidos</th>
         <th scope="col" class="px-8 py-4 font-medium">Correo</th>
         <th scope="col" class="px-8 py-4 font-medium">Rol</th>
-        <th scope="col" class="px-8 py-4 font-medium">Detalles</th>
+        <th v-if="canManageUsers" scope="col" class="px-8 py-4 font-medium">Editar</th>
     </template>
 
     <tr v-for="user in userStore.users" :key="user.userId" class="border-b border-gray-200 bg-white hover:bg-gray-50">
@@ -117,13 +128,13 @@ function formatRole(userRole) {
         <td class="px-8 py-5">
             <p>{{ formatRole(user.userRole) }}</p>
         </td>
-        <td class="px-8 py-5">
+        <td v-if="canManageUsers" class="px-8 py-5">
             <button
                 type="button"
                 class="font-medium text-gold hover:underline"
-                @click="goToUserDetails(user.userId)"
+                @click="goToUserEdit(user)"
             >
-                Detalles
+                Edit
             </button>
         </td>
     </tr>

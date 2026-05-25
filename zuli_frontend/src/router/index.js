@@ -29,6 +29,7 @@ import Login from '../modules/auth/view/Login.vue'
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 import UserList from "../modules/user/view/UserList.vue";
 import UserCreate from "../modules/user/view/UserCreate.vue";
+import UserEdit from "../modules/user/view/UserEdit.vue";
 import UserActivation from "../modules/user/view/UserActivation.vue";
 
 
@@ -148,6 +149,12 @@ const router = createRouter({
             meta: {requiresAuth: true, adminRequired: true},
             component: UserCreate
             
+        },
+        {
+            path: "/admin/edit-user/:userId",
+            name: "userEdit",
+            component: UserEdit,
+            meta: {requiresAuth: true, adminRequired: true}
         },
         {
             path: "/users/activation",

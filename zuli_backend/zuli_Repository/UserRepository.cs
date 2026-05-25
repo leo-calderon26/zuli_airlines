@@ -80,6 +80,39 @@ namespace zuli_Repository
             );
         }
 
+        public async Task<AppUser?> GetByUserIdAsync(Guid userId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            var sql = @"
+                SELECT
+                    au.UserId,
+                    au.PersonId,
+                    p.NationalId,
+                    p.FirstName,
+                    p.FirstLastName,
+                    p.SecondLastName,
+                    p.Email,
+                    au.BusinessEmail,
+                    au.BusinessId,
+                    au.UserRole,
+                    au.PasswordHash,
+                    au.IsActive,
+                    au.FailedLoginAttempts,
+                    au.LockoutEnd,
+                    au.ManagedByAdminId,
+                    au.ActivationTokenHash
+                FROM AirlineUser au
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                WHERE au.UserId = @UserId;
+            ";
+
+            return await connection.QuerySingleOrDefaultAsync<AppUser>(
+                sql,
+                new { UserId = userId }
+            );
+        }
+
         public async Task<AppUser?> GetByActivationTokenHashAsync(string activationTokenHash)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -221,6 +254,46 @@ namespace zuli_Repository
             ";
 
             await connection.ExecuteAsync(sql, user);
+        }
+
+        public async Task UpdateUserAsync(AppUser user)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var personSql = @"
+                    UPDATE Person
+                    SET
+                        FirstName = @FirstName,
+                        FirstLastName = @FirstLastName,
+                        SecondLastName = @SecondLastName,
+                        Email = @Email
+                    WHERE PersonId = @PersonId;
+                ";
+
+                var userSql = @"
+                    UPDATE AirlineUser
+                    SET
+                        BusinessEmail = @BusinessEmail,
+                        UserRole = @UserRole
+                    WHERE UserId = @UserId;
+                ";
+
+                await connection.ExecuteAsync(personSql, user, transaction);
+                await connection.ExecuteAsync(userSql, user, transaction);
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
         public async Task<bool> IsAdmin(string businesId)
         {
