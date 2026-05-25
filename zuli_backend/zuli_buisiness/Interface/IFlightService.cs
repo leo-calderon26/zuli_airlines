@@ -8,7 +8,7 @@ namespace zuli_Business.Interface
     public interface IFlightService
     {
         Task<BasicResponseDTO> CreateFlight(FlightDTO flight);
-        // Task<IEnumerable<FlightDTO>> GetAllFlights();
+        Task<IEnumerable<FlightDTO>> GetAllFlights();
         Task<FlightDTO?> GetFlightById(Guid id);
         Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request);
     }
