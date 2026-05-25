@@ -26,5 +26,9 @@ namespace zuli_backend.Controllers
         [HttpGet("GetPaginated")]
         public async Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetPaginated(int pageNumber = 1, int pageSize = 10)
             => await _service.GetAircraftsPaginated(pageNumber, pageSize);
+
+        [HttpPut("{aircraftId:guid}")]
+        public async Task<ActionResult<BasicResponseDTO>> Update(Guid aircraftId, [FromBody] AircraftDTO aircraft)
+            => await _service.UpdateAircraft(aircraftId, aircraft);
     }
 }

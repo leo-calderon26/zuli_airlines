@@ -7,6 +7,7 @@ import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import AircraftEdit from "../modules/aircraft/view/AircraftEdit.vue"
 
 import AirportList from "../modules/airport/view/AirportList.vue";
 import AirportCreate from '../modules/airport/view/AirportCreate.vue'
@@ -65,6 +66,12 @@ const router = createRouter({
             path: "/admin/create-aircraft",
             name: "createAircraft",
             component: AircraftCreate,
+            meta: {requiresAuth: true, adminRequired: true}
+        },
+        {
+            path: "/admin/edit-aircraft/:aircraftId",
+            name: "editAircraft",
+            component: AircraftEdit,
             meta: {requiresAuth: true, adminRequired: true}
         },
         {

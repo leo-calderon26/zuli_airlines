@@ -49,6 +49,14 @@ namespace zuli_Repository
             var count = await connection.ExecuteScalarAsync<int>(sql, new { model });
             return count > 0;
         }
+
+        public async Task<bool> AlreadyExistByModelExcludingId(string model, Guid aircraftId)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = "SELECT COUNT(1) FROM Aircraft WHERE model = @model AND aircraftId <> @aircraftId";
+            var count = await connection.ExecuteScalarAsync<int>(sql, new { model, aircraftId });
+            return count > 0;
+        }
         public async Task<IEnumerable<AircraftEntity>> GetAll()
         {
             using var connection = _context.CreateConnection();
@@ -77,6 +85,42 @@ namespace zuli_Repository
             
             var aircrafts = (await connection.QueryAsync<AircraftEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
             return (aircrafts, totalCount);
+        }
+
+        public async Task<AircraftEntity?> GetById(Guid aircraftId)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = "SELECT * FROM Aircraft WHERE aircraftId = @aircraftId";
+            return await connection.QuerySingleOrDefaultAsync<AircraftEntity>(sql, new { aircraftId });
+        }
+
+        public async Task UpdateAircraft(AircraftEntity aircraft)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                UPDATE Aircraft
+                SET
+                    model = @model,
+                    weight = @weight,
+                    baggageCapacity = @baggageCapacity,
+                    numberEconomyClassRows = @numberEconomyClassRows,
+                    numberSeatingRowsEconomy = @numberSeatingRowsEconomy,
+                    numberFirstClassRows = @numberFirstClassRows,
+                    numberSeatingRowsFirst = @numberSeatingRowsFirst
+                WHERE aircraftId = @aircraftId";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                aircraft.aircraftId,
+                aircraft.model,
+                aircraft.weight,
+                aircraft.baggageCapacity,
+                aircraft.numberEconomyClassRows,
+                aircraft.numberSeatingRowsEconomy,
+                aircraft.numberFirstClassRows,
+                aircraft.numberSeatingRowsFirst,
+            });
         }
 
         public async Task<bool> IsAdmin(Guid userId)

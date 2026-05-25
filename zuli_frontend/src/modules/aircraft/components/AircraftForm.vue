@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAircraft } from '../composable/useAircraft';
 import ErrorModal from '../../../shared/ErrorModal.vue';
@@ -9,8 +9,19 @@ import AppInput from '../../../shared/AppInput.vue';
 import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
+const props = defineProps({
+    aircraft: {
+        type: Object,
+        default: null
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const router = useRouter();
-const { addAircraft } = useAircraft();
+const { addAircraft, updateAircraft } = useAircraft();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
 
 const form = reactive({
@@ -23,6 +34,27 @@ const form = reactive({
 });
 
 const modelPattern = /^[A-Za-z0-9-]{1,15}$/;
+
+function syncForm(aircraft) {
+    if (!aircraft) {
+        return;
+    }
+
+    form.model = aircraft.model ?? '';
+    form.weight = aircraft.weight ?? '';
+    form.numberEconomyClassRows = aircraft.numberEconomyClassRows ?? 0;
+    form.numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy ?? 0;
+    form.numberFirstClassRows = aircraft.numberFirstClassRows ?? 0;
+    form.numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst ?? 0;
+}
+
+watch(
+    () => props.aircraft,
+    (aircraft) => {
+        syncForm(aircraft);
+    },
+    { immediate: true, deep: true }
+);
 
 const totalSeats = computed(() => {
     const econ = Number(form.numberEconomyClassRows) * Number(form.numberSeatingRowsEconomy);
@@ -76,9 +108,14 @@ async function submit() {
             businessId: data.businessId,
         };
 
-        await addAircraft(aircraft);
-        onSuccess('La aeronave se ha creado correctamente');
-    }, 'Error al crear la aeronave');
+        if (props.isEdit) {
+            await updateAircraft(props.aircraft?.aircraftId, aircraft);
+            onSuccess('La aeronave se ha actualizado correctamente');
+        } else {
+            await addAircraft(aircraft);
+            onSuccess('La aeronave se ha creado correctamente');
+        }
+    }, props.isEdit ? 'Error al actualizar la aeronave' : 'Error al crear la aeronave');
 }
 
 function onSuccessClose() {
@@ -113,7 +150,7 @@ function onSuccessClose() {
         <div v-if="errors.fields.totalSeats" class="mt-2 text-sm text-error">{{ errors.fields.totalSeats }}</div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Guardar aeronave</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading">{{ props.isEdit ? 'Guardar' : 'Guardar aeronave' }}</AppButton>
         </div>
     </form>
 

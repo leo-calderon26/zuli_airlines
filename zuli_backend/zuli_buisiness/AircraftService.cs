@@ -105,5 +105,43 @@ namespace zuli_Business
                 Data = aircraftDTOs
             };
         }
+
+        public async Task<BasicResponseDTO> UpdateAircraft(Guid aircraftId, AircraftDTO aircraft)
+        {
+            _validator.ValidateAircraftInfo(aircraft);
+
+            if (!await _userRepository.IsAdmin(aircraft.businessId))
+            {
+                throw new ZuliUnauthorizedException($"No tiene permisos para actualizar la aeronave {aircraftId}");
+            }
+
+            var existingAircraft = await _repository.GetById(aircraftId);
+
+            if (existingAircraft == null)
+            {
+                throw new ZuliNotFoundException($"No existe una aeronave con id {aircraftId}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(aircraft.model) && await _repository.AlreadyExistByModelExcludingId(aircraft.model, aircraftId))
+            {
+                throw new ZuliValidationException(AircraftAtributes.MODEL, $"Ya existe una aeronave con el mismo nombre {aircraft.model}");
+            }
+
+            existingAircraft.model = aircraft.model;
+            existingAircraft.weight = aircraft.weight;
+            existingAircraft.numberEconomyClassRows = aircraft.numberEconomyClassRows;
+            existingAircraft.numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy;
+            existingAircraft.numberFirstClassRows = aircraft.numberFirstClassRows;
+            existingAircraft.numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst;
+            existingAircraft.baggageCapacity = aircraft.baggageCapacity;
+
+            await _repository.UpdateAircraft(existingAircraft);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = 200,
+                Message = "Se actualizó la aeronave correctamente"
+            };
+        }
     }
 }
