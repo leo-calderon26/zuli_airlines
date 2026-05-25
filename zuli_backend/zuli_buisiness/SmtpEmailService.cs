@@ -62,7 +62,153 @@ namespace zuli_Business
                 toEmail
             );
         }
+        public async Task SendInvoiceEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            string invoiceBody)
+        {
+            string safeBuyerName = WebUtility.HtmlEncode(buyerName);
+            string safeReservationCode = WebUtility.HtmlEncode(reservationCode);
 
+            using var message = new MailMessage();
+
+            message.From = new MailAddress(
+                _emailSettings.FromEmail,
+                _emailSettings.FromName
+            );
+
+            message.To.Add(toEmail);
+            message.Subject = $"Factura de compra - Reserva {reservationCode}";
+            message.IsBodyHtml = true;
+            message.Body = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif; color: #1f2937; background-color: #f3f3f3; padding: 24px;'>
+                        <div style='max-width: 650px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;'>
+                            <div style='background-color: #711717; padding: 20px; text-align: center;'>
+                                <h2 style='color: #ffffff; margin: 0;'>Zuli Airlines</h2>
+                            </div>
+
+                            <div style='padding: 28px;'>
+                                <h3>Factura de compra</h3>
+
+                                <p>Hola {safeBuyerName},</p>
+
+                                <p>
+                                    Adjuntamos el detalle de la factura correspondiente a su compra.
+                                </p>
+
+                                <p>
+                                    <strong>Código de reserva:</strong> {safeReservationCode}
+                                </p>
+
+                                {invoiceBody}
+
+                                <br />
+
+                                <p>Atentamente,</p>
+                                <p><strong>Zuli Airlines</strong></p>
+                            </div>
+                        </div>
+                    </body>
+                </html>";
+
+            using var smtpClient = new SmtpClient(
+                _emailSettings.SmtpHost,
+                _emailSettings.SmtpPort
+            )
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(
+                    _emailSettings.SmtpUser,
+                    _emailSettings.SmtpPassword
+                )
+            };
+
+            await smtpClient.SendMailAsync(message);
+
+            _logger.LogInformation(
+                "Invoice email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
+
+        public async Task SendPurchaseConfirmationEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            string confirmationBody)
+        {
+            string safeBuyerName = WebUtility.HtmlEncode(buyerName);
+            string safeReservationCode = WebUtility.HtmlEncode(reservationCode);
+
+            using var message = new MailMessage();
+
+            message.From = new MailAddress(
+                _emailSettings.FromEmail,
+                _emailSettings.FromName
+            );
+
+            message.To.Add(toEmail);
+            message.Subject = $"Confirmación de compra - Reserva {reservationCode}";
+            message.IsBodyHtml = true;
+            message.Body = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif; color: #1f2937; background-color: #f3f3f3; padding: 24px;'>
+                        <div style='max-width: 650px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;'>
+                            <div style='background-color: #711717; padding: 20px; text-align: center;'>
+                                <h2 style='color: #ffffff; margin: 0;'>Zuli Airlines</h2>
+                            </div>
+
+                            <div style='padding: 28px;'>
+                                <h3>Confirmación de compra</h3>
+
+                                <p>Hola {safeBuyerName},</p>
+
+                                <p>
+                                    Felicitaciones, su compra fue confirmada exitosamente.
+                                </p>
+
+                                <p>
+                                    <strong>Código de reserva:</strong> {safeReservationCode}
+                                </p>
+
+                                <p>
+                                    Puede utilizar este código junto con sus apellidos para procesos posteriores como consulta de reserva o check-in.
+                                </p>
+
+                                {confirmationBody}
+
+                                <br />
+
+                                <p>Atentamente,</p>
+                                <p><strong>Zuli Airlines</strong></p>
+                            </div>
+                        </div>
+                    </body>
+                </html>";
+
+            using var smtpClient = new SmtpClient(
+                _emailSettings.SmtpHost,
+                _emailSettings.SmtpPort
+            )
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(
+                    _emailSettings.SmtpUser,
+                    _emailSettings.SmtpPassword
+                )
+            };
+
+            await smtpClient.SendMailAsync(message);
+
+            _logger.LogInformation(
+                "Purchase confirmation email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
         private void ValidateEmailSettings()
         {
             if (string.IsNullOrWhiteSpace(_emailSettings.SmtpHost))
