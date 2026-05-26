@@ -6,6 +6,7 @@ import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
 import AppInput from '../../../shared/AppInput.vue';
 import AppAutocomplete from '../../../shared/AppAutocomplete.vue';
+import { onMounted } from 'vue';
 import { useRouteForm } from '../composable/useRouteForm.js';
 
 const {
@@ -22,6 +23,8 @@ const {
   destinationSuggestions,
   aircraftList,
   aircraftLoading,
+  aircraftList,
+  aircraftLoading,
   getSuggestionCode,
   getSuggestionLabel,
   handleAirportInput,
@@ -29,7 +32,12 @@ const {
   submit,
   onSuccessClose,
   fetchAircraftList,
+  fetchAircraftList,
 } = useRouteForm();
+
+onMounted(() => {
+  fetchAircraftList();
+});
 
 onMounted(() => {
   fetchAircraftList();
@@ -83,8 +91,28 @@ onMounted(() => {
                 :class="{ 'border-error text-error': errors.fields.departureTime }"
               />
               <p v-if="errors.fields.departureTime" class="mt-1 text-sm text-error">{{ errors.fields.departureTime }}</p>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-content">Hora de salida</label>
+              <input
+                v-model="form.departureTime"
+                type="time"
+                step="60"
+                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                :class="{ 'border-error text-error': errors.fields.departureTime }"
+              />
+              <p v-if="errors.fields.departureTime" class="mt-1 text-sm text-error">{{ errors.fields.departureTime }}</p>
             </div>
 
+            <div>
+              <label class="mb-2 block text-sm font-medium text-content">Hora de llegada</label>
+              <input
+                v-model="form.arrivalTime"
+                type="time"
+                step="60"
+                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                :class="{ 'border-error text-error': errors.fields.arrivalTime }"
+              />
+              <p v-if="errors.fields.arrivalTime" class="mt-1 text-sm text-error">{{ errors.fields.arrivalTime }}</p>
             <div>
               <label class="mb-2 block text-sm font-medium text-content">Hora de llegada</label>
               <input

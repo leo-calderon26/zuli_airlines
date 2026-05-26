@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
@@ -22,6 +22,7 @@ const props = defineProps({
 const router = useRouter();
 const { createUser, updateUser } = useUser();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
+const isAdministrator = computed(() => (sessionStorage.getItem('userRole') ?? '') === 'Administrator');
 
 const form = reactive({
     userId: '',
@@ -45,6 +46,18 @@ function syncForm(user) {
     form.firstLastName = user.firstLastName ?? '';
     form.secondLastName = user.secondLastName ?? '';
     form.userRole = user.userRole ?? '';
+}
+
+function canEditField(fieldName) {
+    if (!props.isEdit) {
+        return true;
+    }
+
+    if (isAdministrator.value) {
+        return true;
+    }
+
+    return fieldName === 'businessEmail';
 }
 
 watch(
@@ -125,21 +138,25 @@ function onSuccessClose() {
 
 <template>
     <form class="relative z-10 w-full max-w-180 rounded-md bg-white px-9 py-9 shadow-md" @submit.prevent="submit">
+        <p v-if="props.isEdit && !isAdministrator" class="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Como operario, solo puedes editar el correo institucional. El formulario permanece visible, pero el resto de campos está bloqueado.
+        </p>
+
         <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
             <div class="md:col-span-2">
-                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="props.isEdit" />
+                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="!canEditField('nationalId')" />
             </div>
 
-            <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" />
-            <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" />
+            <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" :disabled="!canEditField('firstName')" />
+            <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" :disabled="!canEditField('firstLastName')" />
 
             <div class="md:col-span-2">
-                <AppInput v-model="form.secondLastName" label="Segundo Apellido" maxlength="50" placeholder="Ej. Alexander" :error="errors.fields.secondLastName" />
+                <AppInput v-model="form.secondLastName" label="Segundo Apellido" maxlength="50" placeholder="Ej. Alexander" :error="errors.fields.secondLastName" :disabled="!canEditField('secondLastName')" />
             </div>
         </div>
 
         <div class="mt-5">
-            <AppInput v-model="form.businessEmail" label="Correo" placeholder="j.smith@zuliairlines.com" type="email" :error="errors.fields.businessEmail" />
+            <AppInput v-model="form.businessEmail" label="Correo" placeholder="j.smith@zuliairlines.com" type="email" :error="errors.fields.businessEmail" :disabled="!canEditField('businessEmail')" />
         </div>
 
         <div class="mt-5">
@@ -148,6 +165,7 @@ function onSuccessClose() {
                 v-model="form.userRole"
                 class="h-10 w-full rounded-md border border-secondary bg-body px-4 text-[15px] text-content outline-none transition hover:cursor-pointer focus:border-primary"
                 :class="{ 'border-error text-error': errors.fields.userRole }"
+                :disabled="!canEditField('userRole')"
             >
                 <option value="" disabled>Asignar Rol de Acceso</option>
                 <option value="Administrator">Administrador</option>

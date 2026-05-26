@@ -73,7 +73,7 @@ const router = createRouter({
             path: "/admin/edit-aircraft/:aircraftId",
             name: "editAircraft",
             component: AircraftEdit,
-            meta: {requiresAuth: true, adminRequired: true}
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/admin/flights",
@@ -95,7 +95,7 @@ const router = createRouter({
             path: "/admin/edit-airport/:airportCode",
             name: "editAirport",
             component: AirportEdit,
-            meta: {requiresAuth: true, adminRequired: true}
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/check-in",
@@ -157,7 +157,7 @@ const router = createRouter({
             path: "/admin/edit-user/:userId",
             name: "userEdit",
             component: UserEdit,
-            meta: {requiresAuth: true, adminRequired: true}
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/users/activation",
