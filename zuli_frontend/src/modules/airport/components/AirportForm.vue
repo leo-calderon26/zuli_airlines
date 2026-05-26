@@ -23,6 +23,7 @@ const props = defineProps({
 const router = useRouter();
 const { addAirport, updateAirport } = useAirport();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
+const isAdministrator = () => (sessionStorage.getItem('userRole') ?? '') === 'Administrator';
 
 const form = reactive({
     airportCode: '',
@@ -40,6 +41,14 @@ function syncForm(airport) {
     form.name = airport.name ?? '';
     form.country = airport.country ?? '';
     form.city = airport.city ?? '';
+}
+
+function canEditField() {
+    if (!props.isEdit) {
+        return true;
+    }
+
+    return isAdministrator();
 }
 
 watch(
@@ -104,18 +113,22 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
+        <p v-if="props.isEdit && !isAdministrator()" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Como operario, puedes ver este aeropuerto pero no editarlo.
+        </p>
+
         <div class="form-grid">
-            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="props.isEdit" />
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="!canEditField()" />
 
-            <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" />
+            <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" :disabled="!canEditField()" />
 
-            <AppInput v-model="form.country" label="País" :error="errors.fields.country" />
+            <AppInput v-model="form.country" label="País" :error="errors.fields.country" :disabled="!canEditField()" />
 
-            <AppInput v-model="form.city" label="Ciudad" :error="errors.fields.city" />
+            <AppInput v-model="form.city" label="Ciudad" :error="errors.fields.city" :disabled="!canEditField()" />
         </div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">{{ props.isEdit ? 'Guardar' : 'Crear' }}</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading" :disabled="props.isEdit && !isAdministrator()">{{ props.isEdit ? 'Guardar' : 'Crear' }}</AppButton>
         </div>
     </form>
 
