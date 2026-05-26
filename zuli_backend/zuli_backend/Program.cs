@@ -8,12 +8,16 @@ using zuli_backend.Middleware;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
 using zuli_Business.Validation.Strategies;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
+using Mapster;
+using MapsterMapper;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,7 +149,17 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 // FlightRoute strategies
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
-builder.Services.AddScoped<IValidator<FlightRouteDTO>, FlightRouteValidator>();
+builder.Services.AddScoped<zuli_Business.Validation.IValidator<FlightRouteDTO>, FlightRouteValidator>();
+
+// Flight search utils
+builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
+
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(typeof(FlightService).Assembly); 
+
+builder.Services.AddSingleton(config);
+builder.Services.AddScoped<IMapper, ServiceMapper>();
+builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
 
 var app = builder.Build();
 

@@ -30,11 +30,10 @@ namespace zuli_Repository
                     FirstClassPrice,
                     RealDepartureTime,
                     RealArrivalTime,
-                    CheckInStartTime,
-                    CheckInDeadline,
                     AirlineId,
                     AircraftId,
-                    ItineraryId,
+                    flight.RealArrivalAirport,
+                    flight.RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
@@ -49,11 +48,8 @@ namespace zuli_Repository
                     @FirstClassPrice,
                     @RealDepartureTime,
                     @RealArrivalTime,
-                    @CheckInStartTime,
-                    @CheckInDeadline,
-                    @AirlineId,
-                    @AircraftId,
-                    @ItineraryId,
+                    @RealArrivalAirport,
+                    @RealDepartureAirport,
                     @Duration,
                     @CarryOnPrice,
                     @CheckedPrice,
@@ -71,11 +67,9 @@ namespace zuli_Repository
                 flight.FirstClassPrice,
                 flight.RealDepartureTime,
                 flight.RealArrivalTime,
-                flight.CheckInStartTime,
-                flight.CheckInDeadline,
-                flight.AirlineId,
                 flight.AircraftId,
-                flight.ItineraryId,
+                flight.RealArrivalAirport,
+                flight.RealDepartureAirport,
                 flight.Duration,
                 flight.CarryOnPrice,
                 flight.CheckedPrice,
@@ -98,11 +92,9 @@ namespace zuli_Repository
                     FirstClassPrice,
                     RealDepartureTime,
                     RealArrivalTime,
-                    CheckInStartTime,
-                    CheckInDeadline,
-                    AirlineId,
                     AircraftId,
-                    ItineraryId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
@@ -127,11 +119,9 @@ namespace zuli_Repository
                     FirstClassPrice,
                     RealDepartureTime,
                     RealArrivalTime,
-                    CheckInStartTime,
-                    CheckInDeadline,
-                    AirlineId,
                     AircraftId,
-                    ItineraryId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
@@ -144,28 +134,48 @@ namespace zuli_Repository
                 return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
             }
 
-        public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime startDate, DateTime endDate, int seats)
+                public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
         {
             using var connection = _context.CreateConnection();
 
             var sql = @"
-            SELECT 
-                f.Id,
-                fr.DepartureAirport AS Origin,
-                fr.ArrivalAirport AS Destination,
-                f.FlightDate AS DepartureTime,
-                DATEADD(second, fr.EstimatedDuration, f.FlightDate) AS ArrivalTime,
-                fr.EstimatedDuration,
-                f.TouristPrice,
-                f.FirstClassPrice
-            FROM Flight f
-            JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId
-            WHERE f.Status = 'Programado' 
-              AND f.AvailableSeats >= @Seats
-              AND CAST(f.FlightDate AS DATE) >= CAST(@StartDate AS DATE)
-              AND CAST(f.FlightDate AS DATE) <= CAST(@EndDate AS DATE)";
+                SELECT 
+                    fr.FlightRouteId,
+                    fr.DepartureAirport AS Origin,
+                    fr.ArrivalAirport AS Destination,
+                    CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME) AS DepartureTime,
+                    CASE 
+                        WHEN fr.ScheduledArrivalTime < fr.ScheduledDepartureTime 
+                        THEN DATEADD(day, 1, CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledArrivalTime AS DATETIME))
+                        ELSE CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledArrivalTime AS DATETIME)
+                    END AS ArrivalTime,
+                    fr.EstimatedDuration,
+                    fr.TouristPrice,
+                    fr.FirstClassPrice
+                FROM FlightRoute fr
+            LEFT JOIN Aircraft a 
+                ON fr.AircraftId = a.AircraftId
+            LEFT JOIN Flight f 
+                ON fr.FlightRouteId = f.FlightRouteId 
+                AND CAST(f.FlightDate AS DATE) = CAST(@TargetDate AS DATE)
+                WHERE 
+                    (fr.Frequency & @TargetDayMask) > 0
+                    AND (
+                        (f.Id IS NULL AND ((a.NumberEconomyClassRows * a.NumberSeatingRowsEconomy) + (a.NumberFirstClassRows * a.NumberSeatingRowsFirst)) >= @Seats)
+                        OR 
+                        (f.Id IS NOT NULL AND f.Status != 'Cancelado' AND f.AvailableSeats >= @Seats)
+                    )
+                    AND (CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME)) > @CurrentTime";
 
-            return await connection.QueryAsync<RawFlightEntity>(sql, new { StartDate = startDate, EndDate = endDate, Seats = seats });
+            var parameters = new 
+            { 
+                TargetDate = targetDate, 
+                Seats = seats, 
+                TargetDayMask = targetDayMask, 
+                CurrentTime = DateTime.UtcNow  
+            };
+
+            return await connection.QueryAsync<RawFlightEntity>(sql, parameters);
         }
     }
 }

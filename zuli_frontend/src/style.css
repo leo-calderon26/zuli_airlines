@@ -14,7 +14,16 @@
   --color-purple: #e8def8;
   --radius-base: 12px;
   --color-error: oklch(57.7% 0.245 27.325);
-
+  --color-heading: #111827;
+  --color-content: #1f2937;
+  --color-content-subtle: #4b5563;
+  --color-content-muted: #6b7280;
+  --color-border-light: #e5e7eb;
+  --color-surface-input: #f7f7f7;
+  --color-surface-muted: #f9fafb;
+  --color-border-medium: #d1d5db;
+    --color-error-soft: #fef2f2;
+  --color-error-border: #fecaca;
 }
 
 @layer components {

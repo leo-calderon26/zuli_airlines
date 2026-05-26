@@ -28,6 +28,7 @@ function handleClick(e) {
       variant === 'outline' && 'border-2 border-primary text-primary hover:bg-primary hover:text-white',
       variant === 'ghost' && 'text-primary hover:bg-primary/10',
       variant === 'danger' && 'bg-error text-white hover:opacity-90',
+      variant === 'link' && 'text-primary hover:text-gold hover:underline p-0',
     ]"
     @click="handleClick"
   >
