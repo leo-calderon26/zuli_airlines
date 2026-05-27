@@ -27,10 +27,15 @@ export const AIRLINE_ID = 1;
 export const modalFieldLabels = {
   origin: 'Aeropuerto origen',
   destination: 'Aeropuerto destino',
-  scheduledDepartureTime: 'Salida programada',
-  scheduledArrivalTime: 'Llegada programada',
+  departureTime: 'Hora de salida',
+  arrivalTime: 'Hora de llegada',
   duration: 'Duracion',
   frequency: 'Frecuencia',
+  aircraftId: 'Aeronave',
+  touristPrice: 'Precio Turista',
+  firstClassPrice: 'Precio Primera Clase',
+  carryOnPrice: 'Precio Equipaje de Mano',
+  checkedPrice: 'Precio Equipaje Documentado',
 };
 
 export function normalizeCode(value) {
@@ -70,29 +75,6 @@ export function getBusinessId() {
   return getCookieValue(BUSINESS_ID_COOKIE) || sessionStorage.getItem('businessId') || '';
 }
 
-export function isValidDateTime(value) {
-  return Boolean(value) && !Number.isNaN(Date.parse(value));
-}
-
-export function toIsoDateTime(value) {
-  if (!isValidDateTime(value)) return '';
-  return value.length === 16 ? `${value}:00` : value;
-}
-
-export function isValidDayMonth(day, month) {
-  const dayNum = Number(day);
-  const monthNum = Number(month);
-  return Number.isInteger(dayNum) && dayNum >= 1 && dayNum <= 31 && Number.isInteger(monthNum) && monthNum >= 1 && monthNum <= 12;
-}
-
-export function buildDateTimeFromParts(day, month, time) {
-  if (!isValidDayMonth(day, month) || !time) return '';
-  const year = new Date().getFullYear();
-  const monthPadded = String(month).padStart(2, '0');
-  const dayPadded = String(day).padStart(2, '0');
-  return `${year}-${monthPadded}-${dayPadded}T${time}`;
-}
-
 export function encodeDays(selectedDays) {
   if (!Array.isArray(selectedDays)) return 0;
   return selectedDays.reduce((acc, day) => acc | (dayBits[day] || 0), 0);
@@ -109,10 +91,15 @@ export function mapBackendFieldToFormField(rawField) {
   const mapping = {
     departureairport: 'origin',
     arrivalairport: 'destination',
-    scheduleddeparturetime: 'scheduledDepartureTime',
-    scheduledarrivaltime: 'scheduledArrivalTime',
+    scheduleddeparturetime: 'departureTime',
+    scheduledarrivaltime: 'arrivalTime',
     estimatedduration: 'duration',
     frequency: 'frequency',
+    aircraftid: 'aircraftId',
+    touristprice: 'touristPrice',
+    firstclassprice: 'firstClassPrice',
+    carryonprice: 'carryOnPrice',
+    checkedprice: 'checkedPrice',
   };
 
   return mapping[normalized] || '';
