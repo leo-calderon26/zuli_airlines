@@ -165,7 +165,7 @@ namespace zuli_Repository
                 WHERE 
                     (fr.Frequency & @TargetDayMask) > 0
                     AND (
-                        (f.Id IS NULL AND ((a.NumberEconomyClassRows * a.NumberSeatingRowsEconomy) + (a.NumberFirstClassRows * a.NumberSeatingRowsFirst)) >= @Seats)
+                        (f.Id IS NULL AND dbo.getAircraftTotalSeats(a.AircraftId) >= @Seats)
                         OR 
                         (f.Id IS NOT NULL AND f.Status != 'Cancelado' AND f.AvailableSeats >= @Seats)
                     )
