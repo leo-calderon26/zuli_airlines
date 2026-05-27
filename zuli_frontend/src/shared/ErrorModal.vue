@@ -48,6 +48,7 @@ watch(() => props.modelValue, (val) => {
             </div>
             <h2 class="mb-2 text-xl font-bold text-content">{{ title }}</h2>
             <p class="mb-4 text-gray-600">{{ message }}</p>
+            <p v-if="$slots.default" class="mb-4 text-sm text-error"><slot /></p>
 
             <div
               v-if="errors && Object.keys(errors).length"

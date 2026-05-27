@@ -23,6 +23,7 @@ import CheckInView from '../modules/landing/view/CheckInView.vue'
 import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
+import BuyTicketView from '../modules/buyTicket/view/BuyTicketView.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 import UserList from "../modules/user/view/UserList.vue";
@@ -162,6 +163,12 @@ const router = createRouter({
             path: "/admin/unauthorizedAccess",
             name: "unauthorizedAccess",
             component: UnauthorizedAccess,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/comprar-boleto",
+            name: "buyTicket",
+            component: BuyTicketView,
             meta: {requiresAuth: false, adminRequired: false}
         }
     ]

@@ -1,7 +1,4 @@
 ﻿using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -33,6 +30,8 @@ namespace zuli_Repository
                     AircraftId,
                     RealArrivalAirport,
                     RealDepartureAirport,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
@@ -46,6 +45,7 @@ namespace zuli_Repository
                     @FirstClassPrice,
                     @RealDepartureTime,
                     @RealArrivalTime,
+                    @AircraftId,
                     @AircraftId,
                     @RealArrivalAirport,
                     @RealDepartureAirport,
@@ -82,22 +82,24 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    Id,
-                    Status,
-                    FlightDate,
-                    TouristPrice,
-                    FirstClassPrice,
-                    RealDepartureTime,
-                    RealArrivalTime,
-                    AircraftId,
-                    RealArrivalAirport,
-                    RealDepartureAirport,
-                    Duration,
-                    CarryOnPrice,
-                    CheckedPrice,
-                    AvailableSeats,
-                    FlightRouteId
-                FROM Flight";
+                    f.Id,
+                    f.Status,
+                    f.FlightDate,
+                    f.TouristPrice,
+                    f.FirstClassPrice,
+                    f.RealDepartureTime,
+                    f.RealArrivalTime,
+                    f.AircraftId,
+                    f.RealArrivalAirport,
+                    f.RealDepartureAirport,
+                    f.Duration,
+                    f.CarryOnPrice,
+                    f.CheckedPrice,
+                    f.AvailableSeats,
+                    f.FlightRouteId,
+                    fr.CheckedBagMultiplier
+                FROM Flight f
+                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId";
 
             return await connection.QueryAsync<FlightEntity>(sql);
         }
@@ -108,23 +110,25 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    Id,
-                    Status,
-                    FlightDate,
-                    TouristPrice,
-                    FirstClassPrice,
-                    RealDepartureTime,
-                    RealArrivalTime,
-                    AircraftId,
-                    RealArrivalAirport,
-                    RealDepartureAirport,
-                    Duration,
-                    CarryOnPrice,
-                    CheckedPrice,
-                    AvailableSeats,
-                    FlightRouteId
-                FROM Flight
-                WHERE Id = @Id";
+                    f.Id,
+                    f.Status,
+                    f.FlightDate,
+                    f.TouristPrice,
+                    f.FirstClassPrice,
+                    f.RealDepartureTime,
+                    f.RealArrivalTime,
+                    f.AircraftId,
+                    f.RealArrivalAirport,
+                    f.RealDepartureAirport,
+                    f.Duration,
+                    f.CarryOnPrice,
+                    f.CheckedPrice,
+                    f.AvailableSeats,
+                    f.FlightRouteId,
+                    fr.CheckedBagMultiplier
+                FROM Flight f
+                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId
+                WHERE f.Id = @Id";
 
                 return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
             }
@@ -136,6 +140,7 @@ namespace zuli_Repository
             var sql = @"
                 SELECT 
                     fr.FlightRouteId,
+                    f.Id AS FlightId,
                     fr.DepartureAirport AS Origin,
                     fr.ArrivalAirport AS Destination,
                     CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME) AS DepartureTime,
@@ -148,7 +153,9 @@ namespace zuli_Repository
                     fr.TouristPrice,
                     fr.FirstClassPrice,
                     fr.CarryOnPrice,
-                    fr.CheckedPrice
+                    fr.CheckedPrice,
+                    fr.MaxWeightPerBag,
+                    fr.CheckedBagMultiplier
                 FROM FlightRoute fr
             LEFT JOIN Aircraft a 
                 ON fr.AircraftId = a.AircraftId
