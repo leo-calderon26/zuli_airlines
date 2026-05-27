@@ -1,4 +1,5 @@
-﻿using zuli_Business.DTO;
+﻿using MapsterMapper;
+using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
@@ -10,22 +11,26 @@ namespace zuli_Business
     public class FlightRouteService: IFlightRouteService
     {
         private readonly IFlightRouteRepository _flightRouteRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IValidator<FlightRouteDTO> _validator;
 
-        public FlightRouteService(IFlightRouteRepository flightRouterRepository, IValidator<FlightRouteDTO> validator)
+        public FlightRouteService(IFlightRouteRepository flightRouterRepository, IValidator<FlightRouteDTO> validator,
+            IUserRepository userRepository)
         {
             _flightRouteRepository = flightRouterRepository;
             _validator = validator;
+            _userRepository = userRepository;
         }
 
         public async Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRoute)
         {
             await _validator.ValidateAsync(flightRoute);
-            if (!await _flightRouteRepository.IsAdmin(flightRoute.businessId))
+            if (!await _userRepository.IsAdmin(flightRoute.businessId))
             {
                 throw new ZuliNotFoundException("El usuario no tiene permisos de administrador.");
             }
-            var userId = await _flightRouteRepository.GetUserId(flightRoute.businessId);
+
+            var userId = await _userRepository.GetUserId(flightRoute.businessId);
 
             var newFlightRoute = new FlightRouteEntity
             {
@@ -36,7 +41,12 @@ namespace zuli_Business
                 scheduledArrivalTime = flightRoute.scheduledArrivalTime,
                 scheduledDepartureTime = flightRoute.scheduledDepartureTime,
                 frequency = flightRoute.frequency,
-                estimatedDuration = flightRoute.estimatedDuration
+                estimatedDuration = flightRoute.estimatedDuration,
+                aircraftId = flightRoute.aircraftId,
+                carryOnPrice = flightRoute.carryOnPrice,
+                checkedPrice = flightRoute.checkedPrice,
+                touristPrice = flightRoute.touristPrice,
+                firstClassPrice = flightRoute.firstClassPrice
             };
 
             if (await _flightRouteRepository.AlreadyExistFlightRoute(newFlightRoute))
