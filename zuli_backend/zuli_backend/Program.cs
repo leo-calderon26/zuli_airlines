@@ -145,6 +145,9 @@ builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
 builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
+builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
+builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
+
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
 builder.Services.AddSingleton<ActivateAccountValidator>();
