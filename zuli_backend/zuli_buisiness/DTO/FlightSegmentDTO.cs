@@ -13,5 +13,6 @@ namespace zuli_Business.DTO
         public string ArrivalTimeText { get; set; }
         public string DurationText { get; set; }
         public string LayoverTimeText { get; set; }
+        public string DepartureDateText { get; set; } = string.Empty; 
     }
 }
