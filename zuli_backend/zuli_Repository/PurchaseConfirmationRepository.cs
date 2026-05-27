@@ -1,8 +1,9 @@
 using Dapper;
-using zuli_Business.DTO.PurchaseConfirmation;
+using zuli_business.DTO;
 using zuli_Data.Context;
+using zuli_Repository.Interface;
 
-namespace zuli_Data.Repositories.PurchaseConfirmation
+namespace zuli_Repository
 {
     public class PurchaseConfirmationRepository : IPurchaseConfirmationRepository
     {

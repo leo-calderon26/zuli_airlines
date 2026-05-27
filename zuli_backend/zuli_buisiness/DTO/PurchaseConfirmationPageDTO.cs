@@ -1,4 +1,4 @@
-namespace zuli_Business.DTO.PurchaseConfirmation
+namespace zuli_Business.DTO
 {
     public class PurchaseConfirmationPageDTO
     {
