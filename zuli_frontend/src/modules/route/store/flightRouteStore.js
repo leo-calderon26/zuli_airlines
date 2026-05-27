@@ -10,6 +10,11 @@ const createFlightRoutePayload = (route = {}) => ({
     estimatedDuration: route.estimatedDuration ?? 0,
     frequency: route.frequency ?? 0,
     airlineId: route.airlineId ?? 0,
+    aircraftId: route.aircraftId ?? null,
+    touristPrice: route.touristPrice ?? 0,
+    firstClassPrice: route.firstClassPrice ?? 0,
+    carryOnPrice: route.carryOnPrice ?? 0,
+    checkedPrice: route.checkedPrice ?? 0,
 });
 
 export const useFlightRouteStore = defineStore("flightRoute", () => {

@@ -30,15 +30,13 @@ namespace zuli_Repository
                     FirstClassPrice,
                     RealDepartureTime,
                     RealArrivalTime,
-                    AirlineId,
                     AircraftId,
-                    flight.RealArrivalAirport,
-                    flight.RealDepartureAirport,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
                     AvailableSeats,
-                    AdminId,
                     FlightRouteId
                 ) VALUES (
                     @Id,
@@ -48,13 +46,13 @@ namespace zuli_Repository
                     @FirstClassPrice,
                     @RealDepartureTime,
                     @RealArrivalTime,
+                    @AircraftId,
                     @RealArrivalAirport,
                     @RealDepartureAirport,
                     @Duration,
                     @CarryOnPrice,
                     @CheckedPrice,
                     @AvailableSeats,
-                    @AdminId,
                     @FlightRouteId
                 )";
 
@@ -74,7 +72,6 @@ namespace zuli_Repository
                 flight.CarryOnPrice,
                 flight.CheckedPrice,
                 flight.AvailableSeats,
-                flight.AdminId,
                 flight.FlightRouteId
             });
         }
@@ -99,7 +96,6 @@ namespace zuli_Repository
                     CarryOnPrice,
                     CheckedPrice,
                     AvailableSeats,
-                    AdminId,
                     FlightRouteId
                 FROM Flight";
 
@@ -126,7 +122,6 @@ namespace zuli_Repository
                     CarryOnPrice,
                     CheckedPrice,
                     AvailableSeats,
-                    AdminId,
                     FlightRouteId
                 FROM Flight
                 WHERE Id = @Id";
@@ -151,7 +146,9 @@ namespace zuli_Repository
                     END AS ArrivalTime,
                     fr.EstimatedDuration,
                     fr.TouristPrice,
-                    fr.FirstClassPrice
+                    fr.FirstClassPrice,
+                    fr.CarryOnPrice,
+                    fr.CheckedPrice
                 FROM FlightRoute fr
             LEFT JOIN Aircraft a 
                 ON fr.AircraftId = a.AircraftId
