@@ -1,7 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
-// import RouteNavBar from '../components/RouteNavBar.vue';
+import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
@@ -38,14 +36,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
-    <PublicNavBar />
-    <!-- <RouteNavBar/> -->
-    <main class="flex-1 w-full max-w-5xl mx-auto py-10 px-4">
-      <form @submit.prevent="submit" class="space-y-8">
-        <div class="border border-border-soft bg-text-box p-8">
-          <h3 class="text-2xl font-bold text-font mb-6">Información de la Ruta</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="flex flex-col">
+    <AdminNavBar />
+    <RouteNavBar/>
+    <main class="flex-1 pb-8">
+      <div class="page-shell">
+        <form class="form-card" @submit.prevent="submit">
+          <div class="form-grid">
             <AppAutocomplete
               v-model="form.origin"
               label="Aeropuerto origen"
