@@ -17,6 +17,7 @@ namespace zuli_Data.Entities
         public int Duration { get; set; }
         public decimal? CarryOnPrice { get; set; }
         public decimal? CheckedPrice { get; set; }
+        public decimal CheckedBagMultiplier { get; set; }
         public int AvailableSeats { get; set; }
         public Guid AdminId { get; set; }
         public int FlightRouteId { get; set; }

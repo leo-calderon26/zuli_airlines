@@ -11,7 +11,6 @@ using zuli_Business.Interface;
 using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
-using zuli_Business.Validation.Strategies;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
@@ -141,6 +140,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
+builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
