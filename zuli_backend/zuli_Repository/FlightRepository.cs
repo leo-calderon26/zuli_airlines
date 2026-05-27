@@ -46,6 +46,7 @@ namespace zuli_Repository
                     @RealDepartureTime,
                     @RealArrivalTime,
                     @AircraftId,
+                    @AircraftId,
                     @RealArrivalAirport,
                     @RealDepartureAirport,
                     @Duration,
