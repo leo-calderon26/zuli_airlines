@@ -1,6 +1,6 @@
-using zuli_Business.DTO.PurchaseConfirmation;
+using zuli_Business.DTO;
 
-namespace zuli_Data.Repositories.PurchaseConfirmation
+namespace zuli_Data.Repositories.Interface
 {
     public interface IPurchaseConfirmationRepository
     {
