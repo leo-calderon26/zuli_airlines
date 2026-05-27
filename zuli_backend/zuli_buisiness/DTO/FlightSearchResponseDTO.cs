@@ -15,7 +15,8 @@ namespace zuli_Business.DTO
         public string ArrivalDateText { get; set; }
         public string TotalDurationText { get; set; }
         public int Stops { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal TotalTouristPrice { get; set; }
+        public decimal TotalFirstClassPrice { get; set; }
         public List<FlightSegmentDTO> Segments { get; set; } = new List<FlightSegmentDTO>();
     }
 }

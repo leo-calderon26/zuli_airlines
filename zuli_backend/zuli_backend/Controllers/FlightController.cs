@@ -24,8 +24,6 @@ namespace zuli_backend.Controllers
         public async Task<ActionResult<FlightDTO>> GetFlightById(Guid id)
         {
             var flight = await _service.GetFlightById(id);
-            if (flight == null)
-                return NotFound(new { message = "Vuelo no encontrado" });
             return Ok(flight);
         }
 

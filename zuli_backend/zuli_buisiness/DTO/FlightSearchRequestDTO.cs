@@ -30,6 +30,9 @@ namespace zuli_Business.DTO
         public bool DirectFlightsOnly { get; set; } 
         public string FlightClass { get; set; } = "Turista";
 
+        [Range(0, 3, ErrorMessage = "El límite de escalas debe estar entre 0 y 3")]
+        public int MaxLayovers { get; set; } = 1;
+        
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

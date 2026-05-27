@@ -32,6 +32,9 @@ const formatDateTime = (value) => {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
+    return value.slice(0, 5);
+  }
   return date.toLocaleString("es-ES", {
     dateStyle: "short",
     timeStyle: "short",

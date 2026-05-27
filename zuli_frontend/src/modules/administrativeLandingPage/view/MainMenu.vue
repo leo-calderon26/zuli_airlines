@@ -1,7 +1,7 @@
 
 <template>
     <div class="flex flex-col">
-        <PublicNavBar />
+        <AdminNavBar />
             <nav class="bg-neutral-primary-soft border-default">
                 <div class="flex">
                 <div class="size-14 grow-2"></div>
@@ -24,11 +24,6 @@
                                 </router-link>
                             </li>
                             <li class="hover:bg-purple">
-                                <router-link to="/admin/flights" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="flightIcon" alt="User Icon" class="menuIcons" />
-                                    <div class="font-semibold text-gold text-center">Vuelos</div>
-                                </router-link>
-                            </li>
-                            <li class="hover:bg-purple">
                                 <router-link to="/admin/users" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="userIcon" alt="User Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Usuarios</div>
                                 </router-link>
@@ -48,7 +43,7 @@
 </template>
 
 <script>
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
+import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import aircraftIcon from '../../../assets/Aircraft.png';
 import airportIcon from '../../../assets/Airport.png';
 import routeIcon from '../../../assets/Route.png';
@@ -58,7 +53,7 @@ import reportIcon from '../../../assets/Report.png';
 
 export default {
     components: {
-        PublicNavBar
+        AdminNavBar
     },
     data() {
         return {

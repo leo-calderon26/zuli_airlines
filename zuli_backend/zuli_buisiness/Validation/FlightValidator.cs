@@ -1,117 +1,51 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using FluentValidation;
 using zuli_Business.DTO;
-using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
 {
-    public static class FlightValidationFields
+    public class FlightValidator : AbstractValidator<FlightDTO>
     {
-        public const string STATUS = "Status";
-        public const string FLIGHT_DATE = "FlightDate";
-        public const string DURATION = "Duration";
-        public const string PRICES = "Prices";
-        public const string ENTITIES = "Entities";
-        public const string ROUTE = "FlightRouteId";
-        public const string SERVICES = "Services";
-    }
-
-    public class FlightValidator
-    {
-        public void ValidateFlight(FlightDTO flight)
+        public FlightValidator()
         {
-            var errorInfo = new Dictionary<string, List<string>>()
-            {
-                { FlightValidationFields.STATUS, new List<string>() },
-                { FlightValidationFields.FLIGHT_DATE, new List<string>() },
-                { FlightValidationFields.DURATION, new List<string>() },
-                { FlightValidationFields.PRICES, new List<string>() },
-                { FlightValidationFields.ENTITIES, new List<string>() },
-                { FlightValidationFields.ROUTE, new List<string>() },
-                { FlightValidationFields.SERVICES, new List<string>() },
-            };
+            RuleFor(x => x.Status)
+                .NotEmpty().WithMessage("Debe especificar el estado del vuelo")
+                .MaximumLength(20).WithMessage("El estado no puede superar 20 caracteres");
 
-            var hasError = false;
+            RuleFor(x => x.FlightDate).NotEmpty()
+                .WithMessage("Debe especificar la fecha del vuelo");
+            RuleFor(x => x.AircraftId).NotEmpty()
+                .WithMessage("Debe especificar una aeronave valida");
 
-            if (string.IsNullOrWhiteSpace(flight.Status))
-            {
-                errorInfo[FlightValidationFields.STATUS].Add("Debe especificar el estado del vuelo");
-                hasError = true;
-            }
+            RuleFor(x => x.RealArrivalAirport)
+                .Length(3).When(x => !string.IsNullOrEmpty(x.RealArrivalAirport))
+                .WithMessage("El aeropuerto real de llegada debe tener 3 caracteres");
 
-            if (flight.Status?.Length > 20)
-            {
-                errorInfo[FlightValidationFields.STATUS].Add("El estado no puede superar 20 caracteres");
-                hasError = true;
-            }
+            RuleFor(x => x.RealDepartureAirport)
+                .Length(3).When(x => !string.IsNullOrEmpty(x.RealDepartureAirport))
+                .WithMessage("El aeropuerto real de salida debe tener 3 caracteres");
 
-            if (flight.FlightDate == default)
-            {
-                errorInfo[FlightValidationFields.FLIGHT_DATE].Add("Debe especificar la fecha del vuelo");
-                hasError = true;
-            }
+            RuleFor(x => x.BusinessId).NotEmpty()
+                .WithMessage("Debe especificar un administrador valido");
+            RuleFor(x => x.FlightRouteId).GreaterThan(0)
+                .WithMessage("Debe especificar una ruta de vuelo valida");
+            RuleFor(x => x.Duration).GreaterThan(0)
+                .WithMessage("La duracion debe ser mayor a cero");
 
-            if (flight.AirlineId <= 0)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar una aerolinea valida");
-                hasError = true;
-            }
+            RuleFor(x => x.FirstClassPrice).GreaterThanOrEqualTo(0)
+                .WithMessage("Los precios no pueden ser negativos");
+            RuleFor(x => x.TouristPrice).GreaterThanOrEqualTo(0)
+                .WithMessage("Los precios no pueden ser negativos");
+            RuleFor(x => x.CarryOnPrice).GreaterThanOrEqualTo(0)
+                .When(x => x.CarryOnPrice.HasValue).WithMessage("Los precios no pueden ser negativos");
+            RuleFor(x => x.CheckedPrice).GreaterThanOrEqualTo(0)
+                .When(x => x.CheckedPrice.HasValue).WithMessage("Los precios no pueden ser negativos");
 
-            if (flight.AircraftId == Guid.Empty)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar una aeronave valida");
-                hasError = true;
-            }
+            RuleFor(x => x.AvailableSeats).GreaterThanOrEqualTo(0)
+                .WithMessage("AvailableSeats no puede ser negativo");
 
-            if (flight.ItineraryId <= 0)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar un itinerario valido");
-                hasError = true;
-            }
-
-            if (flight.BusinessId == string.Empty)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("Debe especificar un administrador valido");
-                hasError = true;
-            }
-
-            if (flight.FlightRouteId <= 0)
-            {
-                errorInfo[FlightValidationFields.ROUTE].Add("Debe especificar una ruta de vuelo valida");
-                hasError = true;
-            }
-
-            if (flight.Duration <= 0)
-            {
-                errorInfo[FlightValidationFields.DURATION].Add("La duracion debe ser mayor a cero");
-                hasError = true;
-            }
-
-            if (flight.FirstClassPrice < 0 || flight.TouristPrice < 0 || (flight.CarryOnPrice.HasValue && flight.CarryOnPrice < 0) || (flight.CheckedPrice.HasValue && flight.CheckedPrice < 0))
-            {
-                errorInfo[FlightValidationFields.PRICES].Add("Los precios no pueden ser negativos");
-                hasError = true;
-            }
-
-            if (flight.AvailableSeats < 0)
-            {
-                errorInfo[FlightValidationFields.ENTITIES].Add("AvailableSeats no puede ser negativo");
-                hasError = true;
-            }
-
-            if (!string.IsNullOrWhiteSpace(flight.ServiceDescription) && flight.ServiceDescription.Length > 100)
-            {
-                errorInfo[FlightValidationFields.SERVICES].Add("La descripcion de servicios no puede superar 100 caracteres");
-                hasError = true;
-            }
-
-            if (hasError)
-            {
-                throw new ZuliValidationException(
-                    errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value)
-                );
-            }
+            RuleFor(x => x.ServiceDescription)
+                .MaximumLength(100).When(x => !string.IsNullOrEmpty(x.ServiceDescription))
+                .WithMessage("La descripcion de servicios no puede superar 100 caracteres");
         }
     }
 }

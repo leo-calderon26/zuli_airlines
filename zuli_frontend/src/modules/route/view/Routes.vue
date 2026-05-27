@@ -1,6 +1,5 @@
 <script setup>
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
-import RouteNavBar from '../components/RouteNavBar.vue';
+import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
@@ -20,18 +19,25 @@ const {
   modalErrors,
   originSuggestions,
   destinationSuggestions,
+  aircraftList,
+  aircraftLoading,
   getSuggestionCode,
   getSuggestionLabel,
   handleAirportInput,
   applySuggestion,
   submit,
   onSuccessClose,
+  fetchAircraftList,
 } = useRouteForm();
+
+onMounted(() => {
+  fetchAircraftList();
+});
 </script>
 
 <template>
   <div class="flex flex-col">
-    <PublicNavBar />
+    <AdminNavBar />
     <RouteNavBar/>
     <main class="flex-1 pb-8">
       <div class="page-shell">
@@ -67,84 +73,28 @@ const {
               </template>
             </AppAutocomplete>
 
-            <div class="form-field group">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <input
-                  id="scheduledDepartureDay"
-                  v-model="form.scheduledDepartureDay"
-                  name="scheduledDepartureDay"
-                  type="number"
-                  min="1"
-                  max="31"
-                  step="1"
-                  class="form-input peer"
-                  placeholder="Dia"
-                />
-                <input
-                  id="scheduledDepartureMonth"
-                  v-model="form.scheduledDepartureMonth"
-                  name="scheduledDepartureMonth"
-                  type="number"
-                  min="1"
-                  max="12"
-                  step="1"
-                  class="form-input peer"
-                  placeholder="Mes"
-                />
-                <input
-                  id="scheduledDepartureTime"
-                  v-model="form.scheduledDepartureTime"
-                  name="scheduledDepartureTime"
-                  type="time"
-                  step="60"
-                  class="form-input peer"
-                  placeholder="Hora"
-                />
-              </div>
-              <label class="form-label">Salida programada (dia, mes, hora)</label>
-              <p v-if="errors.fields.scheduledDepartureTime" class="text-sm text-error">
-                {{ errors.fields.scheduledDepartureTime }}
-              </p>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-content">Hora de salida</label>
+              <input
+                v-model="form.departureTime"
+                type="time"
+                step="60"
+                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                :class="{ 'border-error text-error': errors.fields.departureTime }"
+              />
+              <p v-if="errors.fields.departureTime" class="mt-1 text-sm text-error">{{ errors.fields.departureTime }}</p>
             </div>
 
-            <div class="form-field group">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <input
-                  id="scheduledArrivalDay"
-                  v-model="form.scheduledArrivalDay"
-                  name="scheduledArrivalDay"
-                  type="number"
-                  min="1"
-                  max="31"
-                  step="1"
-                  class="form-input peer"
-                  placeholder="Dia"
-                />
-                <input
-                  id="scheduledArrivalMonth"
-                  v-model="form.scheduledArrivalMonth"
-                  name="scheduledArrivalMonth"
-                  type="number"
-                  min="1"
-                  max="12"
-                  step="1"
-                  class="form-input peer"
-                  placeholder="Mes"
-                />
-                <input
-                  id="scheduledArrivalTime"
-                  v-model="form.scheduledArrivalTime"
-                  name="scheduledArrivalTime"
-                  type="time"
-                  step="60"
-                  class="form-input peer"
-                  placeholder="Hora"
-                />
-              </div>
-              <label class="form-label">Llegada programada (dia, mes, hora)</label>
-              <p v-if="errors.fields.scheduledArrivalTime" class="text-sm text-error">
-                {{ errors.fields.scheduledArrivalTime }}
-              </p>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-content">Hora de llegada</label>
+              <input
+                v-model="form.arrivalTime"
+                type="time"
+                step="60"
+                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                :class="{ 'border-error text-error': errors.fields.arrivalTime }"
+              />
+              <p v-if="errors.fields.arrivalTime" class="mt-1 text-sm text-error">{{ errors.fields.arrivalTime }}</p>
             </div>
 
             <AppInput
@@ -157,28 +107,95 @@ const {
               :error="errors.fields.duration"
             />
 
-            <div class="form-field group">
-              <div class="frequency-label">Frecuencia semanal</div>
-              <div class="frequency-grid">
-                <label v-for="day in daysOfWeek" :key="day.value" class="frequency-item">
-                  <input
-                    v-model="form.frequency"
-                    type="checkbox"
-                    :value="day.value"
-                    class="frequency-checkbox"
-                  />
-                  <span>{{ day.label }}</span>
-                </label>
-              </div>
-              <p v-if="errors.fields.frequency" class="text-sm text-error">{{ errors.fields.frequency }}</p>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-content">Aeronave</label>
+              <select
+                v-model="form.aircraftId"
+                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                :class="{ 'border-error text-error': errors.fields.aircraftId }"
+                :disabled="aircraftLoading"
+              >
+                <option value="" disabled>Seleccione una aeronave</option>
+                <option
+                  v-for="ac in aircraftList"
+                  :key="ac.aircraftId || ac.id"
+                  :value="ac.aircraftId || ac.id"
+                >{{ ac.model }}</option>
+              </select>
+              <p v-if="errors.fields.aircraftId" class="mt-1 text-sm text-error">{{ errors.fields.aircraftId }}</p>
+              <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
             </div>
           </div>
-
-          <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Guardar ruta</AppButton>
           </div>
-        </form>
-      </div>
+
+        <div class="border border-border-soft bg-text-box p-8">
+          <h3 class="text-2xl font-bold text-font mb-6">Frecuencia semanal</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <label
+              v-for="day in daysOfWeek"
+              :key="day.value"
+              class="flex items-center gap-3 p-3 border border-border-soft rounded-base cursor-pointer transition hover:border-primary"
+              :class="{ 'border-primary bg-primary/5': form.frequency.includes(day.value) }"
+            >
+              <input
+                v-model="form.frequency"
+                type="checkbox"
+                :value="day.value"
+                class="h-4 w-4 accent-sumary"
+              />
+              <span class="text-sm text-font font-medium">{{ day.label }}</span>
+            </label>
+          </div>
+          <p v-if="errors.fields.frequency" class="mt-3 text-sm text-error">{{ errors.fields.frequency }}</p>
+        </div>
+          <div class="border border-border-soft bg-text-box p-8">
+          <h3 class="text-2xl font-bold text-font mb-6">Precios</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <AppInput
+              v-model="form.touristPrice"
+              label="Precio Turista ($)"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              :error="errors.fields.touristPrice"
+            />
+            <AppInput
+              v-model="form.firstClassPrice"
+              label="Precio Primera Clase ($)"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              :error="errors.fields.firstClassPrice"
+            />
+            <AppInput
+              v-model="form.carryOnPrice"
+              label="Precio Equipaje de Mano ($)"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              :error="errors.fields.carryOnPrice"
+            />
+            <AppInput
+              v-model="form.checkedPrice"
+              label="Precio Equipaje Documentado ($)"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              :error="errors.fields.checkedPrice"
+            />
+          </div>
+          </div>
+
+        <div class="flex justify-end">
+          <AppButton type="submit" variant="primary" size="lg" :loading="isLoading">
+            {{ isLoading ? 'Guardando...' : 'Guardar ruta' }}
+          </AppButton>
+        </div>
+      </form>
     </main>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
@@ -189,55 +206,12 @@ const {
 <style scoped>
 @reference "../../../style.css";
 
-.page-shell {
-  @apply mx-auto w-full max-w-5xl px-6;
-}
-
-.form-card {
-  @apply w-full max-w-none rounded-lg border border-gray-200 bg-white p-8 shadow-sm;
-}
-
-.form-grid {
-  @apply grid grid-cols-1 gap-6 md:grid-cols-2;
-}
-
-.form-field {
-  @apply relative z-0 w-full;
-}
-
-.form-input {
-  @apply block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 text-base
-    text-gray-900 focus:border-gold focus:outline-none focus:ring-0;
-}
-
-.form-label {
-  @apply absolute top-3 -z-10 origin-[0] -translate-y-6 transform text-base
-    text-gray-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100
-    peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:text-gold;
-}
-
-.frequency-label {
-  @apply text-base text-gray-700;
-}
-
 .suggestion-code {
   @apply font-semibold text-gray-900;
 }
 
 .suggestion-label {
   @apply text-gray-600;
-}
-
-.frequency-grid {
-  @apply mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3;
-}
-
-.frequency-item {
-  @apply flex items-center gap-2 text-sm text-gray-700;
-}
-
-.frequency-checkbox {
-  @apply h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold;
 }
 
 </style>
