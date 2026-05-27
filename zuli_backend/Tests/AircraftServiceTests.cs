@@ -123,7 +123,7 @@ namespace zuli_backend.Tests
 
             Assert.That(async () => await _service.UpdateAircraft(aircraftId, request), Throws.TypeOf<ZuliValidationException>());
 
-            _userRepositoryMock.Verify(r => r.IsAdmin(It.IsAny<Guid>()), Times.Never);
+            _userRepositoryMock.Verify(r => r.IsAdmin(It.IsAny<string>()), Times.Never);
             _aircraftRepositoryMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
             _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(It.IsAny<AircraftEntity>()), Times.Never);
         }

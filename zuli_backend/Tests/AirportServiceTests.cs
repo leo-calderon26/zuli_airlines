@@ -94,11 +94,21 @@ namespace zuli_backend.Tests
                 businessId = "123456789"
             };
 
+            var existingAirport = new AirportEntity
+            {
+                AirportCode = "SJO",
+                Name = "Old",
+                Country = "Costa Rica",
+                City = "San Jose",
+                AdminId = Guid.NewGuid()
+            };
+
             _userRepositoryMock.Setup(r => r.IsAdmin(airport.businessId)).ReturnsAsync(true);
+            _airportRepositoryMock.Setup(r => r.GetByCodeAsync("SJO")).ReturnsAsync(existingAirport);
 
             Assert.That(async () => await _service.UpdateAirportAsync("SJO", airport), Throws.TypeOf<ZuliValidationException>());
 
-            _airportRepositoryMock.Verify(r => r.GetByCodeAsync(It.IsAny<string>()), Times.Never);
+            _airportRepositoryMock.Verify(r => r.GetByCodeAsync("SJO"), Times.Once);
             _airportRepositoryMock.Verify(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>()), Times.Never);
         }
 

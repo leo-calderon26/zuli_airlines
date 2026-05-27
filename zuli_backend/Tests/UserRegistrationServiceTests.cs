@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
+using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
