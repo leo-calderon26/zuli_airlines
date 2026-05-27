@@ -16,9 +16,12 @@ namespace zuli_Repository
             using var connection = _context.CreateConnection();
             const string sql = @"
                   INSERT INTO FlightRoute
-                    (adminId, airlineId, arrivalAirport, departureAirport, scheduledArrivalTime, scheduledDeparture, frequency, estimatedDuration)
+                    (adminId, airlineId, arrivalAirport, departureAirport, scheduledArrivalTime, scheduledDepartureTime, frequency, estimatedDuration,
+                    aircraftId, carryOnPrice, checkedPrice, touristPrice, firstClassPrice)
                   VALUES
-                    (@AdminId, @AirlineId, @ArrivalAirport, @DepartureAirport, @ScheduledArrivalTime, @ScheduledDepartureTime, @Frequency, @EstimatedDuration);
+                    (@AdminId, @AirlineId, @ArrivalAirport, @DepartureAirport,
+                     @ScheduledArrivalTime, @ScheduledDepartureTime, @Frequency, @EstimatedDuration,
+                     CONVERT(uniqueidentifier, @AircraftId), @CarryOnPrice, @CheckedPrice, @TouristPrice, @FirstClassPrice);
             ";
 
             var newId = await connection.ExecuteScalarAsync<int>(sql, new
@@ -30,7 +33,12 @@ namespace zuli_Repository
                 ScheduledArrivalTime = flightRoute.scheduledArrivalTime,
                 ScheduledDepartureTime = flightRoute.scheduledDepartureTime,
                 Frequency = flightRoute.frequency,
-                EstimatedDuration = flightRoute.estimatedDuration 
+                EstimatedDuration = flightRoute.estimatedDuration,
+                AircraftId = flightRoute.aircraftId,
+                CarryOnPrice = flightRoute.carryOnPrice,
+                CheckedPrice = flightRoute.checkedPrice,
+                TouristPrice = flightRoute.touristPrice,
+                FirstClassPrice = flightRoute.firstClassPrice
             });
             return newId;
         }
@@ -46,8 +54,13 @@ namespace zuli_Repository
                 AND departureAirport = @departureAirport
                 AND frequency = @frequency
                 AND scheduledArrivalTime = @scheduledArrivalTime
-                AND scheduledDeparture = @scheduledDepartureTime
-                AND estimatedDuration = @estimatedDuration";
+                AND scheduledDepartureTime = @scheduledDepartureTime
+                AND estimatedDuration = @estimatedDuration
+                AND aircraftId = CONVERT(uniqueidentifier, @aircraftId)
+                AND carryOnPrice = @carryOnPrice
+                AND checkedPrice = @checkedPrice
+                AND touristPrice = @touristPrice
+                AND firstClassPrice = @firstClassPrice";
 
             var count = await connection.ExecuteScalarAsync<int>(sql, new
             {
@@ -56,32 +69,15 @@ namespace zuli_Repository
                 flightRoute.frequency,
                 flightRoute.scheduledArrivalTime,
                 flightRoute.scheduledDepartureTime,
-                flightRoute.estimatedDuration
+                flightRoute.estimatedDuration,
+                flightRoute.aircraftId,
+                flightRoute.carryOnPrice,
+                flightRoute.checkedPrice,
+                flightRoute.touristPrice,
+                flightRoute.firstClassPrice
             });
 
             return count > 0;
-        }
- 
-        public async Task<bool> IsAdmin(string businesId)
-        {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-            SELECT CASE WHEN EXISTS (
-            SELECT 1
-            FROM AirlineUser
-            WHERE BusinessId = @BusinessId AND UserRole = 'Administrator'
-            ) THEN 1 ELSE 0 END";
-            return await connection.ExecuteScalarAsync<bool>(sql, new { BusinessId = businesId });
-        }
-        public async Task<Guid> GetUserId(string businesId)
-        {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-            SELECT UserId
-            FROM AirlineUser
-            WHERE BusinessId = @BusinessId";
-            var userId = await connection.ExecuteScalarAsync<Guid?>(sql, new { BusinessId = businesId });
-            return userId ?? Guid.Empty;
         }
 
         public async Task<(IEnumerable<FlightRouteEntity> flightRoutes, int totalCount)> GetFlightRoutesPaginated(int pageNumber, int pageSize)
@@ -98,12 +94,17 @@ namespace zuli_Repository
                     flightRouteId,
                     frequency,
                     scheduledArrivalTime,
-                    scheduledDeparture AS scheduledDepartureTime,
+                    scheduledDepartureTime,
                     estimatedDuration,
                     adminId,
                     airlineId,
                     arrivalAirport,
-                    departureAirport
+                    departureAirport,
+                    CAST(aircraftId AS nvarchar(36)) AS aircraftId,
+                    carryOnPrice,
+                    checkedPrice,
+                    touristPrice,
+                    firstClassPrice
                 FROM FlightRoute
                 ORDER BY flightRouteId
                 OFFSET @Offset ROWS
