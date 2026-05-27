@@ -1,5 +1,5 @@
 using Dapper;
-using zuli_business.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Context;
 using zuli_Repository.Interface;
 
@@ -7,7 +7,7 @@ namespace zuli_Repository
 {
     public class PurchaseConfirmationRepository : IPurchaseConfirmationRepository
     {
-        private readonly DapperContext context;
+        private readonly DapperContext _context;
 
         public PurchaseConfirmationRepository(DapperContext context)
         {
