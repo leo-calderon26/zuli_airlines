@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted } from 'vue';
 import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
@@ -126,7 +127,6 @@ onMounted(() => {
               <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
             </div>
           </div>
-          </div>
 
         <div class="border border-border-soft bg-text-box p-8">
           <h3 class="text-2xl font-bold text-font mb-6">Frecuencia semanal</h3>
@@ -196,6 +196,7 @@ onMounted(() => {
           </AppButton>
         </div>
       </form>
+      </div>
     </main>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
