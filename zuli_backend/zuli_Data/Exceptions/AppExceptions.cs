@@ -45,4 +45,9 @@ namespace zuli_Data.Exceptions
         public ZuliUnauthorizedException(string msg, int errorId = -1)
        : base(msg, StatusCodes.Status401Unauthorized, "FORBIDDEN", errorId) { }
     }
+        public class ZuliEmailException : AppExceptions
+    {
+        public ZuliEmailException(string msg, int errorId = -1)
+            : base(msg, StatusCodes.Status500InternalServerError, "EMAIL_ERROR", errorId) { }
+    }
 }
