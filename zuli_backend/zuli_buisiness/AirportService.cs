@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Mapster;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
@@ -102,15 +103,13 @@ namespace zuli_Business
             if (!await _userRepository.IsAdmin(airport.businessId))
                 throw new ZuliUnauthorizedException("No tiene permisos.");
 
-            var normalizedCode = code?.Trim().ToUpperInvariant();
+            var normalizedCode = code.Trim().ToUpperInvariant();
             var existing = await _repository.GetByCodeAsync(normalizedCode);
             if (existing == null) throw new ZuliNotFoundException($"No existe aeropuerto {code}");
 
             _validator.ValidateAirportInfo(airport);
 
-            existing.Name = airport.name;
-            existing.Country = airport.country;
-            existing.City = airport.city;
+            airport.Adapt(existing, TypeAdapterConfig.GlobalSettings);
 
             await _repository.UpdateAirportAsync(existing);
 

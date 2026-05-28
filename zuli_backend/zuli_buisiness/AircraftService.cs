@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Mapster;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -32,24 +33,11 @@ namespace zuli_Business
             {
                 throw new ZuliNotFoundException($"El Usuario que esta intentando crear la aeronave y no tiene permisos {aircraft.businessId}");
             }
-            if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
-            {
-                throw new ZuliNotFoundException($"Ya existe una aeronave con el mismo nombre {aircraft.model}");
-            }
 
             var userId = await _userRepository.GetUserId(aircraft.businessId);
 
-            var newAircraft = new AircraftEntity
-            {
-                AdminId = userId,
-                model = aircraft.model,
-                weight = aircraft.weight,
-                numberEconomyClassRows = aircraft.numberEconomyClassRows,
-                numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
-                numberFirstClassRows = aircraft.numberFirstClassRows,
-                numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-                baggageCapacity = aircraft.baggageCapacity,
-            };
+            var newAircraft = aircraft.Adapt<AircraftEntity>();
+            newAircraft.AdminId = userId;
 
             await _repository.CreateAircraft(newAircraft);
 
@@ -64,18 +52,7 @@ namespace zuli_Business
         {
             var aircraft = await _repository.GetAll();
 
-            return aircraft.Select(item => new AircraftDTO
-            {
-                aircraftId = item.aircraftId,
-                model = item.model,
-                weight = item.weight,
-                baggageCapacity = item.baggageCapacity,
-                numberEconomyClassRows = item.numberEconomyClassRows,
-                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
-                numberFirstClassRows = item.numberFirstClassRows,
-                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
-            }
-            ).ToList();
+            return aircraft.Select(item => item.Adapt<AircraftDTO>()).ToList();
         }
 
         public async Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
@@ -84,17 +61,7 @@ namespace zuli_Business
 
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            var aircraftDTOs = aircrafts.Select(item => new AircraftDTO
-            {
-                aircraftId = item.aircraftId,
-                model = item.model,
-                weight = item.weight,
-                baggageCapacity = item.baggageCapacity,
-                numberEconomyClassRows = item.numberEconomyClassRows,
-                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
-                numberFirstClassRows = item.numberFirstClassRows,
-                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
-            }).ToList();
+            var aircraftDTOs = aircrafts.Select(item => item.Adapt<AircraftDTO>()).ToList();
 
             return new AircraftPaginatedResponseDTO<AircraftDTO>
             {
@@ -106,7 +73,7 @@ namespace zuli_Business
             };
         }
 
-        public async Task<BasicResponseDTO> UpdateAircraft(Guid aircraftId, AircraftDTO aircraft)
+        public async Task<BasicResponseDTO> UpdateAircraftAsync(Guid aircraftId, AircraftDTO aircraft)
         {
             _validator.ValidateAircraftInfo(aircraft);
 
@@ -116,26 +83,15 @@ namespace zuli_Business
             }
 
             var existingAircraft = await _repository.GetById(aircraftId);
-
             if (existingAircraft == null)
             {
-                throw new ZuliNotFoundException($"No existe una aeronave con id {aircraftId}");
+                throw new ZuliNotFoundException($"La aeronave con ID {aircraftId} no existe.");
             }
 
-            if (!string.IsNullOrWhiteSpace(aircraft.model) && await _repository.AlreadyExistByModelExcludingId(aircraft.model, aircraftId))
-            {
-                throw new ZuliValidationException(AircraftAtributes.MODEL, $"Ya existe una aeronave con el mismo nombre {aircraft.model}");
-            }
 
-            existingAircraft.model = aircraft.model;
-            existingAircraft.weight = aircraft.weight;
-            existingAircraft.numberEconomyClassRows = aircraft.numberEconomyClassRows;
-            existingAircraft.numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy;
-            existingAircraft.numberFirstClassRows = aircraft.numberFirstClassRows;
-            existingAircraft.numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst;
-            existingAircraft.baggageCapacity = aircraft.baggageCapacity;
+            aircraft.Adapt(existingAircraft, TypeAdapterConfig.GlobalSettings);
 
-            await _repository.UpdateAircraft(existingAircraft);
+            await _repository.UpdateAircraftAsync(existingAircraft);
 
             return new BasicResponseDTO
             {

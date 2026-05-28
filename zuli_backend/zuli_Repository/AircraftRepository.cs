@@ -13,10 +13,10 @@ namespace zuli_Repository
         // Inyeccion de dependencias de la capa Data
         private readonly DapperContext _context;
 
-        public AircraftRepository(DapperContext context) 
+        public AircraftRepository(DapperContext context)
         {
             _context = context;
-            
+
         }
 
         public async Task<int> CreateAircraft(AircraftEntity aircraft)
@@ -39,24 +39,9 @@ namespace zuli_Repository
                 numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
                 numberFirstClassRows = aircraft.numberFirstClassRows,
                 numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-            }); 
+            });
         }
 
-        public async Task<bool> AlreadyExistByModel(string model)
-        {
-            using var connection = _context.CreateConnection();
-            var sql = "SELECT COUNT(1) FROM Aircraft WHERE model = @model";
-            var count = await connection.ExecuteScalarAsync<int>(sql, new { model });
-            return count > 0;
-        }
-
-        public async Task<bool> AlreadyExistByModelExcludingId(string model, Guid aircraftId)
-        {
-            using var connection = _context.CreateConnection();
-            var sql = "SELECT COUNT(1) FROM Aircraft WHERE model = @model AND aircraftId <> @aircraftId";
-            var count = await connection.ExecuteScalarAsync<int>(sql, new { model, aircraftId });
-            return count > 0;
-        }
         public async Task<IEnumerable<AircraftEntity>> GetAll()
         {
             using var connection = _context.CreateConnection();
@@ -68,21 +53,21 @@ namespace zuli_Repository
         public async Task<(IEnumerable<AircraftEntity> aircrafts, int totalCount)> GetAircraftsPaginated(int pageNumber, int pageSize)
         {
             using var connection = _context.CreateConnection();
-            
+
             // Obtener el total de registros
             var countSql = "SELECT COUNT(1) FROM Aircraft";
             var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
-            
+
             // Calcular el offset
             var offset = (pageNumber - 1) * pageSize;
-            
+
             // Obtener los registros paginados
             var sql = @"
                 SELECT * FROM Aircraft 
                 ORDER BY aircraftId
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY";
-            
+
             var aircrafts = (await connection.QueryAsync<AircraftEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
             return (aircrafts, totalCount);
         }
@@ -94,7 +79,7 @@ namespace zuli_Repository
             return await connection.QuerySingleOrDefaultAsync<AircraftEntity>(sql, new { aircraftId });
         }
 
-        public async Task UpdateAircraft(AircraftEntity aircraft)
+        public async Task UpdateAircraftAsync(AircraftEntity aircraft)
         {
             using var connection = _context.CreateConnection();
 
@@ -134,5 +119,5 @@ namespace zuli_Repository
             ) THEN 1 ELSE 0 END";
             return await connection.ExecuteScalarAsync<bool>(sql, new { UserId = userId });
         }
-    }   
+    }
 }
