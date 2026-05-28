@@ -144,7 +144,7 @@ function onSuccessClose() {
 
         <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
             <div class="md:col-span-2">
-                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="!canEditField('nationalId')" />
+                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="props.isEdit" />
             </div>
 
             <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" :disabled="!canEditField('firstName')" />

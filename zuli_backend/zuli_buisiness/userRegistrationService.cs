@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Mapster;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -54,28 +55,10 @@ namespace zuli_Business
             string activationToken = GenerateSecureToken();
             string activationTokenHash = HashToken(activationToken);
 
-            var user = new AppUser
-            {
-                UserId = Guid.NewGuid(),
-
-                NationalId = nationalId,
-                FirstName = firstName,
-                FirstLastName = firstLastName,
-                SecondLastName = secondLastName,
-                Email = null,
-
-                BusinessEmail = businessEmail,
-                BusinessId = nationalId,
-                UserRole = userRole,
-                PasswordHash = null,
-
-                IsActive = false,
-                FailedLoginAttempts = 0,
-                LockoutEnd = null,
-
-                ManagedByAdminId = adminUserId,
-                ActivationTokenHash = activationTokenHash
-            };
+            var user = request.Adapt<AppUser>();
+            user.UserId = Guid.NewGuid();
+            user.ManagedByAdminId = adminUserId;
+            user.ActivationTokenHash = activationTokenHash;
 
             await _userRepository.CreatePendingUserAsync(user);
 
@@ -133,7 +116,7 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> UpdateUserAsync(Guid userId, RegisterUserRequestDTO request)
         {
-            ValidateUpdateRequest(request);
+            _registerUserValidator.Validate(request);
 
             AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
 
@@ -150,12 +133,7 @@ namespace zuli_Business
                 ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
             }
 
-            existingUser.FirstName = request.FirstName.Trim();
-            existingUser.FirstLastName = request.FirstLastName.Trim();
-            existingUser.SecondLastName = request.SecondLastName.Trim();
-            existingUser.BusinessEmail = businessEmail;
-            existingUser.Email = businessEmail;
-            existingUser.UserRole = request.UserRole.Trim();
+            request.Adapt(existingUser, TypeAdapterConfig.GlobalSettings);
 
             await _userRepository.UpdateUserAsync(existingUser);
 
@@ -257,18 +235,7 @@ namespace zuli_Business
                 PageSize = normalizedPageSize,
                 TotalItems = result.TotalItems,
                 TotalPages = totalPages,
-                Users = result.Users.Select(user => new UserListItemDTO
-                {
-                    UserId = user.UserId,
-                    PersonId = user.PersonId,
-                    NationalId = user.NationalId,
-                    FirstName = user.FirstName,
-                    FirstLastName = user.FirstLastName,
-                    SecondLastName = user.SecondLastName,
-                    BusinessEmail = user.BusinessEmail,
-                    UserRole = user.UserRole,
-                    IsActive = user.IsActive
-                }).ToList()
+                Users = result.Users.Select(user => user.Adapt<UserListItemDTO>()).ToList()
             };
         }
         private static string NormalizeSearchType(string? searchType)
@@ -282,79 +249,6 @@ namespace zuli_Business
                 "nationalId" => "nationalId",
                 _ => "all"
             };
-        }
-
-        private static void ValidateUpdateRequest(RegisterUserRequestDTO? request)
-        {
-            var errors = new Dictionary<string, List<string>>();
-
-            if (request == null)
-            {
-                errors["request"] = new List<string>
-                {
-                    "Solicitud inválida."
-                };
-
-                throw new ZuliValidationException(errors);
-            }
-
-            if (string.IsNullOrWhiteSpace(request.NationalId))
-            {
-                errors["nationalId"] = new List<string> { "La cédula es obligatoria." };
-            }
-            else if (!System.Text.RegularExpressions.Regex.IsMatch(request.NationalId.Trim(), @"^\d{9}$"))
-            {
-                errors["nationalId"] = new List<string> { "La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones." };
-            }
-
-            if (string.IsNullOrWhiteSpace(request.BusinessEmail))
-            {
-                errors["businessEmail"] = new List<string> { "El correo institucional es obligatorio." };
-            }
-            else if (!System.Text.RegularExpressions.Regex.IsMatch(request.BusinessEmail.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            {
-                errors["businessEmail"] = new List<string> { "El correo institucional no tiene un formato válido." };
-            }
-
-            ValidateTextField("firstName", request.FirstName, "El primer nombre", errors);
-            ValidateTextField("firstLastName", request.FirstLastName, "El primer apellido", errors);
-            ValidateTextField("secondLastName", request.SecondLastName, "El segundo apellido", errors);
-            ValidateUserRole(request.UserRole, errors);
-
-            if (errors.Count > 0)
-            {
-                throw new ZuliValidationException(errors);
-            }
-        }
-
-        private static void ValidateTextField(string fieldName, string value, string displayName, Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                errors[fieldName] = new List<string> { $"{displayName} es obligatorio." };
-                return;
-            }
-
-            if (value.Trim().Length > 50)
-            {
-                errors[fieldName] = new List<string> { $"{displayName} no puede superar los 50 caracteres." };
-            }
-        }
-
-        private static void ValidateUserRole(string userRole, Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(userRole))
-            {
-                errors["userRole"] = new List<string> { "El tipo de usuario es obligatorio." };
-                return;
-            }
-
-            string trimmedRole = userRole.Trim();
-
-            if (trimmedRole != "Administrator" && trimmedRole != "Operator")
-            {
-                errors["userRole"] = new List<string> { "El tipo de usuario no es válido." };
-            }
         }
 
     }

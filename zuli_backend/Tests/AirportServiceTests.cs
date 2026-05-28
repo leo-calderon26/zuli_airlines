@@ -1,9 +1,11 @@
 using Moq;
 using NUnit.Framework;
+using Mapster;
 using System;
 using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
+using zuli_Business.Mappings;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -21,6 +23,9 @@ namespace zuli_backend.Tests
         [SetUp]
         public void SetUp()
         {
+            var config = TypeAdapterConfig.GlobalSettings;
+            new AirportMappingConfig().Register(config);
+
             _airportRepositoryMock = new Mock<IAirportRepository>();
             _userRepositoryMock = new Mock<IUserRepository>();
 
@@ -43,7 +48,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock.Setup(r => r.IsAdmin(airport.businessId)).ReturnsAsync(true);
             _airportRepositoryMock.Setup(r => r.GetByCodeAsync("SJO")).ReturnsAsync(existingAirport);
-            _airportRepositoryMock.Setup(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>())).Returns(Task.CompletedTask);
+            _airportRepositoryMock.Setup(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
             var result = await _service.UpdateAirportAsync(airportCode, airport);
 
@@ -112,11 +117,11 @@ namespace zuli_backend.Tests
             _airportRepositoryMock.Verify(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>()), Times.Never);
         }
 
-        private static AirportDTO BuildValidAirportDto()
+        private static AirportDTO BuildValidAirportDto(string? airportCode = null)
         {
             return new AirportDTO
             {
-                airportCode = "SJO",
+                airportCode = airportCode ?? "SJO",
                 name = "Juan Santamaria",
                 country = "Costa Rica",
                 city = "Alajuela",

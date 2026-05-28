@@ -264,36 +264,28 @@ namespace zuli_Repository
 
             using var transaction = connection.BeginTransaction();
 
-            try
-            {
-                var personSql = @"
-                    UPDATE Person
-                    SET
-                        FirstName = @FirstName,
-                        FirstLastName = @FirstLastName,
-                        SecondLastName = @SecondLastName,
-                        Email = @Email
-                    WHERE PersonId = @PersonId;
-                ";
+            var personSql = @"
+                UPDATE Person
+                SET
+                    FirstName = @FirstName,
+                    FirstLastName = @FirstLastName,
+                    SecondLastName = @SecondLastName,
+                    Email = @Email
+                WHERE PersonId = @PersonId;
+            ";
 
-                var userSql = @"
-                    UPDATE AirlineUser
-                    SET
-                        BusinessEmail = @BusinessEmail,
-                        UserRole = @UserRole
-                    WHERE UserId = @UserId;
-                ";
+            var userSql = @"
+                UPDATE AirlineUser
+                SET
+                    BusinessEmail = @BusinessEmail,
+                    UserRole = @UserRole
+                WHERE UserId = @UserId;
+            ";
 
-                await connection.ExecuteAsync(personSql, user, transaction);
-                await connection.ExecuteAsync(userSql, user, transaction);
+            await connection.ExecuteAsync(personSql, user, transaction);
+            await connection.ExecuteAsync(userSql, user, transaction);
 
-                transaction.Commit();
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
+            transaction.Commit();
         }
         public async Task<bool> IsAdmin(string businesId)
         {

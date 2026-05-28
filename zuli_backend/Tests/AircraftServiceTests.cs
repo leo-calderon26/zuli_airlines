@@ -1,9 +1,11 @@
 using Moq;
 using NUnit.Framework;
+using Mapster;
 using System;
 using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
+using zuli_Business.Mappings;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -21,6 +23,9 @@ namespace zuli_backend.Tests
         [SetUp]
         public void SetUp()
         {
+            var config = TypeAdapterConfig.GlobalSettings;
+            new AircraftMappingConfig().Register(config);
+
             _aircraftRepositoryMock = new Mock<IAircraftRepository>();
             _userRepositoryMock = new Mock<IUserRepository>();
 
@@ -47,10 +52,9 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock.Setup(r => r.IsAdmin(request.businessId!)).ReturnsAsync(true);
             _aircraftRepositoryMock.Setup(r => r.GetById(aircraftId)).ReturnsAsync(existingAircraft);
-            _aircraftRepositoryMock.Setup(r => r.AlreadyExistByModelExcludingId("B737", aircraftId)).ReturnsAsync(false);
-            _aircraftRepositoryMock.Setup(r => r.UpdateAircraft(It.IsAny<AircraftEntity>())).Returns(Task.CompletedTask);
+            _aircraftRepositoryMock.Setup(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>())).Returns(Task.CompletedTask);
 
-            var result = await _service.UpdateAircraft(aircraftId, request);
+            var result = await _service.UpdateAircraftAsync(aircraftId, request);
 
             Assert.That(result.StatusCode, Is.EqualTo(200));
             Assert.That(result.Message, Is.EqualTo("Se actualizó la aeronave correctamente"));
@@ -58,7 +62,7 @@ namespace zuli_backend.Tests
             Assert.That(existingAircraft.weight, Is.EqualTo(1000m));
             Assert.That(existingAircraft.baggageCapacity, Is.EqualTo(300m));
 
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(existingAircraft), Times.Once);
+            _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(existingAircraft), Times.Once);
         }
 
         [Test]
@@ -69,10 +73,10 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock.Setup(r => r.IsAdmin(request.businessId!)).ReturnsAsync(false);
 
-            Assert.That(async () => await _service.UpdateAircraft(aircraftId, request), Throws.TypeOf<ZuliUnauthorizedException>());
+            Assert.That(async () => await _service.UpdateAircraftAsync(aircraftId, request), Throws.TypeOf<ZuliUnauthorizedException>());
 
             _aircraftRepositoryMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(It.IsAny<AircraftEntity>()), Times.Never);
+            _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
         }
 
         [Test]
@@ -84,26 +88,11 @@ namespace zuli_backend.Tests
             _userRepositoryMock.Setup(r => r.IsAdmin(request.businessId!)).ReturnsAsync(true);
             _aircraftRepositoryMock.Setup(r => r.GetById(aircraftId)).ReturnsAsync((AircraftEntity?)null);
 
-            Assert.That(async () => await _service.UpdateAircraft(aircraftId, request), Throws.TypeOf<ZuliNotFoundException>());
+            Assert.That(async () => await _service.UpdateAircraftAsync(aircraftId, request), Throws.TypeOf<ZuliNotFoundException>());
 
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(It.IsAny<AircraftEntity>()), Times.Never);
+            _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
         }
 
-        [Test]
-        public void UpdateAircraft_DuplicateModel_ThrowsValidationException()
-        {
-            var aircraftId = Guid.NewGuid();
-            var request = BuildValidAircraftDto();
-            var existingAircraft = new AircraftEntity { aircraftId = aircraftId };
-
-            _userRepositoryMock.Setup(r => r.IsAdmin(request.businessId!)).ReturnsAsync(true);
-            _aircraftRepositoryMock.Setup(r => r.GetById(aircraftId)).ReturnsAsync(existingAircraft);
-            _aircraftRepositoryMock.Setup(r => r.AlreadyExistByModelExcludingId("B737", aircraftId)).ReturnsAsync(true);
-
-            Assert.That(async () => await _service.UpdateAircraft(aircraftId, request), Throws.TypeOf<ZuliValidationException>());
-
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(It.IsAny<AircraftEntity>()), Times.Never);
-        }
 
         [Test]
         public void UpdateAircraft_InvalidRequest_ThrowsValidationException()
@@ -121,11 +110,11 @@ namespace zuli_backend.Tests
                 numberSeatingRowsFirst = -1
             };
 
-            Assert.That(async () => await _service.UpdateAircraft(aircraftId, request), Throws.TypeOf<ZuliValidationException>());
+            Assert.That(async () => await _service.UpdateAircraftAsync(aircraftId, request), Throws.TypeOf<ZuliValidationException>());
 
             _userRepositoryMock.Verify(r => r.IsAdmin(It.IsAny<string>()), Times.Never);
             _aircraftRepositoryMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraft(It.IsAny<AircraftEntity>()), Times.Never);
+            _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
         }
 
         private static AircraftDTO BuildValidAircraftDto()

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Mapster;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Business.Mappings;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
@@ -29,6 +31,10 @@ namespace zuli_backend.Tests
             _userRepositoryMock = new Mock<IUserRepository>();
             _emailServiceMock = new Mock<IEmailService>();
             _configurationMock = new Mock<IConfiguration>();
+
+            var config = TypeAdapterConfig.GlobalSettings;
+            new UserRegistrationMappingConfig().Register(config);
+            new UserUpdateMappingConfig().Register(config);
 
             _service = new UserRegistrationService(
                 _userRepositoryMock.Object,

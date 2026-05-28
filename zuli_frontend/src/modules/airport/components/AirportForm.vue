@@ -118,7 +118,7 @@ function onSuccessClose() {
         </p>
 
         <div class="form-grid">
-            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="!canEditField()" />
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="props.isEdit" />
 
             <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" :disabled="!canEditField()" />
 

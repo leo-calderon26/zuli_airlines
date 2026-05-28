@@ -31,7 +31,7 @@ namespace zuli_backend.Controllers
             => await _service.GetAirportsPaginated(pageNumber, pageSize);
 
         [HttpPut("{code}")]
-        public async Task<ActionResult<BasicResponseDTO>> Update(string code, AirportDTO airport)
+        public async Task<ActionResult<BasicResponseDTO>> UpdateAirportAsync(string code, AirportDTO airport)
             => await _service.UpdateAirportAsync(code, airport);
 
     }

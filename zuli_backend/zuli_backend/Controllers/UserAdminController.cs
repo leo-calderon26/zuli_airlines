@@ -61,7 +61,7 @@ namespace zuli_backend.Controllers
 
         [HttpPut("{userId:guid}")]
         [Authorize(Roles = "Administrator,Operator")]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] RegisterUserRequestDTO request)
+        public async Task<IActionResult> UpdateUserAsync(Guid userId, [FromBody] RegisterUserRequestDTO request)
         {
             BasicResponseDTO response = await _userRegistrationService.UpdateUserAsync(userId, request);
 
