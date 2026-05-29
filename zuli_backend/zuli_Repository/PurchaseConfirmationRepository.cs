@@ -20,36 +20,54 @@ namespace zuli_Repository
                 SELECT
                     r.ReservationId,
                     r.ReservationCode,
-                    r.BuyerName,
-                    r.BuyerEmail,
-                    r.BuyerPhone,
+                    CONCAT(
+                        buyerPerson.FirstName,
+                        ' ',
+                        buyerPerson.FirstLastName,
+                        ' ',
+                        ISNULL(buyerPerson.SecondLastName, '')
+                    ) AS BuyerName,
+                    buyerEmail.Email AS BuyerEmail,
+                    b.PhoneNumber AS BuyerPhone,
                     r.PaymentMethod,
                     r.FlightClass,
                     r.TotalAmount
                 FROM Reservation r
+                INNER JOIN Buyer b
+                    ON r.BuyerId = b.BuyerId
+                INNER JOIN Person buyerPerson
+                    ON b.PersonId = buyerPerson.PersonId
+                INNER JOIN EmailPerson buyerEmail
+                    ON buyerPerson.PersonId = buyerEmail.PersonId
                 WHERE r.ReservationId = @reservationId;
             ";
 
             const string passengersQuery = @"
                 SELECT
-                    CONCAT(p.FirstName, ' ', p.FirstLastName, ' ', p.SecondLastName) AS FullName,
-                    p.BirthDate,
-                    p.Gender,
-                    pp.Country AS PassportCountry,
-                    ISNULL(b.CheckedBaggageQuantity, 0) AS CheckedBaggageQuantity,
-                    ISNULL(b.CarryOnQuantity, 0) AS CarryOnQuantity
+                    CONCAT(
+                        passengerPerson.FirstName,
+                        ' ',
+                        passengerPerson.FirstLastName,
+                        ' ',
+                        ISNULL(passengerPerson.SecondLastName, '')
+                    ) AS FullName,
+                    passengerPerson.BirthDate,
+                    passengerPerson.Gender,
+                    p.Country AS PassportCountry,
+                    ISNULL(bg.CheckedBaggageQuantity, 0) AS CheckedBaggageQuantity,
+                    ISNULL(bg.CarryOnQuantity, 0) AS CarryOnQuantity
                 FROM PassengerReservation pr
-                INNER JOIN Person p
-                    ON pr.PersonId = p.PersonId
-                LEFT JOIN Passport pp
-                    ON p.PersonId = pp.PersonId
-                LEFT JOIN Baggage b
-                    ON pr.PassengerReservationId = b.PassengerReservationId
+                INNER JOIN Person passengerPerson
+                    ON pr.PersonId = passengerPerson.PersonId
+                LEFT JOIN Passport p
+                    ON passengerPerson.PersonId = p.PersonId
+                LEFT JOIN Baggage bg
+                    ON pr.PassengerReservationId = bg.PassengerReservationId
                 WHERE pr.ReservationId = @reservationId;
             ";
 
             const string flightsQuery = @"
-                SELECT
+                SELECT DISTINCT
                     f.FlightId,
                     CAST(f.FlightId AS VARCHAR(20)) AS FlightNumber,
                     al.Name AS AirlineName,
@@ -59,18 +77,16 @@ namespace zuli_Repository
                     destination.Code AS DestinationAirportCode,
                     f.DepartureDateTime,
                     f.ArrivalDateTime
-                FROM Itinerary i
+                FROM PassengerReservation pr
                 INNER JOIN Flight f
-                    ON i.FlightId = f.FlightId
-                INNER JOIN FlightRoute fr
-                    ON f.FlightRouteId = fr.FlightRouteId
+                    ON pr.FlightId = f.FlightId
                 INNER JOIN Airport origin
-                    ON fr.OriginAirportId = origin.AirportId
+                    ON f.OriginAirportId = origin.AirportId
                 INNER JOIN Airport destination
-                    ON fr.DestinationAirportId = destination.AirportId
+                    ON f.DestinationAirportId = destination.AirportId
                 INNER JOIN Airline al
                     ON f.AirlineId = al.AirlineId
-                WHERE i.ReservationId = @reservationId
+                WHERE pr.ReservationId = @reservationId
                 ORDER BY f.DepartureDateTime;
             ";
 
