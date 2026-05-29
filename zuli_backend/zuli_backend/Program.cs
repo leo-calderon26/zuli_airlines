@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
+
 
 using zuli_Business;
 using zuli_Business.DTO;
@@ -148,6 +150,7 @@ builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
 
+
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
 builder.Services.AddSingleton<ActivateAccountValidator>();
@@ -166,6 +169,8 @@ config.Scan(typeof(FlightService).Assembly);
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 
