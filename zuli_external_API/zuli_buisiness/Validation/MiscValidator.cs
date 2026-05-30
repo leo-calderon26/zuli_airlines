@@ -7,24 +7,14 @@ namespace zuli_Business.Validation
 {
     public static class MiscValidator
     {
-        /// <summary>
-        /// Verifica si la cadena contiene solo letras, números, guiones o barras diagonales (/), sin otros caracteres especiales.
-        /// </summary>
-        /// <param name="input">Texto a validar.</param>
-        /// <returns>
-        /// <c>true</c> si tiene combinación de letras, números, guiones y barras únicamente; en caso contrario, <c>false</c>.
-        /// </returns>
+        /// Verifica si la cadena contiene solo letras, números, 
+        /// guiones o barras diagonales (/), sin otros caracteres especiales.
         public static bool ContainsNumbersAndChars(string input)
             => !string.IsNullOrWhiteSpace(input) &&
                Regex.IsMatch(input, @"^[A-Za-z\d/-]+$");
 
-        /// <summary>
-        /// Verifica si la cadena contiene solo letras, sin números ni caracteres especiales.
-        /// </summary>
-        /// <param name="input">Texto a validar.</param>
-        /// <returns>
-        /// <c>true</c> si tiene letras únicamente; en caso contrario, <c>false</c>.
-        /// </returns>
+        /// Verifica si la cadena contiene solo letras, sin números
+        /// ni caracteres especiales.
         public static bool ContainsChars(string input)
             => !string.IsNullOrWhiteSpace(input) &&
                Regex.IsMatch(input, @"^[A-Za-z]+$");
