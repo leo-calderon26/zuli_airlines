@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO;
+using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
 {

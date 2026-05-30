@@ -1,58 +1,67 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using zuli_Buisiness.DTO;
-using zuli_Buisiness.Interface;
+using zuli_Business.DTO;
+using zuli_Business.Utils;
+using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 using zuli_Business.Validation;
+using zuli_Business.DTO;
+using MapsterMapper;
 
 namespace zuli_Business
 {
     public class FlightService : IFlightService
     {
-        // Inyeccion de dependencias
+        private readonly IFlightPathFinder _pathFinder;
+        private readonly IFlightDateGenerator _dateGenerator;
         private readonly IFlightRepository _repository;
         private readonly FlightValidator _validator;
-        public FlightService(IFlightRepository repository)
+        private readonly IMapper _mapper;
+        public FlightService(IFlightPathFinder pathFinder, IFlightRepository repository, IFlightDateGenerator dateGenerator,
+            IMapper mapper)
         {
+            _pathFinder = pathFinder;
             _repository = repository;
+            _dateGenerator = dateGenerator;
             _validator = new FlightValidator();
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<BookedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight)
         {
-            // El validate requested flight valida cosas
             _validator.ValidateRequestedFlightInfo(requestedFlight);
 
-            var newRequestedFlight = new RequestedFlightEntity
+            List<RawFlightEntity> rawFlights = await FetchAvailableFlights(requestedFlight.earliestDeparture, requestedFlight.destination, requestedFlight.passengersQuantity);
+
+            List<RawFlightEntity> scheduledFlights = _dateGenerator.GenerateOccurrences(rawFlights, requestedFlight.earliestDeparture, requestedFlight.latestDeparture);
+
+            PathFinderParametersDTO criteria = new PathFinderParametersDTO
             {
-                origin = requestedFlight.origin,
-                destination = requestedFlight.destination,
-                earliestDeparture = requestedFlight.earliestDeparture,
-                latestDeparture = requestedFlight.latestDeparture,
-                passengersQuantity = requestedFlight.passengersQuantity,
+                FlightPool = scheduledFlights,
+                Origin = requestedFlight.origin,
+                Destination = requestedFlight.destination,
+                EarliestDeparture = requestedFlight.earliestDeparture,
+                LatestDeparture = requestedFlight.latestDeparture,
+                DirectFlightsOnly = requestedFlight.DirectFlightsOnly,
+                MaxLayovers = requestedFlight.MaxLayovers
             };
 
-            var flightArray = await _repository.RetrieveAvailableFlights(newRequestedFlight);
+            // var flightArray = await _repository.RetrieveAvailableFlights(newRequestedFlight);
 
-            return flightArray.Select(item => new BookedFlightDTO
-            {
-                flightGUID = item.flightGUID,
-                departureTime = item.departureTime,
-                arrivalTime = item.arrivalTime,
-                duration = item.duration,
-                departureAirportCode = item.departureAirportCode,
-                departureAirportName = item.departureAirportName,
-                departureAirportCity = item.departureAirportCity,
-                arrivalAirportCode = item.arrivalAirportCode,
-                arrivalAirportName = item.arrivalAirportName,
-                arrivalAirportCity = item.arrivalAirportCity,
-                touristPrice = item.touristPrice,
-                firstClassPrice = item.firstClassPrice,
-                carryOnPrice = item.carryOnPrice,
-                checkedPrice = item.checkedPrice
-            }).ToList();
+            List<List<RawFlightEntity>> validPaths = _pathFinder.FindPaths(criteria);
+            List<RawFlightEntity> flatFlights = validPaths.SelectMany(path => path).ToList();
+            List<BookedFlightDTO> formattedOptions = _mapper.Map<List<BookedFlightDTO>>(flatFlights);
+
+            return formattedOptions;
+        }
+        private async Task<List<RawFlightEntity>> FetchAvailableFlights(DateTime earliestDeparture, string destination, int passengersQuantity)
+        {
+            var dayOneFlights = await _repository.GetAvailableFlights(earliestDeparture, destination, passengersQuantity);
+
+            return dayOneFlights.ToList();
         }
     }
 }

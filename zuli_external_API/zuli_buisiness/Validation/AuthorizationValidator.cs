@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using zuli_Buisiness.DTO;
-using zuli_Business.Validation;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
