@@ -1,13 +1,11 @@
 <script setup>
 import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import { onMounted } from 'vue';
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
 import AppInput from '../../../shared/AppInput.vue';
 import AppAutocomplete from '../../../shared/AppAutocomplete.vue';
-import { onMounted } from 'vue';
 import { useRouteForm } from '../composable/useRouteForm.js';
 
 const {
@@ -41,7 +39,6 @@ onMounted(() => {
 <template>
   <div class="flex flex-col">
     <AdminNavBar />
-    <RouteNavBar/>
     <main class="flex-1 pb-8">
       <div class="page-shell">
         <form class="form-card" @submit.prevent="submit">
@@ -129,7 +126,6 @@ onMounted(() => {
               <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
             </div>
           </div>
-          </div>
 
         <div class="border border-border-soft bg-text-box p-8">
           <h3 class="text-2xl font-bold text-font mb-6">Frecuencia semanal</h3>
@@ -199,6 +195,7 @@ onMounted(() => {
           </AppButton>
         </div>
       </form>
+      </div>
     </main>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />

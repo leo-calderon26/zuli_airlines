@@ -30,8 +30,6 @@ namespace zuli_Repository
                     AircraftId,
                     RealArrivalAirport,
                     RealDepartureAirport,
-                    RealArrivalAirport,
-                    RealDepartureAirport,
                     Duration,
                     CarryOnPrice,
                     CheckedPrice,
@@ -45,7 +43,6 @@ namespace zuli_Repository
                     @FirstClassPrice,
                     @RealDepartureTime,
                     @RealArrivalTime,
-                    @AircraftId,
                     @AircraftId,
                     @RealArrivalAirport,
                     @RealDepartureAirport,
@@ -100,24 +97,6 @@ namespace zuli_Repository
                     fr.CheckedBagMultiplier
                 FROM Flight f
                 INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId";
-                    f.Id,
-                    f.Status,
-                    f.FlightDate,
-                    f.TouristPrice,
-                    f.FirstClassPrice,
-                    f.RealDepartureTime,
-                    f.RealArrivalTime,
-                    f.AircraftId,
-                    f.RealArrivalAirport,
-                    f.RealDepartureAirport,
-                    f.Duration,
-                    f.CarryOnPrice,
-                    f.CheckedPrice,
-                    f.AvailableSeats,
-                    f.FlightRouteId,
-                    fr.CheckedBagMultiplier
-                FROM Flight f
-                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId";
 
             return await connection.QueryAsync<FlightEntity>(sql);
         }
@@ -147,37 +126,17 @@ namespace zuli_Repository
                 FROM Flight f
                 INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId
                 WHERE f.Id = @Id";
-                    f.Id,
-                    f.Status,
-                    f.FlightDate,
-                    f.TouristPrice,
-                    f.FirstClassPrice,
-                    f.RealDepartureTime,
-                    f.RealArrivalTime,
-                    f.AircraftId,
-                    f.RealArrivalAirport,
-                    f.RealDepartureAirport,
-                    f.Duration,
-                    f.CarryOnPrice,
-                    f.CheckedPrice,
-                    f.AvailableSeats,
-                    f.FlightRouteId,
-                    fr.CheckedBagMultiplier
-                FROM Flight f
-                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId
-                WHERE f.Id = @Id";
 
-                return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
-            }
+            return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
+        }
 
-                public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
+        public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
         {
             using var connection = _context.CreateConnection();
 
             var sql = @"
                 SELECT 
                     fr.FlightRouteId,
-                    f.Id AS FlightId,
                     f.Id AS FlightId,
                     fr.DepartureAirport AS Origin,
                     fr.ArrivalAirport AS Destination,
@@ -189,11 +148,6 @@ namespace zuli_Repository
                     END AS ArrivalTime,
                     fr.EstimatedDuration,
                     fr.TouristPrice,
-                    fr.FirstClassPrice,
-                    fr.CarryOnPrice,
-                    fr.CheckedPrice,
-                    fr.MaxWeightPerBag,
-                    fr.CheckedBagMultiplier
                     fr.FirstClassPrice,
                     fr.CarryOnPrice,
                     fr.CheckedPrice,
