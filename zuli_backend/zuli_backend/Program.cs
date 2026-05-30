@@ -149,6 +149,7 @@ builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
+builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
 
 
 builder.Services.AddSingleton<LoginValidator>();
