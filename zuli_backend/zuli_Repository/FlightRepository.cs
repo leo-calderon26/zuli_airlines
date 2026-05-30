@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -79,24 +79,22 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    f.Id,
-                    f.Status,
-                    f.FlightDate,
-                    f.TouristPrice,
-                    f.FirstClassPrice,
-                    f.RealDepartureTime,
-                    f.RealArrivalTime,
-                    f.AircraftId,
-                    f.RealArrivalAirport,
-                    f.RealDepartureAirport,
-                    f.Duration,
-                    f.CarryOnPrice,
-                    f.CheckedPrice,
-                    f.AvailableSeats,
-                    f.FlightRouteId,
-                    fr.CheckedBagMultiplier
-                FROM Flight f
-                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId";
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    AircraftId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    FlightRouteId
+                FROM Flight";
 
             return await connection.QueryAsync<FlightEntity>(sql);
         }
@@ -107,25 +105,23 @@ namespace zuli_Repository
 
             var sql = @"
                 SELECT 
-                    f.Id,
-                    f.Status,
-                    f.FlightDate,
-                    f.TouristPrice,
-                    f.FirstClassPrice,
-                    f.RealDepartureTime,
-                    f.RealArrivalTime,
-                    f.AircraftId,
-                    f.RealArrivalAirport,
-                    f.RealDepartureAirport,
-                    f.Duration,
-                    f.CarryOnPrice,
-                    f.CheckedPrice,
-                    f.AvailableSeats,
-                    f.FlightRouteId,
-                    fr.CheckedBagMultiplier
-                FROM Flight f
-                INNER JOIN FlightRoute fr ON f.FlightRouteId = fr.FlightRouteId
-                WHERE f.Id = @Id";
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    AircraftId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    FlightRouteId
+                FROM Flight
+                WHERE Id = @Id";
 
             return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
         }
