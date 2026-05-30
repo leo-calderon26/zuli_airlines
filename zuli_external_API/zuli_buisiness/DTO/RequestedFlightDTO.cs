@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Business.DTO.External
+namespace zuli_Business.DTO
 {
     public class RequestedFlightDTO
     {
@@ -22,5 +22,9 @@ namespace zuli_Business.DTO.External
         [Required(ErrorMessage = "La cantidad de pasajeros es requerida")]
         [Range(1, 1000, ErrorMessage = "La cantidad de pasajeros no puede ser menor a uno ni mayor a 1000")]
         public int passengersQuantity { get; set; }
+        public bool DirectFlightsOnly { get; set; } = true;
+
+        [Range(0, 3, ErrorMessage = "El límite de escalas debe estar entre 0 y 3")]
+        public int MaxLayovers { get; set; } = 1;
     }
 }

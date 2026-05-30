@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
 
-namespace zuli_Business.DTO.External
+namespace zuli_Business.DTO
 {
     public class AuthorizationResponseDTO
     {

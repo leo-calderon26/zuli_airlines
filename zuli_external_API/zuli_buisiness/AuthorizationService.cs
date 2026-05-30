@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using zuli_Business.DTO.External;
+using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
