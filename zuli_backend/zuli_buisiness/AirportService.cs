@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
@@ -16,13 +17,19 @@ namespace zuli_Business
     {
         private readonly IAirportRepository _repository;
         private readonly IUserRepository _userRepository;
-        private readonly AirportValidator _validator;
+        private readonly FluentValidation.IValidator<AirportDTO> _validator;
+        private readonly FluentValidation.IValidator<string> _searchValidator;
 
-        public AirportService(IAirportRepository repository, IUserRepository userRepository)
+        public AirportService(
+            IAirportRepository repository,
+            IUserRepository userRepository,
+            FluentValidation.IValidator<AirportDTO> validator,
+            FluentValidation.IValidator<string> searchValidator)
         {
             _repository = repository;
             _userRepository = userRepository;
-            _validator = new AirportValidator();
+            _validator = validator;
+            _searchValidator = searchValidator;
         }
 
         public async Task<BasicResponseDTO> CreateAirport(AirportDTO airport)
@@ -38,7 +45,8 @@ namespace zuli_Business
             }
 
             var userId = await _userRepository.GetUserId(airport.businessId);
-            _validator.ValidateAirportInfo(airport);
+            var validationResult = await _validator.ValidateAsync(airport);
+            validationResult.ThrowIfInvalid();
 
             var newAirport = new AirportEntity
             {
@@ -60,7 +68,8 @@ namespace zuli_Business
 
         public async Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm)
         {
-            _validator.ValidateSearchTerm(searchTerm);
+            var validationResult = await _searchValidator.ValidateAsync(searchTerm);
+            validationResult.ThrowIfInvalid();
 
             var airports = await _repository.SearchAirportsByTerm(searchTerm.Trim());
 
@@ -107,7 +116,8 @@ namespace zuli_Business
             var existing = await _repository.GetByCodeAsync(normalizedCode);
             if (existing == null) throw new ZuliNotFoundException($"No existe aeropuerto {code}");
 
-            _validator.ValidateAirportInfo(airport);
+            var validationResult = await _validator.ValidateAsync(airport);
+            validationResult.ThrowIfInvalid();
 
             airport.Adapt(existing, TypeAdapterConfig.GlobalSettings);
 
