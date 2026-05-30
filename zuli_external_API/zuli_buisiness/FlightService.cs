@@ -42,15 +42,10 @@ namespace zuli_Business
             PathFinderParametersDTO criteria = new PathFinderParametersDTO
             {
                 FlightPool = scheduledFlights,
-                Origin = requestedFlight.origin,
                 Destination = requestedFlight.destination,
                 EarliestDeparture = requestedFlight.earliestDeparture,
-                LatestDeparture = requestedFlight.latestDeparture,
-                DirectFlightsOnly = requestedFlight.DirectFlightsOnly,
-                MaxLayovers = requestedFlight.MaxLayovers
+                LatestDeparture = requestedFlight.latestDeparture
             };
-
-            // var flightArray = await _repository.RetrieveAvailableFlights(newRequestedFlight);
 
             List<List<RawFlightEntity>> validPaths = _pathFinder.FindPaths(criteria);
             List<RawFlightEntity> flatFlights = validPaths.SelectMany(path => path).ToList();

@@ -10,7 +10,6 @@ using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
 {
-    // Esto son tag pasa saber donde esta el error
     public static class AuthorizationAtributes
     {
         public const string AIRLINENAME = "AirlineName";
@@ -25,7 +24,7 @@ namespace zuli_Business.Validation
             };
 
             var IsEmptyInfo = false;
-            //Validar que el código de destino solo pueda traer letras 
+
             if (!MiscValidator.ContainsChars(user.airlineName))
             {
                 errorInfo[AuthorizationAtributes.AIRLINENAME].Add("El nombre de la aerolínea no puede tener números ni caractes especiales");

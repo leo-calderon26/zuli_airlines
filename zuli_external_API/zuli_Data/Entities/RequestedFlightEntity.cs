@@ -7,7 +7,6 @@ namespace zuli_Data.Entities
 {
     public class RequestedFlightEntity
     {
-        [Key] public string origin { get; set; }
         [Key] public string destination { get; set; }
         public DateTime earliestDeparture { get; set; }
         public DateTime latestDeparture { get; set; }
