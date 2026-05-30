@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using zuli_Business.DTO;
@@ -133,12 +134,91 @@ namespace zuli_Business
                 reservationCode
             );
         }
+        public async Task SendInvoiceEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            byte[] invoicePdf)
+        {
+            string safeBuyerName = WebUtility.HtmlEncode(buyerName);
+            string safeReservationCode = WebUtility.HtmlEncode(reservationCode);
+
+            using var message = new MailMessage();
+
+            message.From = new MailAddress(
+                _emailSettings.FromEmail,
+                _emailSettings.FromName
+            );
+
+            message.To.Add(toEmail);
+            message.Subject = $"Factura de compra - Reserva {reservationCode}";
+            message.IsBodyHtml = true;
+            message.Body = $@"
+                <html>
+                    <body style='font-family: Arial, sans-serif; color: #1f2937; background-color: #f3f3f3; padding: 24px;'>
+                        <div style='max-width: 650px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;'>
+                            <div style='background-color: #711717; padding: 20px; text-align: center;'>
+                                <h2 style='color: #ffffff; margin: 0;'>Zuli Airlines</h2>
+                            </div>
+
+                            <div style='padding: 28px;'>
+                                <h3>Factura de compra</h3>
+
+                                <p>Hola {safeBuyerName},</p>
+
+                                <p>
+                                    Adjuntamos en PDF la factura correspondiente a su compra.
+                                </p>
+
+                                <p>
+                                    <strong>Código de reserva:</strong> {safeReservationCode}
+                                </p>
+
+                                <br />
+
+                                <p>Atentamente,</p>
+                                <p><strong>Zuli Airlines</strong></p>
+                            </div>
+                        </div>
+                    </body>
+                </html>";
+
+            using var invoiceStream = new MemoryStream(invoicePdf);
+
+            message.Attachments.Add(
+                new Attachment(
+                    invoiceStream,
+                    $"Factura-{reservationCode}.pdf",
+                    MediaTypeNames.Application.Pdf
+                )
+            );
+
+            using var smtpClient = new SmtpClient(
+                _emailSettings.SmtpHost,
+                _emailSettings.SmtpPort
+            )
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(
+                    _emailSettings.SmtpUser,
+                    _emailSettings.SmtpPassword
+                )
+            };
+
+            await smtpClient.SendMailAsync(message);
+
+            _logger.LogInformation(
+                "Invoice email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
 
         public async Task SendPurchaseConfirmationEmailAsync(
             string toEmail,
             string buyerName,
             string reservationCode,
-            string confirmationBody)
+            byte[] confirmationPdf)
         {
             string safeBuyerName = WebUtility.HtmlEncode(buyerName);
             string safeReservationCode = WebUtility.HtmlEncode(reservationCode);
@@ -171,14 +251,12 @@ namespace zuli_Business
                                 </p>
 
                                 <p>
-                                    <strong>Código de reserva:</strong> {safeReservationCode}
+                                    Adjuntamos en PDF la confirmación de compra con la información de pasajeros e itinerario.
                                 </p>
 
                                 <p>
-                                    Puede utilizar este código junto con sus apellidos para procesos posteriores como consulta de reserva o check-in.
+                                    <strong>Código de reserva:</strong> {safeReservationCode}
                                 </p>
-
-                                {confirmationBody}
 
                                 <br />
 
@@ -188,6 +266,16 @@ namespace zuli_Business
                         </div>
                     </body>
                 </html>";
+
+            using var confirmationStream = new MemoryStream(confirmationPdf);
+
+            message.Attachments.Add(
+                new Attachment(
+                    confirmationStream,
+                    $"Confirmacion-{reservationCode}.pdf",
+                    MediaTypeNames.Application.Pdf
+                )
+            );
 
             using var smtpClient = new SmtpClient(
                 _emailSettings.SmtpHost,
