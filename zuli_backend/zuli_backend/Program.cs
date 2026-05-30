@@ -127,11 +127,6 @@ builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
-builder.Services.AddScoped<IExternalFlightService, ExternalFlightService>();
-builder.Services.AddScoped<IExternalFlightRepository, ExternalFlightRepository>();
-
-builder.Services.AddScoped<IExternalAuthorizationService, ExternalAuthorizationService>();
-
 builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
 builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
 

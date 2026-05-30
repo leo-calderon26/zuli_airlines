@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using zuli_Business.DTO.External;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
 {
-    // Esto son tag pasa saber donde esta el error
     public static class AuthorizationAtributes
     {
         public const string AIRLINENAME = "AirlineName";
@@ -25,13 +24,8 @@ namespace zuli_Business.Validation
             };
 
             var IsEmptyInfo = false;
-            if (string.IsNullOrWhiteSpace(user.airlineName))
-            {
-                errorInfo[AircraftAtributes.MODEL].Add("El nombre del modelo no puede traer espacios en blanco");
-                IsEmptyInfo = true;
-            }
-            //Validar que el código de destino solo pueda traer letras 
-            if (!MiscValidor.ContainsChars(user.airlineName))
+
+            if (!MiscValidator.ContainsChars(user.airlineName))
             {
                 errorInfo[AuthorizationAtributes.AIRLINENAME].Add("El nombre de la aerolínea no puede tener números ni caractes especiales");
                 IsEmptyInfo = true;

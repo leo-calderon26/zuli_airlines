@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Business.DTO.External
+namespace zuli_Business.DTO
 {
-    public class RetrievedFlightDTO
+    public class BookedFlightDTO
     {
         public Guid flightGUID { get; set; }
         public DateTime departureTime { get; set; }

@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Business.DTO.External
+namespace zuli_Business.DTO
 {
     public class RequestedFlightDTO
     {
-        [Required(ErrorMessage = "El código del aeropuerto de origen es requerido")]
-        [StringLength(3, ErrorMessage = "El código del aeropuerto de origen debe ser de 3 caracteres")]
-        public string origin { get; set; }
         [Required(ErrorMessage = "El código del aeropuerto de destino es requerido")]
         [StringLength(3, ErrorMessage = "El código del aeropuerto de destino debe ser de 3 caracteres")]
         public string destination { get; set; }
