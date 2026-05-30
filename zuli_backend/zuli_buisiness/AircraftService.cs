@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -17,17 +18,22 @@ namespace zuli_Business
         // Inyeccion de dependencias
         private readonly IAircraftRepository _repository;
         private readonly IUserRepository _userRepository;
-        private readonly AircraftValidator _validator;
-        public AircraftService(IAircraftRepository repository, IUserRepository userRepository)
+        private readonly FluentValidation.IValidator<AircraftDTO> _validator;
+
+        public AircraftService(
+            IAircraftRepository repository,
+            IUserRepository userRepository,
+            FluentValidation.IValidator<AircraftDTO> validator)
         {
             _repository = repository;
             _userRepository = userRepository;
-            _validator = new AircraftValidator();
+            _validator = validator;
         }
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft)
         {
-            _validator.ValidateAircraftInfo(aircraft);
+            var validationResult = await _validator.ValidateAsync(aircraft);
+            validationResult.ThrowIfInvalid();
 
             if (!await _userRepository.IsAdmin(aircraft.businessId))
             {
@@ -75,7 +81,8 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> UpdateAircraftAsync(Guid aircraftId, AircraftDTO aircraft)
         {
-            _validator.ValidateAircraftInfo(aircraft);
+            var validationResult = await _validator.ValidateAsync(aircraft);
+            validationResult.ThrowIfInvalid();
 
             if (!await _userRepository.IsAdmin(aircraft.businessId))
             {

@@ -1,136 +1,48 @@
-using System.Text.RegularExpressions;
+using FluentValidation;
 using zuli_Business.DTO;
-using zuli_Data.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace zuli_Business.Validation
 {
-    public class RegisterUserValidator
+    public class RegisterUserValidator : AbstractValidator<RegisterUserRequestDTO>
     {
-        public void Validate(RegisterUserRequestDTO? request)
+        public RegisterUserValidator()
         {
-            var errors = new Dictionary<string, List<string>>();
+            RuleFor(x => x.NationalId)
+                .NotEmpty().WithMessage("La cédula es obligatoria.")
+                .Must(id => Regex.IsMatch(id.Trim(), @"^\d{9}$"))
+                .When(x => !string.IsNullOrWhiteSpace(x.NationalId))
+                .WithMessage("La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones.");
 
-            if (request == null)
-            {
-                errors["request"] = new List<string>
-                {
-                    "Solicitud inválida."
-                };
+            RuleFor(x => x.BusinessEmail)
+                .NotEmpty().WithMessage("El correo institucional es obligatorio.")
+                .Must(email => Regex.IsMatch(email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                .When(x => !string.IsNullOrWhiteSpace(x.BusinessEmail))
+                .WithMessage("El correo institucional no tiene un formato válido.");
 
-                throw new ZuliValidationException(errors);
-            }
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage("El primer nombre es obligatorio.")
+                .MaximumLength(50).WithMessage("El primer nombre no puede superar los 50 caracteres.")
+                .Matches(@"^[\p{L} '-]+$").When(x => !string.IsNullOrWhiteSpace(x.FirstName))
+                .WithMessage("El primer nombre solo puede contener letras, espacios, apóstrofes o guiones.");
 
-            ValidateNationalId(request.NationalId, errors);
-            ValidateEmail(request.BusinessEmail, errors);
-            ValidateTextField("firstName", request.FirstName, "El primer nombre", errors);
-            ValidateTextField("firstLastName", request.FirstLastName, "El primer apellido", errors);
-            ValidateTextField("secondLastName", request.SecondLastName, "El segundo apellido", errors);
-            ValidateUserRole(request.UserRole, errors);
+            RuleFor(x => x.FirstLastName)
+                .NotEmpty().WithMessage("El primer apellido es obligatorio.")
+                .MaximumLength(50).WithMessage("El primer apellido no puede superar los 50 caracteres.")
+                .Matches(@"^[\p{L} '-]+$").When(x => !string.IsNullOrWhiteSpace(x.FirstLastName))
+                .WithMessage("El primer apellido solo puede contener letras, espacios, apóstrofes o guiones.");
 
-            if (errors.Count > 0)
-            {
-                throw new ZuliValidationException(errors);
-            }
-        }
+            RuleFor(x => x.SecondLastName)
+                .NotEmpty().WithMessage("El segundo apellido es obligatorio.")
+                .MaximumLength(50).WithMessage("El segundo apellido no puede superar los 50 caracteres.")
+                .Matches(@"^[\p{L} '-]+$").When(x => !string.IsNullOrWhiteSpace(x.SecondLastName))
+                .WithMessage("El segundo apellido solo puede contener letras, espacios, apóstrofes o guiones.");
 
-        private static void ValidateNationalId(string nationalId, Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(nationalId))
-            {
-                errors["nationalId"] = new List<string>
-                {
-                    "La cédula es obligatoria."
-                };
-
-                return;
-            }
-
-            if (!Regex.IsMatch(nationalId.Trim(), @"^\d{9}$"))
-            {
-                errors["nationalId"] = new List<string>
-                {
-                    "La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones."
-                };
-            }
-        }
-
-        private static void ValidateEmail(string email, Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                errors["businessEmail"] = new List<string>
-                {
-                    "El correo institucional es obligatorio."
-                };
-
-                return;
-            }
-
-            if (!Regex.IsMatch(email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            {
-                errors["businessEmail"] = new List<string>
-                {
-                    "El correo institucional no tiene un formato válido."
-                };
-            }
-        }
-
-        private static void ValidateTextField(
-            string fieldName,
-            string value,
-            string displayName,
-            Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                errors[fieldName] = new List<string>
-                {
-                    $"{displayName} es obligatorio."
-                };
-
-                return;
-            }
-
-            if (value.Trim().Length > 50)
-            {
-                errors[fieldName] = new List<string>
-                {
-                    $"{displayName} no puede superar los 50 caracteres."
-                };
-
-                return;
-            }
-
-            if (!Regex.IsMatch(value.Trim(), @"^[\p{L} '-]+$"))
-            {
-                errors[fieldName] = new List<string>
-                {
-                    $"{displayName} solo puede contener letras, espacios, apóstrofes o guiones."
-                };
-            }
-        }
-
-        private static void ValidateUserRole(string userRole, Dictionary<string, List<string>> errors)
-        {
-            if (string.IsNullOrWhiteSpace(userRole))
-            {
-                errors["userRole"] = new List<string>
-                {
-                    "El tipo de usuario es obligatorio."
-                };
-
-                return;
-            }
-
-            string trimmedRole = userRole.Trim();
-
-            if (trimmedRole != "Administrator" && trimmedRole != "Operator")
-            {
-                errors["userRole"] = new List<string>
-                {
-                    "El tipo de usuario no es válido."
-                };
-            }
+            RuleFor(x => x.UserRole)
+                .NotEmpty().WithMessage("El tipo de usuario es obligatorio.")
+                .Must(role => role.Trim() == "Administrator" || role.Trim() == "Operator")
+                .When(x => !string.IsNullOrWhiteSpace(x.UserRole))
+                .WithMessage("El tipo de usuario no es válido.");
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
+using FluentValidation;
 using zuli_Business.DTO;
-using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation
 {
@@ -16,134 +13,50 @@ namespace zuli_Business.Validation
         public const string ADMINID = "AdminId";
     }
 
-    public class AirportValidator
+    public class AirportValidator : AbstractValidator<AirportDTO>
     {
-        public void ValidateAirportInfo(AirportDTO airport)
+        public AirportValidator()
         {
-            var errorInfo = new Dictionary<string, List<string>>()
-            {
-                { AirportAtributes.CODE, new List<string>() },
-                { AirportAtributes.NAME, new List<string>() },
-                { AirportAtributes.COUNTRY, new List<string>() },
-                { AirportAtributes.CITY, new List<string>() },
-                { AirportAtributes.ADMINID, new List<string>() },
-            };
+            RuleFor(x => x.airportCode)
+                .NotEmpty().WithMessage("El codigo del aeropuerto no puede venir vacio o con espacios en blanco")
+                .OverridePropertyName(AirportAtributes.CODE);
 
-            var IsEmptyInfo = false;
+            RuleFor(x => x.airportCode)
+                .Length(3)
+                .When(x => !string.IsNullOrWhiteSpace(x.airportCode))
+                .WithMessage("El codigo del aeropuerto debe tener exactamente 3 caracteres")
+                .OverridePropertyName(AirportAtributes.CODE);
 
-            // Validar si el codigo no viene vacio
-            if (string.IsNullOrWhiteSpace(airport.airportCode))
-            {
-                errorInfo[AirportAtributes.CODE].Add("El codigo del aeropuerto no puede venir vacio o con espacios en blanco");
-                IsEmptyInfo = true;
-            }
+            RuleFor(x => x.airportCode)
+                .Must(code => !code.Contains(' '))
+                .When(x => !string.IsNullOrWhiteSpace(x.airportCode))
+                .WithMessage("El codigo del aeropuerto no puede contener espacios")
+                .OverridePropertyName(AirportAtributes.CODE);
 
-            // Validar si el nombre no viene vacio
-            if (string.IsNullOrWhiteSpace(airport.name))
-            {
-                errorInfo[AirportAtributes.NAME].Add("El nombre del aeropuerto no puede venir vacio o con espacios en blanco");
-                IsEmptyInfo = true;
-            }
+            RuleFor(x => x.airportCode)
+                .Must(MiscValidor.ContainsChars)
+                .When(x => !string.IsNullOrWhiteSpace(x.airportCode))
+                .WithMessage("El codigo del aeropuerto solo puede contener letras")
+                .OverridePropertyName(AirportAtributes.CODE);
 
-            // Validar si el pais no viene vacio
-            if (string.IsNullOrWhiteSpace(airport.country))
-            {
-                errorInfo[AirportAtributes.COUNTRY].Add("El pais no puede venir vacio o con espacios en blanco");
-                IsEmptyInfo = true;
-            }
+            RuleFor(x => x.name)
+                .NotEmpty().WithMessage("El nombre del aeropuerto no puede venir vacio o con espacios en blanco")
+                .MaximumLength(100).WithMessage("El nombre del aeropuerto no puede medir más de 100 caracteres")
+                .OverridePropertyName(AirportAtributes.NAME);
 
-            // Validar si la ciudad no viene vacia
-            if (string.IsNullOrWhiteSpace(airport.city))
-            {
-                errorInfo[AirportAtributes.CITY].Add("La ciudad no puede venir vacia o con espacios en blanco");
-                IsEmptyInfo = true;
-            }
+            RuleFor(x => x.country)
+                .NotEmpty().WithMessage("El pais no puede venir vacio o con espacios en blanco")
+                .MaximumLength(60).WithMessage("El pais no puede medir más de 60 caracteres")
+                .OverridePropertyName(AirportAtributes.COUNTRY);
 
-            // Validar que el adminId no venga vacio
-            if (airport.businessId == string.Empty)
-            {
-                errorInfo[AirportAtributes.ADMINID].Add("El adminId no puede venir vacio");
-                IsEmptyInfo = true;
-            }
+            RuleFor(x => x.city)
+                .NotEmpty().WithMessage("La ciudad no puede venir vacia o con espacios en blanco")
+                .MaximumLength(60).WithMessage("La ciudad no puede medir más de 60 caracteres")
+                .OverridePropertyName(AirportAtributes.CITY);
 
-            if (IsEmptyInfo)
-            {
-                throw new ZuliValidationException(
-                    errorInfo.Where(x => x.Value.Count > 0)
-                             .ToDictionary(x => x.Key, x => x.Value)
-                );
-            }
-            else
-            {
-                // Validar longitud exacta del codigo del aeropuerto
-                if (airport.airportCode.Length != 3)
-                {
-                    errorInfo[AirportAtributes.CODE].Add("El codigo del aeropuerto debe tener exactamente 3 caracteres");
-                    IsEmptyInfo = true;
-                }
-
-                // Validar que el codigo no tenga espacios
-                if (airport.airportCode.Contains(" "))
-                {
-                    errorInfo[AirportAtributes.CODE].Add("El codigo del aeropuerto no puede contener espacios");
-                    IsEmptyInfo = true;
-                }
-
-                // Validar que el codigo solo tenga letras
-                if (!airport.airportCode.All(char.IsLetter))
-                {
-                    errorInfo[AirportAtributes.CODE].Add("El codigo del aeropuerto solo puede contener letras");
-                    IsEmptyInfo = true;
-                }
-
-                // Validar longitud maxima del nombre
-                if (!string.IsNullOrWhiteSpace(airport.name) && airport.name.Length > 100)
-                {
-                    errorInfo[AirportAtributes.NAME].Add("El nombre del aeropuerto no puede medir más de 100 caracteres");
-                    IsEmptyInfo = true;
-                }
-
-                // Validar longitud maxima del pais
-                if (!string.IsNullOrWhiteSpace(airport.country) && airport.country.Length > 60)
-                {
-                    errorInfo[AirportAtributes.COUNTRY].Add("El pais no puede medir más de 60 caracteres");
-                    IsEmptyInfo = true;
-                }
-
-                // Validar longitud maxima de la ciudad
-                if (!string.IsNullOrWhiteSpace(airport.city) && airport.city.Length > 60)
-                {
-                    errorInfo[AirportAtributes.CITY].Add("La ciudad no puede medir más de 60 caracteres");
-                    IsEmptyInfo = true;
-                }
-
-                if (IsEmptyInfo)
-                {
-                    throw new ZuliValidationException(
-                        errorInfo.Where(x => x.Value.Count > 0)
-                                 .ToDictionary(x => x.Key, x => x.Value)
-                    );
-                }
-            }
-        }
-        
-        public void ValidateSearchTerm(string searchTerm)
-        {
-            var errors = new Dictionary<string, List<string>>();
-
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                errors.Add("SearchTerm", new List<string> { "El término de búsqueda no puede estar vacío." });
-            }
-            else if (searchTerm.Trim().Length < 2)
-            {
-                errors.Add("SearchTerm", new List<string> { "Debe ingresar al menos 2 letras para buscar." });
-            }
-
-            if (errors.Count > 0)
-            {
-                throw new ZuliValidationException(errors);
-            }
+            RuleFor(x => x.businessId)
+                .NotEmpty().WithMessage("El adminId no puede venir vacio")
+                .OverridePropertyName(AirportAtributes.ADMINID);
         }
     }
 }

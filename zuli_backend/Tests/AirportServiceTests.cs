@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Mappings;
+using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -29,7 +30,11 @@ namespace zuli_backend.Tests
             _airportRepositoryMock = new Mock<IAirportRepository>();
             _userRepositoryMock = new Mock<IUserRepository>();
 
-            _service = new AirportService(_airportRepositoryMock.Object, _userRepositoryMock.Object);
+            _service = new AirportService(
+                _airportRepositoryMock.Object,
+                _userRepositoryMock.Object,
+                new AirportValidator(),
+                new AirportSearchValidator());
         }
 
         [Test]
@@ -48,7 +53,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock.Setup(r => r.IsAdmin(airport.businessId)).ReturnsAsync(true);
             _airportRepositoryMock.Setup(r => r.GetByCodeAsync("SJO")).ReturnsAsync(existingAirport);
-            _airportRepositoryMock.Setup(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            _airportRepositoryMock.Setup(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>())).Returns(Task.CompletedTask);
 
             var result = await _service.UpdateAirportAsync(airportCode, airport);
 

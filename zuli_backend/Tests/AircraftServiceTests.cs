@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Mappings;
+using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -29,7 +30,10 @@ namespace zuli_backend.Tests
             _aircraftRepositoryMock = new Mock<IAircraftRepository>();
             _userRepositoryMock = new Mock<IUserRepository>();
 
-            _service = new AircraftService(_aircraftRepositoryMock.Object, _userRepositoryMock.Object);
+            _service = new AircraftService(
+                _aircraftRepositoryMock.Object,
+                _userRepositoryMock.Object,
+                new AircraftValidator());
         }
 
         [Test]

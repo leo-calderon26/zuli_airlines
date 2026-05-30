@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -17,7 +18,7 @@ namespace zuli_Business
     {
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
-        private readonly RegisterUserValidator _registerUserValidator;
+        private readonly FluentValidation.IValidator<RegisterUserRequestDTO> _registerUserValidator;
         private readonly ActivateAccountValidator _activateAccountValidator;
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
@@ -25,7 +26,7 @@ namespace zuli_Business
         public UserRegistrationService(
             IUserRepository userRepository,
             IEmailService emailService,
-            RegisterUserValidator registerUserValidator,
+            FluentValidation.IValidator<RegisterUserRequestDTO> registerUserValidator,
             ActivateAccountValidator activateAccountValidator,
             IConfiguration configuration)
         {
@@ -41,7 +42,8 @@ namespace zuli_Business
             RegisterUserRequestDTO request,
             Guid adminUserId)
         {
-            _registerUserValidator.Validate(request);
+            var validationResult = await _registerUserValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
 
             string nationalId = request.NationalId.Trim();
             string businessEmail = request.BusinessEmail.Trim().ToLower();
@@ -116,7 +118,8 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> UpdateUserAsync(Guid userId, RegisterUserRequestDTO request)
         {
-            _registerUserValidator.Validate(request);
+            var validationResult = await _registerUserValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
 
             AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
 
