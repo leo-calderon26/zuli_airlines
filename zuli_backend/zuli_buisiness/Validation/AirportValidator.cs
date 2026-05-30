@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     public static class AirportAtributes
     {
@@ -60,7 +60,7 @@ namespace zuli_Buisiness.Validation
             }
 
             // Validar que el adminId no venga vacio
-            if (airport.adminId == Guid.Empty)
+            if (airport.businessId == string.Empty)
             {
                 errorInfo[AirportAtributes.ADMINID].Add("El adminId no puede venir vacio");
                 IsEmptyInfo = true;
@@ -124,6 +124,25 @@ namespace zuli_Buisiness.Validation
                                  .ToDictionary(x => x.Key, x => x.Value)
                     );
                 }
+            }
+        }
+        
+        public void ValidateSearchTerm(string searchTerm)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                errors.Add("SearchTerm", new List<string> { "El término de búsqueda no puede estar vacío." });
+            }
+            else if (searchTerm.Trim().Length < 2)
+            {
+                errors.Add("SearchTerm", new List<string> { "Debe ingresar al menos 2 letras para buscar." });
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
             }
         }
     }

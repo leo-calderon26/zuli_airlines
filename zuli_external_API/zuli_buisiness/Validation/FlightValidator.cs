@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO.External;
 using zuli_Data.Exceptions;
 
 namespace zuli_Business.Validation

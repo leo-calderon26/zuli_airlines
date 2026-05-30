@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD:zuli_external_API/zuli_backend/Controllers/AuthorizationController.cs
 using zuli_Buisiness.DTO;
 using zuli_Buisiness.Interface;
+=======
+using zuli_Business.DTO.External;
+using zuli_Business.Interface;
+>>>>>>> develop:zuli_backend/zuli_backend/Controllers/ExternalAuthorizationController.cs
 
 namespace zuli_backend.Controllers
 {

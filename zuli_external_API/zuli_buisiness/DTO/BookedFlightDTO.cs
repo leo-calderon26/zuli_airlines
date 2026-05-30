@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO.External
 {
     public class BookedFlightDTO
     {

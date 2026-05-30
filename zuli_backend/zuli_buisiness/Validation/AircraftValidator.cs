@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using zuli_Buisiness.DTO;
+using zuli_Business.DTO;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     // Esto son tag pasa saber donde esta el error
     public static class AircraftAtributes
     {
+        public const string BUSINESSID = "BusinessId";
         public const string ECONOMYROWS = "EconomyRows";
         public const string SEATINGECONOMY = "SeatingRowsEconomy";
         public const string FIRSTROWS = "FirstRows";
         public const string SEATINGFIRST = "SeatingRowsFirst";
         public const string MODEL = "Model";
         public const string WEIGHT = "Weight";
+        public const string BAGGAGECAPACITY = "BaggageCapacity";
     }
     public class AircraftValidator
     {
@@ -22,15 +24,24 @@ namespace zuli_Buisiness.Validation
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
+                {AircraftAtributes.BUSINESSID, new List<string>() },
                 {AircraftAtributes.ECONOMYROWS, new List<string>() },
                 {AircraftAtributes.SEATINGECONOMY, new List<string>() },
                 {AircraftAtributes.FIRSTROWS, new List<string>() },
                 {AircraftAtributes.SEATINGFIRST, new List<string>() },
                 {AircraftAtributes.MODEL, new List<string>() },
                 {AircraftAtributes.WEIGHT, new List<string>() },
+                {AircraftAtributes.BAGGAGECAPACITY, new List<string>() },
             };
 
             var IsEmptyInfo = false;
+
+            if (string.IsNullOrWhiteSpace(aircraft.businessId))
+            {
+                errorInfo[AircraftAtributes.BUSINESSID].Add("Es necesario ingresar el Id de negocio");
+                IsEmptyInfo = true;
+            }
+
             //Validar si el modelo no tiene espacios en blanco
             if (string.IsNullOrWhiteSpace(aircraft.model))
             {
@@ -69,6 +80,11 @@ namespace zuli_Buisiness.Validation
                 errorInfo[AircraftAtributes.WEIGHT].Add("El peso tiene que ser un numero positivo");
                 IsEmptyInfo = true;
             }
+            if (aircraft.baggageCapacity < 0)
+            {
+                errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje tiene que ser un numero positivo");
+                IsEmptyInfo = true;
+            }
             if (IsEmptyInfo)
             {
                 throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
@@ -86,7 +102,17 @@ namespace zuli_Buisiness.Validation
                     errorInfo[AircraftAtributes.MODEL].Add("La cantidad de asientos no puede ser mayor que a 1000 asientos");
                     IsEmptyInfo = true;
                 }
-                if (errorInfo[AircraftAtributes.MODEL].Count > 0)
+                if (aircraft.baggageCapacity > (aircraft.weight * 0.30m))
+                {
+                    errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje no puede ser mayor al 30% del peso de la aeronave");
+                    IsEmptyInfo = true;
+                }
+                if (aircraft.baggageCapacity < (aircraft.weight * 0.30m))
+                {
+                    errorInfo[AircraftAtributes.BAGGAGECAPACITY].Add("La capacidad de equipaje no puede ser menor al 30% del peso de la aeronave");
+                    IsEmptyInfo = true;
+                }
+                if (errorInfo.Any(x => x.Value.Count > 0))
                     throw new ZuliValidationException(errorInfo.Where(x => x.Value.Count > 0).ToDictionary(x => x.Key, x => x.Value));
             }
         }

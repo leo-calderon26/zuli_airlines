@@ -1,18 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
 
-namespace zuli_Buisiness.DTO
+namespace zuli_Business.DTO
 {
-    public class FlightDTO
-    {
-        public int flightId { get; set; }
-        public DateTime date { get; set; }
-        public string status { get; set; }
-        public TimeOnly realArrivalTime { get; set; }
-        public TimeOnly checkInStartTime { get; set; }
-        public TimeOnly checkInDeadline { get; set; }
-        public TimeOnly realDepartureTime { get; set; }
-    }
+	public class FlightDTO
+	{
+		public Guid? Id { get; set; }
+		public string Status { get; set; } = string.Empty;
+		public DateTime FlightDate { get; set; }
+		public decimal TouristPrice { get; set; }
+		public decimal FirstClassPrice { get; set; }
+		public DateTime? RealDepartureTime { get; set; }
+		public DateTime? RealArrivalTime { get; set; }
+		public Guid AircraftId { get; set; }
+		public int Duration { get; set; }
+		public decimal? CarryOnPrice { get; set; }
+		public decimal? CheckedPrice { get; set; }
+		public int AvailableSeats { get; set; }
+		public string? RealArrivalAirport { get; set; }
+		public string? RealDepartureAirport { get; set; }
+		public string BusinessId { get; set; }
+		public int FlightRouteId { get; set; }
+		public string? ServiceDescription { get; set; }
+	}
 }

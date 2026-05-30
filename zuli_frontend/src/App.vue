@@ -1,7 +1,19 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+  import { RouterView } from 'vue-router';
+  import PublicBottomBar from './shared/PublicBottomBar.vue';
 </script>
 
 <template>
-  <HelloWorld />
+  <div class="min-h-screen flex flex-col bg-secondary">
+    <RouterView v-slot="{ Component }">
+      <component :is="Component" class="flex flex-col flex-1" />
+    </RouterView>
+    <PublicBottomBar />
+  </div>
 </template>
+
+<script>
+export default {
+    name: "App"
+};
+</script>

@@ -6,6 +6,7 @@ using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 using Dapper;
+using System.Linq;
 
 namespace zuli_Repository
 {
@@ -54,6 +55,60 @@ namespace zuli_Repository
             );
 
             return count > 0;
+        }
+         public async Task<IEnumerable<AirportEntity>> SearchAirportsByTerm(string searchTerm)
+        {
+            using var connection = _context.CreateConnection();
+
+            var parameters = new 
+            { 
+                Term = $"%{searchTerm}%",
+                ExactTerm = $"{searchTerm}%" 
+            };
+
+            var sql = @"
+            SELECT TOP 5 AirportCode, Name, Country, City, AdminId
+            FROM (
+                SELECT AirportCode, Name, Country, City, AdminId, 1 AS Priority
+                FROM Airport 
+                WHERE AirportCode LIKE @ExactTerm
+        
+                UNION ALL
+        
+                SELECT AirportCode, Name, Country, City, AdminId, 2 AS Priority
+                FROM Airport 
+                WHERE City LIKE @ExactTerm AND AirportCode NOT LIKE @ExactTerm
+        
+                UNION ALL
+        
+                SELECT AirportCode, Name, Country, City, AdminId, 3 AS Priority
+                FROM Airport 
+                WHERE (AirportCode LIKE @Term OR City LIKE @Term OR Country LIKE @Term)
+                  AND AirportCode NOT LIKE @ExactTerm AND City NOT LIKE @ExactTerm
+            ) AS Resultados
+            ORDER BY Priority, City ASC";
+
+
+            var airports = await connection.QueryAsync<AirportEntity>(sql, parameters);
+            return airports;
+        }
+        public async Task<(IEnumerable<AirportEntity> airports, int totalCount)> GetAirportsPaginated(int pageNumber, int pageSize)
+        {
+            using var connection = _context.CreateConnection();
+
+            var countSql = "SELECT COUNT(1) FROM Airport";
+            var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
+
+            var offset = (pageNumber - 1) * pageSize;
+
+            var sql = @"
+                SELECT * FROM Airport
+                ORDER BY AirportCode
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY";
+
+            var airports = (await connection.QueryAsync<AirportEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
+            return (airports, totalCount);
         }
 
     }

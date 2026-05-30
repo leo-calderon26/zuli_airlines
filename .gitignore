@@ -779,3 +779,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+zuli_frontend/package-lock.json
+zuli_frontend/bun.lock
+.idea

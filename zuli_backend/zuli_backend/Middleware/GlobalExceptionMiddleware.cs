@@ -1,6 +1,4 @@
-﻿
-using zuli_Buisiness;
-using zuli_Data.Exceptions;
+﻿using zuli_Data.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Diagnostics;

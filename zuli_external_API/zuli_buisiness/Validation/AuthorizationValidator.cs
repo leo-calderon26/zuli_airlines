@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using zuli_Buisiness.DTO;
-using zuli_Business.Validation;
+using zuli_Business.DTO.External;
 using zuli_Data.Exceptions;
 
-namespace zuli_Buisiness.Validation
+namespace zuli_Business.Validation
 {
     // Esto son tag pasa saber donde esta el error
     public static class AuthorizationAtributes
