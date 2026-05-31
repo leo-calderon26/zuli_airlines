@@ -18,18 +18,15 @@ namespace zuli_Business
         private readonly IAirportRepository _repository;
         private readonly IUserRepository _userRepository;
         private readonly FluentValidation.IValidator<AirportDTO> _validator;
-        private readonly FluentValidation.IValidator<string> _searchValidator;
 
         public AirportService(
             IAirportRepository repository,
             IUserRepository userRepository,
-            FluentValidation.IValidator<AirportDTO> validator,
-            FluentValidation.IValidator<string> searchValidator)
+            FluentValidation.IValidator<AirportDTO> validator)
         {
             _repository = repository;
             _userRepository = userRepository;
             _validator = validator;
-            _searchValidator = searchValidator;
         }
 
         public async Task<BasicResponseDTO> CreateAirport(AirportDTO airport)
@@ -68,8 +65,10 @@ namespace zuli_Business
 
         public async Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm)
         {
-            var validationResult = await _searchValidator.ValidateAsync(searchTerm);
-            validationResult.ThrowIfInvalid();
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                throw new ZuliValidationException(AirportAtributes.CODE, "El término de búsqueda no puede estar vacío.");
+            }
 
             var airports = await _repository.SearchAirportsByTerm(searchTerm.Trim());
 
