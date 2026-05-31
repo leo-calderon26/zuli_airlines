@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using MapsterMapper;
+using Moq;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Data.Entities;
@@ -15,6 +16,7 @@ namespace zuli_backend.Test
         private Mock<IBaggageRepository> _baggageRepoMock;
         private Mock<IFlightRepository> _flightRepoMock;
         private Mock<IBuyerRepository> _buyerRepoMock;
+        private Mock<IMapper> _mapperMock;
 
         private TicketService _ticketService;
 
@@ -29,13 +31,27 @@ namespace zuli_backend.Test
             _baggageRepoMock = new Mock<IBaggageRepository>();
             _flightRepoMock = new Mock<IFlightRepository>();
             _buyerRepoMock = new Mock<IBuyerRepository>();
+            _mapperMock = new Mock<IMapper>();
+
+            _mapperMock
+                .Setup(m => m.Map<BuyerEntity>(It.IsAny<BuyerTicketDTO>()))
+                .Returns<BuyerTicketDTO>(dto => new BuyerEntity
+                {
+                    FirstName = dto.FirstName,
+                    FirstLastName = dto.FirstLastName,
+                    SecondLastName = dto.SecondLastName,
+                    BirthDate = dto.BirthDate,
+                    Email = dto.Email,
+                    Phone = dto.Phone
+                });
 
             _ticketService = new TicketService(
                 _personRepoMock.Object,
                 _reservationRepoMock.Object,
                 _baggageRepoMock.Object,
                 _flightRepoMock.Object,
-                _buyerRepoMock.Object
+                _buyerRepoMock.Object,
+                _mapperMock.Object
             );
         }
 

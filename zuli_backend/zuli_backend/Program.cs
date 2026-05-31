@@ -137,7 +137,6 @@ builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 builder.Services.AddScoped<ITicketService, TicketService>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
