@@ -14,15 +14,8 @@ namespace zuli_backend.Controllers
         [HttpPost("purchase")]
         public async Task<ActionResult<TicketPurchaseResponseDTO>> Purchase([FromBody] TicketPurchaseRequestDTO request)
         {
-            try
-            {
-                var result = await _service.Purchase(request);
-                return Ok(result);
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { detail = ex.Message });
-            }
+            var result = await _service.Purchase(request);
+            return Ok(result);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Mapster;
+using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
@@ -14,19 +15,22 @@ namespace zuli_Business
         private readonly IBaggageRepository _baggageRepository;
         private readonly IFlightRepository _flightRepository;
         private readonly IBuyerRepository _buyerRepository;
+        private readonly IMapper _mapper;
 
         public TicketService(
             IPersonRepository personRepository,
             IReservationRepository reservationRepository,
             IBaggageRepository baggageRepository,
             IFlightRepository flightRepository,
-            IBuyerRepository buyerRepository)
+            IBuyerRepository buyerRepository,
+            IMapper mapper)
         {
             _personRepository = personRepository;
             _reservationRepository = reservationRepository;
             _baggageRepository = baggageRepository;
             _flightRepository = flightRepository;
             _buyerRepository = buyerRepository;
+            _mapper = mapper;
         }
 
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
@@ -66,15 +70,7 @@ namespace zuli_Business
 
         private async Task<int> CreateBuyer(BuyerTicketDTO buyerDto)
         {
-            var buyer = new BuyerEntity
-            {
-                FirstName = buyerDto.FirstName,
-                FirstLastName = buyerDto.FirstLastName,
-                SecondLastName = buyerDto.SecondLastName,
-                BirthDate = buyerDto.BirthDate,
-                Email = buyerDto.Email,
-                Phone = buyerDto.Phone
-            };
+            var buyer = _mapper.Map<BuyerEntity>(buyerDto);
             return await _buyerRepository.CreateBuyer(buyer);
         }
 
