@@ -36,6 +36,7 @@ namespace zuli_Business
             _activateAccountValidator = activateAccountValidator;
             _configuration = configuration;
             _passwordHasher = new PasswordHasher<AppUser>();
+            // logger removed
         }
 
         public async Task<RegisterUserResponseDTO> RegisterUserAsync(
@@ -52,6 +53,8 @@ namespace zuli_Business
             string secondLastName = request.SecondLastName.Trim();
             string userRole = request.UserRole.Trim();
 
+            // logging removed
+
             await ValidateUniqueUserAsync(nationalId, businessEmail);
 
             string activationToken = GenerateSecureToken();
@@ -62,7 +65,20 @@ namespace zuli_Business
             user.ManagedByAdminId = adminUserId;
             user.ActivationTokenHash = activationTokenHash;
 
-            await _userRepository.CreatePendingUserAsync(user);
+            if (string.IsNullOrWhiteSpace(user.BusinessId))
+            {
+                int num = RandomNumberGenerator.GetInt32(10000000, 100000000);
+                user.BusinessId = num.ToString();
+            }
+
+            try
+            {
+                await _userRepository.CreatePendingUserAsync(user);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             string fullName = $"{user.FirstName} {user.FirstLastName} {user.SecondLastName}";
             string activationLink = BuildActivationLink(activationToken);
@@ -134,6 +150,14 @@ namespace zuli_Business
             if (userByEmail != null && userByEmail.UserId != userId)
             {
                 ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
+            }
+
+            string nationalId = request.NationalId.Trim();
+            AppUser? userByNationalId = await _userRepository.GetByNationalIdAsync(nationalId);
+
+            if (userByNationalId != null && userByNationalId.UserId != userId)
+            {
+                ThrowValidationError("nationalId", "Ya existe una persona registrada con esa cédula.");
             }
 
             request.Adapt(existingUser, TypeAdapterConfig.GlobalSettings);

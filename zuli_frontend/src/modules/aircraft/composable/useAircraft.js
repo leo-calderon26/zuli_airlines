@@ -22,15 +22,15 @@ export function useAircraft() {
     };
 
     const addAircraft = async (aircraftData) => {
-        const newAircraft = await createAircraft(aircraftData);
-        store.addAircraft(newAircraft);
-        return newAircraft;
+        const response = await createAircraft(aircraftData);
+        await fetchAircraftsPaginated(store.pageNumber, store.pageSize);
+        return response;
     };
 
     const updateAircraft = async (aircraftId, aircraftData) => {
-        await updateAircraftRequest(aircraftId, aircraftData);
-        store.updateAircraft(aircraftId, aircraftData);
-        return aircraftData;
+        const response = await updateAircraftRequest(aircraftId, aircraftData);
+        await fetchAircraftsPaginated(store.pageNumber, store.pageSize);
+        return response;
     };
 
     const changePage = async (pageNumber) => {

@@ -1,5 +1,6 @@
 <script setup>
 import AdminNavBar from '../../../shared/AdminNavBar.vue';
+import { onMounted } from 'vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
@@ -38,8 +39,6 @@ onMounted(() => {
 <template>
   <div class="flex flex-col">
     <AdminNavBar />
-    <RouteNavBar />
-    
     <main class="flex-1 pb-8">
       <div class="page-shell">
         <form class="form-card" @submit.prevent="submit">
@@ -127,25 +126,6 @@ onMounted(() => {
               <p v-if="errors.fields.aircraftId" class="mt-1 text-sm text-error">{{ errors.fields.aircraftId }}</p>
               <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
             </div>
-          </div> <div class="border border-border-soft bg-text-box p-8 mt-6">
-            <h3 class="text-2xl font-bold text-font mb-6">Frecuencia semanal</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              <label
-                v-for="day in daysOfWeek"
-                :key="day.value"
-                class="flex items-center gap-3 p-3 border border-border-soft rounded-base cursor-pointer transition hover:border-primary"
-                :class="{ 'border-primary bg-primary/5': form.frequency.includes(day.value) }"
-              >
-                <input
-                  v-model="form.frequency"
-                  type="checkbox"
-                  :value="day.value"
-                  class="h-4 w-4 accent-sumary"
-                />
-                <span class="text-sm text-font font-medium">{{ day.label }}</span>
-              </label>
-            </div>
-            <p v-if="errors.fields.frequency" class="mt-3 text-sm text-error">{{ errors.fields.frequency }}</p>
           </div>
 
           <div class="border border-border-soft bg-text-box p-8 mt-6">
@@ -190,14 +170,14 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="flex justify-end mt-6">
-            <AppButton type="submit" variant="primary" size="lg" :loading="isLoading">
-              {{ isLoading ? 'Guardando...' : 'Guardar ruta' }}
-            </AppButton>
-          </div>
-
-        </form>
-      </div> </main>
+        <div class="flex justify-end">
+          <AppButton type="submit" variant="primary" size="lg" :loading="isLoading">
+            {{ isLoading ? 'Guardando...' : 'Guardar ruta' }}
+          </AppButton>
+        </div>
+      </form>
+      </div>
+    </main>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
     <ErrorModal v-model="showErrorModal" :message="errorMessage" :errors="modalErrors" />

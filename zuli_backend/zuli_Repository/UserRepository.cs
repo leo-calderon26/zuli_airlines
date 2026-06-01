@@ -18,11 +18,13 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // (logging removed)
+
             var sql = @"
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    au.BusinessId AS NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -37,8 +39,8 @@ namespace zuli_Repository
                     au.ManagedByAdminId,
                     au.ActivationTokenHash
                 FROM AirlineUser au
-                LEFT JOIN Person p ON au.PersonId = p.PersonId
-                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE au.BusinessEmail = @BusinessEmail;
             ";
 
@@ -52,11 +54,13 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // (logging removed)
+
             var sql = @"
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    au.BusinessId AS NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -71,9 +75,9 @@ namespace zuli_Repository
                     au.ManagedByAdminId,
                     au.ActivationTokenHash
                 FROM AirlineUser au
-                LEFT JOIN Person p ON au.PersonId = p.PersonId
-                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
-                WHERE au.BusinessId = @NationalId;
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
+                WHERE au.NationalId = @NationalId;
             ";
 
             return await connection.QuerySingleOrDefaultAsync<AppUser>(
@@ -85,6 +89,8 @@ namespace zuli_Repository
         public async Task<AppUser?> GetByUserIdAsync(Guid userId)
         {
             using var connection = _dapperContext.CreateConnection();
+
+            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -120,11 +126,13 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // (logging removed)
+
             var sql = @"
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    au.BusinessId AS NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -139,8 +147,8 @@ namespace zuli_Repository
                     au.ManagedByAdminId,
                     au.ActivationTokenHash
                 FROM AirlineUser au
-                LEFT JOIN Person p ON au.PersonId = p.PersonId
-                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE au.ActivationTokenHash = @ActivationTokenHash;
             ";
 
@@ -160,16 +168,21 @@ namespace zuli_Repository
 
             try
             {
+                // (logging removed)
                 var personSql = @"
                     INSERT INTO Person (
                         FirstName,
                         FirstLastName,
-                        SecondLastName
+                        SecondLastName,
+                        BirthDate,
+                        Gender
                     )
                     VALUES (
                         @FirstName,
                         @FirstLastName,
-                        @SecondLastName
+                        @SecondLastName,
+                        '',
+                        ''
                     );
 
                     SELECT CAST(SCOPE_IDENTITY() AS INT);
@@ -181,12 +194,26 @@ namespace zuli_Repository
                     transaction
                 );
 
+                // (logging removed)
+
+                if (!string.IsNullOrWhiteSpace(user.Email))
+                {
+                    var emailSql = @"
+                        INSERT INTO PersonEmail (PersonId, Email)
+                        VALUES (@PersonId, @Email);";
+
+                    await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email }, transaction);
+
+                    // (logging removed)
+                }
+
                 user.PersonId = personId;
 
                 var userSql = @"
                     INSERT INTO AirlineUser (
                         UserId,
                         PersonId,
+                        NationalId,
                         BusinessEmail,
                         BusinessId,
                         UserRole,
@@ -200,6 +227,7 @@ namespace zuli_Repository
                     VALUES (
                         @UserId,
                         @PersonId,
+                        @NationalId,
                         @BusinessEmail,
                         @BusinessId,
                         @UserRole,
@@ -214,9 +242,11 @@ namespace zuli_Repository
 
                 await connection.ExecuteAsync(userSql, user, transaction);
 
+                // (logging removed)
+
                 transaction.Commit();
             }
-            catch
+            catch (Exception)
             {
                 transaction.Rollback();
                 throw;
@@ -266,6 +296,7 @@ namespace zuli_Repository
                 {
                     user.UserId,
                     user.PersonId,
+                    user.NationalId,
                     user.FirstName,
                     user.FirstLastName,
                     user.SecondLastName,
@@ -324,7 +355,7 @@ namespace zuli_Repository
             {
                 "email" => "(au.BusinessEmail LIKE @Search OR pe.Email LIKE @Search)",
 
-                "nationalId" => "au.BusinessId LIKE @Search",
+                "nationalId" => "au.NationalId LIKE @Search",
 
                 "name" => @"
                     (
@@ -338,7 +369,7 @@ namespace zuli_Repository
                 _ => @"
                     (
                         au.BusinessEmail LIKE @Search
-                        OR au.BusinessId LIKE @Search
+                        OR au.NationalId LIKE @Search
                         OR p.FirstName LIKE @Search
                         OR p.FirstLastName LIKE @Search
                         OR p.SecondLastName LIKE @Search
@@ -351,8 +382,8 @@ namespace zuli_Repository
             var countSql = $@"
                 SELECT COUNT(*)
                 FROM AirlineUser au
-                LEFT JOIN Person p ON au.PersonId = p.PersonId
-                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE {whereClause};
             ";
 
@@ -360,7 +391,7 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    au.BusinessId AS NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -375,8 +406,8 @@ namespace zuli_Repository
                     au.ManagedByAdminId,
                     au.ActivationTokenHash
                 FROM AirlineUser au
-                LEFT JOIN Person p ON au.PersonId = p.PersonId
-                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
+                INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE {whereClause}
                 ORDER BY p.FirstName, p.FirstLastName, p.SecondLastName
                 OFFSET @Offset ROWS

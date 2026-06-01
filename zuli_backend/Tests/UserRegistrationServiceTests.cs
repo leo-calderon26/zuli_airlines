@@ -72,6 +72,7 @@ namespace zuli_backend.Tests
             AppUser? updatedUser = null;
 
             _userRepositoryMock.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync(existingUser);
+            _userRepositoryMock.Setup(r => r.GetByNationalIdAsync("123456789")).ReturnsAsync((AppUser?)null);
             _userRepositoryMock.Setup(r => r.GetByBusinessEmailAsync("new.user@ucr.ac.cr")).ReturnsAsync((AppUser?)null);
             _userRepositoryMock.Setup(r => r.UpdateUserAsync(It.IsAny<AppUser>()))
                 .Callback<AppUser>(user => updatedUser = user)
@@ -85,6 +86,7 @@ namespace zuli_backend.Tests
             Assert.That(updatedUser!.FirstName, Is.EqualTo("Maria"));
             Assert.That(updatedUser.FirstLastName, Is.EqualTo("Gomez"));
             Assert.That(updatedUser.SecondLastName, Is.EqualTo("Ruiz"));
+            Assert.That(updatedUser.NationalId, Is.EqualTo("123456789"));
             Assert.That(updatedUser.BusinessEmail, Is.EqualTo("new.user@ucr.ac.cr"));
             Assert.That(updatedUser.Email, Is.EqualTo("new.user@ucr.ac.cr"));
             Assert.That(updatedUser.UserRole, Is.EqualTo("Administrator"));
@@ -130,6 +132,7 @@ namespace zuli_backend.Tests
             var request = BuildValidRequest();
 
             _userRepositoryMock.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync(existingUser);
+            _userRepositoryMock.Setup(r => r.GetByNationalIdAsync("123456789")).ReturnsAsync(existingUser);
             _userRepositoryMock.Setup(r => r.GetByBusinessEmailAsync("user@ucr.ac.cr")).ReturnsAsync(existingUser);
             _userRepositoryMock.Setup(r => r.UpdateUserAsync(It.IsAny<AppUser>())).Returns(Task.CompletedTask);
 

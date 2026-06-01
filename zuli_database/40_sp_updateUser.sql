@@ -4,6 +4,7 @@ GO
 CREATE OR ALTER PROCEDURE dbo.sp_updateUser
     @UserId UNIQUEIDENTIFIER,
     @PersonId INT,
+    @NationalId CHAR(9),
     @FirstName VARCHAR(50),
     @FirstLastName VARCHAR(50),
     @SecondLastName VARCHAR(50),
@@ -22,6 +23,7 @@ BEGIN
 
     UPDATE dbo.AirlineUser
     SET
+        NationalId = @NationalId,
         BusinessEmail = @BusinessEmail,
         UserRole = @UserRole
     WHERE UserId = @UserId;

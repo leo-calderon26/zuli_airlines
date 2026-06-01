@@ -1,7 +1,4 @@
-﻿using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -126,16 +123,17 @@ namespace zuli_Repository
                 FROM Flight
                 WHERE Id = @Id";
 
-                return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
-            }
+            return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
+        }
 
-                public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
+        public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
         {
             using var connection = _context.CreateConnection();
 
             var sql = @"
                 SELECT 
                     fr.FlightRouteId,
+                    f.Id AS FlightId,
                     fr.DepartureAirport AS Origin,
                     fr.ArrivalAirport AS Destination,
                     CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME) AS DepartureTime,
@@ -148,7 +146,9 @@ namespace zuli_Repository
                     fr.TouristPrice,
                     fr.FirstClassPrice,
                     fr.CarryOnPrice,
-                    fr.CheckedPrice
+                    fr.CheckedPrice,
+                    fr.MaxWeightPerBag,
+                    fr.CheckedBagMultiplier
                 FROM FlightRoute fr
             LEFT JOIN Aircraft a 
                 ON fr.AircraftId = a.AircraftId

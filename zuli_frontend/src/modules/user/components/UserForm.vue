@@ -26,6 +26,7 @@ const isAdministrator = computed(() => (sessionStorage.getItem('userRole') ?? ''
 
 const form = reactive({
     userId: '',
+    nationalId: '',
     businessEmail: '',
     firstName: '',
     firstLastName: '',
@@ -39,6 +40,7 @@ function syncForm(user) {
     }
 
     form.userId = user.userId ?? '';
+    form.nationalId = user.nationalId ?? '';
     form.businessEmail = user.businessEmail ?? '';
     form.firstName = user.firstName ?? '';
     form.firstLastName = user.firstLastName ?? '';
@@ -71,6 +73,10 @@ function validateForm() {
         errors.fields.firstName = 'El primer nombre es obligatorio.';
     }
 
+    if (!/^\d{9}$/.test(form.nationalId.trim())) {
+        errors.fields.nationalId = 'La cédula debe tener exactamente 9 dígitos, sin espacios ni guiones.';
+    }
+
     if (!form.firstLastName.trim()) {
         errors.fields.firstLastName = 'El primer apellido es obligatorio.';
     }
@@ -97,6 +103,7 @@ async function submit() {
 
     await handleSubmit(async () => {
         const payload = {
+            nationalId: form.nationalId.trim(),
             businessEmail: form.businessEmail.trim(),
             firstName: form.firstName.trim(),
             firstLastName: form.firstLastName.trim(),
@@ -116,6 +123,7 @@ async function submit() {
 }
 
 function clearForm() {
+    form.nationalId = '';
     form.businessEmail = '';
     form.firstName = '';
     form.firstLastName = '';
@@ -135,6 +143,10 @@ function onSuccessClose() {
         </p>
 
         <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+            <div class="md:col-span-2">
+                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="!canEditField('nationalId')" />
+            </div>
+
             <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" :disabled="!canEditField('firstName')" />
             <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" :disabled="!canEditField('firstLastName')" />
 
