@@ -2,7 +2,7 @@ namespace zuli_Business.DTO
 {
     public class PurchaseConfirmationFlightDTO
     {
-        public int FlightId { get; set; }
+        public Guid FlightId { get; set; }
         public string FlightNumber { get; set; } = string.Empty;
         public string AirlineName { get; set; } = string.Empty;
 

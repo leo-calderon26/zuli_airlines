@@ -4,6 +4,6 @@ namespace zuli_Repository.Interface
 {
     public interface IPurchaseConfirmationRepository
     {
-        Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(Guid reservationId);
+        Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(int reservationId);
     }
 }

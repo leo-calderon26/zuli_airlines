@@ -14,7 +14,7 @@ namespace zuli_Repository
             _context = context;
         }
 
-        public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(Guid reservationId)
+        public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(int reservationId)
         {
             const string reservationQuery = @"
                 SELECT
@@ -25,19 +25,19 @@ namespace zuli_Repository
                         ' ',
                         buyerPerson.FirstLastName,
                         ' ',
-                        ISNULL(buyerPerson.SecondLastName, '')
+                        buyerPerson.SecondLastName
                     ) AS BuyerName,
                     buyerEmail.Email AS BuyerEmail,
-                    b.PhoneNumber AS BuyerPhone,
-                    r.PaymentMethod,
-                    r.FlightClass,
-                    r.TotalAmount
-                FROM Reservation r
-                INNER JOIN Buyer b
+                    ISNULL(b.Phone, '') AS BuyerPhone,
+                    ISNULL(r.PaymentMethod, '') AS PaymentMethod,
+                    ISNULL(r.FlightClass, '') AS FlightClass,
+                    ISNULL(r.TotalPayment, 0) AS TotalAmount
+                FROM dbo.Reservation r
+                INNER JOIN dbo.Buyer b
                     ON r.BuyerId = b.BuyerId
-                INNER JOIN Person buyerPerson
+                INNER JOIN dbo.Person buyerPerson
                     ON b.PersonId = buyerPerson.PersonId
-                INNER JOIN EmailPerson buyerEmail
+                LEFT JOIN dbo.PersonEmail buyerEmail
                     ON buyerPerson.PersonId = buyerEmail.PersonId
                 WHERE r.ReservationId = @reservationId;
             ";
@@ -49,45 +49,73 @@ namespace zuli_Repository
                         ' ',
                         passengerPerson.FirstLastName,
                         ' ',
-                        ISNULL(passengerPerson.SecondLastName, '')
+                        passengerPerson.SecondLastName
                     ) AS FullName,
                     passengerPerson.BirthDate,
                     passengerPerson.Gender,
-                    p.Country AS PassportCountry,
-                    ISNULL(bg.CheckedBaggageQuantity, 0) AS CheckedBaggageQuantity,
-                    ISNULL(bg.CarryOnQuantity, 0) AS CarryOnQuantity
-                FROM PassengerReservation pr
-                INNER JOIN Person passengerPerson
-                    ON pr.PersonId = passengerPerson.PersonId
-                LEFT JOIN Passport p
-                    ON passengerPerson.PersonId = p.PersonId
-                LEFT JOIN Baggage bg
-                    ON pr.PassengerReservationId = bg.PassengerReservationId
-                WHERE pr.ReservationId = @reservationId;
+                    ISNULL(passport.PassportCountry, '') AS PassportCountry,
+                    ISNULL(baggageSummary.CheckedBaggageQuantity, 0) AS CheckedBaggageQuantity,
+                    ISNULL(baggageSummary.CarryOnQuantity, 0) AS CarryOnQuantity
+                FROM dbo.PassengerReservation pr
+                INNER JOIN dbo.Person passengerPerson
+                    ON pr.PassengerId = passengerPerson.PersonId
+                LEFT JOIN dbo.Passport passport
+                    ON passengerPerson.PersonId = passport.PassengerId
+                LEFT JOIN (
+                    SELECT
+                        PassengerId,
+                        ReservationId,
+                        SUM(
+                            CASE
+                                WHEN LOWER(ISNULL(Type, '')) LIKE '%checked%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%fact%'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ) AS CheckedBaggageQuantity,
+                        SUM(
+                            CASE
+                                WHEN LOWER(ISNULL(Type, '')) LIKE '%carry%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%mano%'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ) AS CarryOnQuantity
+                    FROM dbo.Baggage
+                    GROUP BY PassengerId, ReservationId
+                ) baggageSummary
+                    ON pr.PassengerId = baggageSummary.PassengerId
+                    AND pr.ReservationId = baggageSummary.ReservationId
+                WHERE pr.ReservationId = @reservationId
+                ORDER BY passengerPerson.FirstName, passengerPerson.FirstLastName;
             ";
 
             const string flightsQuery = @"
                 SELECT DISTINCT
-                    f.FlightId,
-                    CAST(f.FlightId AS VARCHAR(20)) AS FlightNumber,
-                    al.Name AS AirlineName,
-                    origin.Name AS OriginAirportName,
-                    origin.Code AS OriginAirportCode,
-                    destination.Name AS DestinationAirportName,
-                    destination.Code AS DestinationAirportCode,
-                    f.DepartureDateTime,
-                    f.ArrivalDateTime
-                FROM PassengerReservation pr
-                INNER JOIN Flight f
-                    ON pr.FlightId = f.FlightId
-                INNER JOIN Airport origin
-                    ON f.OriginAirportId = origin.AirportId
-                INNER JOIN Airport destination
-                    ON f.DestinationAirportId = destination.AirportId
-                INNER JOIN Airline al
-                    ON f.AirlineId = al.AirlineId
-                WHERE pr.ReservationId = @reservationId
-                ORDER BY f.DepartureDateTime;
+                    f.Id AS FlightId,
+                    CONCAT('ZU-', RIGHT(CONVERT(VARCHAR(36), f.Id), 4)) AS FlightNumber,
+                    airline.AirlineName,
+                    departureAirport.Name AS OriginAirportName,
+                    departureAirport.AirportCode AS OriginAirportCode,
+                    arrivalAirport.Name AS DestinationAirportName,
+                    arrivalAirport.AirportCode AS DestinationAirportCode,
+                    ISNULL(f.RealDepartureTime, f.FlightDate) AS DepartureDateTime,
+                    ISNULL(f.RealArrivalTime, DATEADD(MINUTE, f.Duration, f.FlightDate)) AS ArrivalDateTime
+                FROM dbo.Reservation r
+                INNER JOIN dbo.BoardingPass bp
+                    ON r.ReservationCode = bp.ReservationCode
+                INNER JOIN dbo.Flight f
+                    ON bp.FlightId = f.Id
+                INNER JOIN dbo.FlightRoute fr
+                    ON f.FlightRouteId = fr.FlightRouteId
+                INNER JOIN dbo.Airline airline
+                    ON fr.AirlineId = airline.AirlineId
+                INNER JOIN dbo.Airport departureAirport
+                    ON fr.DepartureAirport = departureAirport.AirportCode
+                INNER JOIN dbo.Airport arrivalAirport
+                    ON fr.ArrivalAirport = arrivalAirport.AirportCode
+                WHERE r.ReservationId = @reservationId
+                ORDER BY DepartureDateTime;
             ";
 
             using var connection = _context.CreateConnection();

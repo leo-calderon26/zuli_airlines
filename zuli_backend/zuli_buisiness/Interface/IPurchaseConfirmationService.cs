@@ -1,10 +1,11 @@
-using zuli_business.DTO;
+using zuli_Business.DTO;
 
-namespace zuli_business.Interface
+namespace zuli_Business.Interface
 {
     public interface IPurchaseConfirmationService
     {
-        Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(Guid reservationId);
-        Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(Guid reservationId);
+        Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(int reservationId);
+
+        Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(int reservationId);
     }
 }

@@ -153,7 +153,7 @@ namespace zuli_Business
                                 foreach (var passenger in confirmation.Passengers)
                                 {
                                     AddCell(table, passenger.FullName);
-                                    AddCell(table, passenger.BirthDate.ToString("dd/MM/yyyy"));
+                                    AddCell(table, passenger.BirthDate);
                                     AddCell(table, passenger.Gender);
                                     AddCell(table, passenger.PassportCountry);
                                     AddCell(table, $"Maletas: {passenger.CheckedBaggageQuantity} / Carry on: {passenger.CarryOnQuantity}");
