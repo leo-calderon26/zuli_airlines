@@ -2,7 +2,7 @@ namespace zuli_Data.Entities
 {
     public class PurchaseConfirmationEntity
     {
-        public Guid ReservationId { get; set; }
+        public int ReservationId { get; set; }
         public string ReservationCode { get; set; } = string.Empty;
 
         public string BuyerName { get; set; } = string.Empty;
