@@ -1,9 +1,9 @@
-using zuli_Business.DTO;
+using zuli_Data.Entities;
 
-namespace zuli_Data.Repositories.Interface
+namespace zuli_Repository.Interface
 {
     public interface IPurchaseConfirmationRepository
     {
-        Task<PurchaseConfirmationPageDTO?> GetPurchaseConfirmationAsync(Guid reservationId);
+        Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(Guid reservationId);
     }
 }

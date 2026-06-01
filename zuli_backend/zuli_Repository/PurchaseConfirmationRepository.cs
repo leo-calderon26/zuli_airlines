@@ -1,6 +1,6 @@
 using Dapper;
-using zuli_Business.DTO;
-using zuli_Data.Context;
+using zuli_Data;
+using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
 namespace zuli_Repository
@@ -14,7 +14,7 @@ namespace zuli_Repository
             _context = context;
         }
 
-        public async Task<PurchaseConfirmationPageDTO?> GetPurchaseConfirmationAsync(Guid reservationId)
+        public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(Guid reservationId)
         {
             const string reservationQuery = @"
                 SELECT
@@ -92,22 +92,22 @@ namespace zuli_Repository
 
             using var connection = _context.CreateConnection();
 
-            var confirmation = await connection.QueryFirstOrDefaultAsync<PurchaseConfirmationPageDTO>(
+            var confirmation = await connection.QueryFirstOrDefaultAsync<PurchaseConfirmationEntity>(
                 reservationQuery,
                 new { reservationId }
             );
 
-            if (confirmation is null)
+            if (confirmation == null)
             {
                 return null;
             }
 
-            var passengers = await connection.QueryAsync<PurchaseConfirmationPassengerDTO>(
+            var passengers = await connection.QueryAsync<PurchaseConfirmationPassengerEntity>(
                 passengersQuery,
                 new { reservationId }
             );
 
-            var flights = await connection.QueryAsync<PurchaseConfirmationFlightDTO>(
+            var flights = await connection.QueryAsync<PurchaseConfirmationFlightEntity>(
                 flightsQuery,
                 new { reservationId }
             );
