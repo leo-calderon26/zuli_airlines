@@ -26,6 +26,7 @@ namespace zuli_Business
         private readonly IFlightPathFinder _pathFinder;
         private readonly FluentValidation.IValidator<FlightDTO> _validator;
         private readonly FluentValidation.IValidator<FlightSearchRequestDTO> _searchValidator;
+        private readonly FluentValidation.IValidator<FlightAvailabilityRequestDTO> _availabilityValidator;
         private readonly IMapper _mapper;
 
         public FlightService(
@@ -35,6 +36,7 @@ namespace zuli_Business
             IFlightPathFinder pathFinder,
             FluentValidation.IValidator<FlightDTO> validator,
             FluentValidation.IValidator<FlightSearchRequestDTO> searchValidator,
+            FluentValidation.IValidator<FlightAvailabilityRequestDTO> availabilityValidator,
             IMapper mapper)
         {
             _repository = repository;
@@ -43,6 +45,7 @@ namespace zuli_Business
             _pathFinder = pathFinder; 
             _validator = validator; 
             _searchValidator = searchValidator; 
+            _availabilityValidator = availabilityValidator;
             _mapper = mapper;
         }
 
@@ -177,6 +180,28 @@ namespace zuli_Business
                 Flights = paginatedFlights,
                 TotalRecords = totalRecords,
                 TotalPages = totalPages
+            };
+        }
+
+        public async Task<BasicResponseDTO> CheckAvailability(FlightAvailabilityRequestDTO request)
+        {
+            var validationResult = await _availabilityValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
+
+            foreach (var segment in request.Segments)
+            {
+                int availabilityStatus = await _repository.
+                    CheckAvailability(segment.FlightRouteId, segment.DepartureDate, request.Seats);
+                if (availabilityStatus == 0)
+                {
+                    throw new ZuliValidationException("Seats", "No hay espacios disponibles en el trayecto seleccionado.");
+                }
+            }
+
+            return new BasicResponseDTO 
+            { 
+                StatusCode = SUCCESS_STATUS_CODE, 
+                Message = "Asientos disponibles" 
             };
         }
     }

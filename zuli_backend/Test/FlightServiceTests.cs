@@ -28,7 +28,8 @@ namespace zuli_backend.Tests
         private Mock<IValidator<FlightDTO>> _flightValidatorMock;
         private Mock<IValidator<FlightSearchRequestDTO>> _searchValidatorMock;
         private Mock<IMapper> _mapperMock;
-
+        private Mock<IValidator<FlightAvailabilityRequestDTO>> _availabilityValidatorMock;
+        
         private FlightService _flightService;
 
         [SetUp]
@@ -41,6 +42,7 @@ namespace zuli_backend.Tests
             _flightValidatorMock = new Mock<IValidator<FlightDTO>>();
             _searchValidatorMock = new Mock<IValidator<FlightSearchRequestDTO>>();
             _mapperMock = new Mock<IMapper>();
+            _availabilityValidatorMock = new Mock<IValidator<FlightAvailabilityRequestDTO>>();
 
             _flightService = new FlightService(
                 _flightRepoMock.Object,
@@ -49,7 +51,8 @@ namespace zuli_backend.Tests
                 _pathFinderMock.Object,
                 _flightValidatorMock.Object,
                 _searchValidatorMock.Object,
-                _mapperMock.Object
+                _mapperMock.Object,
+                _availabilityValidatorMock.Object
             );
         }
 
