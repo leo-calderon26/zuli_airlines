@@ -1,6 +1,10 @@
 <template>
   <div class="min-h-screen bg-secondary text-content">
-    <PublicNavBar />
+    <PurchaseConfirmationTopBar
+      @go-home="goHome"
+      @go-destination="goDestination"
+      @go-reservation="goReservation"
+    />
 
     <main class="page-shell py-10">
       <section
@@ -14,10 +18,10 @@
 
       <section
         v-else-if="pageError"
-        class="rounded-xl border border-error/30 bg-white p-8 shadow-sm"
+        class="rounded-[18px] border border-error/30 bg-white p-8 shadow-sm"
       >
         <h1 class="text-2xl font-semibold text-error">
-          No se pudo cargar la confirmación
+          Error de Carga
         </h1>
 
         <p class="mt-3 text-content">
@@ -26,10 +30,24 @@
 
         <button
           type="button"
-          class="mt-6 rounded-full bg-primary px-6 py-3 text-white shadow-md transition hover:opacity-90"
-          @click="loadConfirmation"
+          class="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-white shadow-md transition hover:opacity-90"
+          @click="goHome"
         >
-          Reintentar
+          <span>Inicio</span>
+
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 10v10h14V10" />
+            <path d="M9 20v-6h6v6" />
+          </svg>
         </button>
       </section>
 
@@ -64,31 +82,44 @@
             <div class="flex justify-end">
               <button
                 type="button"
-                class="rounded-full bg-primary px-8 py-4 text-white shadow-lg transition hover:opacity-90"
+                class="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-white shadow-lg transition hover:opacity-90"
                 @click="goHome"
               >
-                Volver al inicio
+                <span>Volver al inicio</span>
+
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 10.5 12 3l9 7.5" />
+                  <path d="M5 10v10h14V10" />
+                  <path d="M9 20v-6h6v6" />
+                </svg>
               </button>
             </div>
           </div>
         </section>
       </template>
     </main>
-
-    <PublicBottomBar />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue'
-import PublicNavBar from '../../../shared/PublicNavBar.vue'
+
 import BuyerInfoCard from '../components/BuyerInfoCard.vue'
 import ConfirmationHero from '../components/ConfirmationHero.vue'
 import ItineraryCard from '../components/ItineraryCard.vue'
 import PassengerTable from '../components/PassengerTable.vue'
 import PaymentSummaryCard from '../components/PaymentSummaryCard.vue'
+import PurchaseConfirmationTopBar from '../components/PurchaseConfirmationTopBar.vue'
+
 import {
   completePurchaseConfirmation,
   getPurchaseConfirmation,
@@ -117,9 +148,9 @@ async function loadConfirmation() {
   pageError.value = ''
 
   try {
-    const shouldComplete = route.query.complete === 'true'
+    const shouldCompletePurchase = route.query.complete === 'true'
 
-    confirmation.value = shouldComplete
+    confirmation.value = shouldCompletePurchase
       ? await completePurchaseConfirmation(reservationId.value)
       : await getPurchaseConfirmation(reservationId.value)
   } catch (error) {
@@ -130,15 +161,32 @@ async function loadConfirmation() {
 }
 
 function getErrorMessage(error) {
-  const data = error?.response?.data || error?.data
+  const responseData = error?.response?.data
 
-  return data?.detail
-    || data?.message
-    || error?.message
-    || 'No se pudo cargar la confirmación de compra.'
+  if (responseData?.detail) {
+    return responseData.detail
+  }
+
+  if (responseData?.message) {
+    return responseData.message
+  }
+
+  if (responseData?.errors) {
+    return 'La reserva tiene información incompleta o inválida.'
+  }
+
+  return 'No se pudo cargar la confirmación de compra.'
 }
 
 function goHome() {
+  router.push('/')
+}
+
+function goDestination() {
+  router.push('/')
+}
+
+function goReservation() {
   router.push('/')
 }
 </script>
