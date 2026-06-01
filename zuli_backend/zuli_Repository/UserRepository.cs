@@ -22,7 +22,7 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -56,7 +56,7 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -73,7 +73,7 @@ namespace zuli_Repository
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
                 LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE p.NationalId = @NationalId;
+                WHERE au.NationalId = @NationalId;
             ";
 
             return await connection.QuerySingleOrDefaultAsync<AppUser>(
@@ -90,7 +90,7 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
@@ -128,7 +128,6 @@ namespace zuli_Repository
             {
                 var personSql = @"
                     INSERT INTO Person (
-                        NationalId,
                         FirstName,
                         FirstLastName,
                         SecondLastName,
@@ -136,7 +135,6 @@ namespace zuli_Repository
                         Gender
                     )
                     VALUES (
-                        @NationalId,
                         @FirstName,
                         @FirstLastName,
                         @SecondLastName,
@@ -168,6 +166,7 @@ namespace zuli_Repository
                     INSERT INTO AirlineUser (
                         UserId,
                         PersonId,
+                        NationalId,
                         BusinessEmail,
                         BusinessId,
                         UserRole,
@@ -181,6 +180,7 @@ namespace zuli_Repository
                     VALUES (
                         @UserId,
                         @PersonId,
+                        @NationalId,
                         @BusinessEmail,
                         @BusinessId,
                         @UserRole,
@@ -285,7 +285,7 @@ namespace zuli_Repository
             {
                 "email" => "au.BusinessEmail LIKE @Search",
 
-                "nationalId" => "p.NationalId LIKE @Search",
+                "nationalId" => "au.NationalId LIKE @Search",
 
                 "name" => @"
                     (
@@ -299,7 +299,7 @@ namespace zuli_Repository
                 _ => @"
                     (
                         au.BusinessEmail LIKE @Search
-                        OR p.NationalId LIKE @Search
+                        OR au.NationalId LIKE @Search
                         OR p.FirstName LIKE @Search
                         OR p.FirstLastName LIKE @Search
                         OR p.SecondLastName LIKE @Search
@@ -320,7 +320,7 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
