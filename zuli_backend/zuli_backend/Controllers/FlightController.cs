@@ -33,5 +33,12 @@ namespace zuli_backend.Controllers
             var result = await _service.Search(request);
             return Ok(result);
         }
+
+        [HttpPost("check-availability")]
+        public async Task<ActionResult<BasicResponseDTO>> CheckAvailability([FromBody] FlightAvailabilityRequestDTO request)
+        {
+            var result = await _service.CheckAvailability(request);
+            return Ok(result);
+        }
     }
 }

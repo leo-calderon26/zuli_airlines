@@ -178,5 +178,29 @@ namespace zuli_Repository
 
             return await connection.QueryAsync<RawFlightEntity>(sql, parameters);
         }
+        
+        public async Task<int> CheckAvailability(int flightRouteId, DateTime targetDate, int seats)
+        {
+            using var connection = _context.CreateConnection();
+            var sql = @"
+                SELECT TOP 1 1 
+                FROM FlightRoute fr
+                LEFT JOIN Aircraft a ON fr.AircraftId = a.AircraftId
+                LEFT JOIN Flight f ON fr.FlightRouteId = f.FlightRouteId 
+                                AND CAST(f.FlightDate AS DATE) = CAST(@TargetDate AS DATE)
+                WHERE fr.FlightRouteId = @FlightRouteId
+                AND (
+                    (f.Id IS NULL AND dbo.getAircraftTotalSeats(a.AircraftId) >= @Seats)
+                    OR 
+                    (f.Id IS NOT NULL AND f.Status != 'Cancelado' AND f.AvailableSeats >= @Seats)
+                )";
+            
+            return await connection.QueryFirstOrDefaultAsync<int>(sql, new 
+            { 
+                FlightRouteId = flightRouteId, 
+                TargetDate = targetDate, 
+                Seats = seats 
+            });
+        }
     }
 }
