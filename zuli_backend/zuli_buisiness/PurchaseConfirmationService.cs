@@ -22,7 +22,7 @@ namespace zuli_Business
             _emailService = emailService;
         }
 
-        public async Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(Guid reservationId)
+        public async Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(int reservationId)
         {
             var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationId);
 
@@ -34,7 +34,7 @@ namespace zuli_Business
             return MapToDto(confirmationEntity);
         }
 
-        public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(Guid reservationId)
+        public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(int reservationId)
         {
             var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationId);
 

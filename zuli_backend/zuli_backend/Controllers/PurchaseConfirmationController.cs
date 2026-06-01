@@ -16,7 +16,7 @@ namespace zuli_backend.Controllers
         }
 
         [HttpGet("{reservationId}")]
-        public async Task<ActionResult<PurchaseConfirmationPageDTO>> GetConfirmationPage(Guid reservationId)
+        public async Task<ActionResult<PurchaseConfirmationPageDTO>> GetConfirmationPage(int reservationId)
         {
             var confirmation = await _service.GetConfirmationPageAsync(reservationId);
 
@@ -32,7 +32,7 @@ namespace zuli_backend.Controllers
         }
 
         [HttpPost("Complete/{reservationId}")]
-        public async Task<ActionResult<PurchaseConfirmationPageDTO>> CompleteConfirmation(Guid reservationId)
+        public async Task<ActionResult<PurchaseConfirmationPageDTO>> CompleteConfirmation(int reservationId)
         {
             var confirmation = await _service.CompleteConfirmationAsync(reservationId);
 

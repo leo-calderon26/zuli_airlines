@@ -2,7 +2,7 @@ namespace zuli_Business.DTO
 {
     public class PurchaseConfirmationPageDTO
     {
-        public Guid ReservationId { get; set; }
+        public int ReservationId { get; set; }
         public string ReservationCode { get; set; } = string.Empty;
         public string Message { get; set; } = "Reserva completada. Los detalles han sido enviados a su correo electrónico.";
 
