@@ -1,9 +1,11 @@
+using MapsterMapper;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using zuli_Business;
+using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
@@ -17,6 +19,7 @@ namespace zuli_backend.Tests
         private Mock<IPurchaseConfirmationRepository> _purchaseConfirmationRepositoryMock;
         private Mock<IPurchaseConfirmationPdfService> _purchaseConfirmationPdfServiceMock;
         private Mock<IEmailService> _emailServiceMock;
+        private Mock<IMapper> _mapperMock;
 
         private PurchaseConfirmationService _purchaseConfirmationService;
 
@@ -26,11 +29,13 @@ namespace zuli_backend.Tests
             _purchaseConfirmationRepositoryMock = new Mock<IPurchaseConfirmationRepository>();
             _purchaseConfirmationPdfServiceMock = new Mock<IPurchaseConfirmationPdfService>();
             _emailServiceMock = new Mock<IEmailService>();
+            _mapperMock = new Mock<IMapper>();
 
             _purchaseConfirmationService = new PurchaseConfirmationService(
                 _purchaseConfirmationRepositoryMock.Object,
                 _purchaseConfirmationPdfServiceMock.Object,
-                _emailServiceMock.Object
+                _emailServiceMock.Object,
+                _mapperMock.Object
             );
         }
 
@@ -39,10 +44,15 @@ namespace zuli_backend.Tests
         {
             var reservationId = 100;
             var confirmationEntity = BuildValidConfirmationEntity(reservationId);
+            var confirmationDto = BuildValidConfirmationDto(reservationId);
 
             _purchaseConfirmationRepositoryMock
-                .Setup(r => r.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
                 .ReturnsAsync(confirmationEntity);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
+                .Returns(confirmationDto);
 
             var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationId);
 
@@ -54,17 +64,22 @@ namespace zuli_backend.Tests
             Assert.That(result.Flights.Count, Is.EqualTo(1));
 
             _purchaseConfirmationRepositoryMock.Verify(
-                r => r.GetPurchaseConfirmationAsync(reservationId),
+                repository => repository.GetPurchaseConfirmationAsync(reservationId),
+                Times.Once
+            );
+
+            _mapperMock.Verify(
+                mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity),
                 Times.Once
             );
 
             _purchaseConfirmationPdfServiceMock.Verify(
-                p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()),
+                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
                 Times.Never
             );
 
             _emailServiceMock.Verify(
-                e => e.SendInvoiceEmailAsync(
+                emailService => emailService.SendInvoiceEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -80,7 +95,7 @@ namespace zuli_backend.Tests
             var reservationId = 999;
 
             _purchaseConfirmationRepositoryMock
-                .Setup(r => r.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
                 .ReturnsAsync((PurchaseConfirmationEntity?)null);
 
             var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationId);
@@ -88,17 +103,22 @@ namespace zuli_backend.Tests
             Assert.That(result, Is.Null);
 
             _purchaseConfirmationRepositoryMock.Verify(
-                r => r.GetPurchaseConfirmationAsync(reservationId),
+                repository => repository.GetPurchaseConfirmationAsync(reservationId),
                 Times.Once
             );
 
+            _mapperMock.Verify(
+                mapper => mapper.Map<PurchaseConfirmationPageDTO>(It.IsAny<PurchaseConfirmationEntity>()),
+                Times.Never
+            );
+
             _purchaseConfirmationPdfServiceMock.Verify(
-                p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()),
+                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
                 Times.Never
             );
 
             _emailServiceMock.Verify(
-                e => e.SendPurchaseConfirmationEmailAsync(
+                emailService => emailService.SendPurchaseConfirmationEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -113,23 +133,28 @@ namespace zuli_backend.Tests
         {
             var reservationId = 100;
             var confirmationEntity = BuildValidConfirmationEntity(reservationId);
+            var confirmationDto = BuildValidConfirmationDto(reservationId);
             var invoicePdf = new byte[] { 1, 2, 3 };
             var confirmationPdf = new byte[] { 4, 5, 6 };
 
             _purchaseConfirmationRepositoryMock
-                .Setup(r => r.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
                 .ReturnsAsync(confirmationEntity);
 
+            _mapperMock
+                .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
+                .Returns(confirmationDto);
+
             _purchaseConfirmationPdfServiceMock
-                .Setup(p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()))
+                .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
                 .Returns(invoicePdf);
 
             _purchaseConfirmationPdfServiceMock
-                .Setup(p => p.GenerateConfirmationPdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()))
+                .Setup(pdfService => pdfService.GenerateConfirmationPdf(confirmationDto))
                 .Returns(confirmationPdf);
 
             _emailServiceMock
-                .Setup(e => e.SendInvoiceEmailAsync(
+                .Setup(emailService => emailService.SendInvoiceEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -138,7 +163,7 @@ namespace zuli_backend.Tests
                 .Returns(Task.CompletedTask);
 
             _emailServiceMock
-                .Setup(e => e.SendPurchaseConfirmationEmailAsync(
+                .Setup(emailService => emailService.SendPurchaseConfirmationEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -153,20 +178,33 @@ namespace zuli_backend.Tests
             Assert.That(result.InvoiceEmailSent, Is.True);
             Assert.That(result.ConfirmationEmailSent, Is.True);
             Assert.That(result.EmailsSent, Is.True);
-            Assert.That(result.Message, Is.EqualTo("Reserva completada. Los detalles han sido enviados a su correo electrónico."));
+            Assert.That(
+                result.Message,
+                Is.EqualTo("Reserva completada. Los detalles han sido enviados a su correo electrónico.")
+            );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()),
+            _purchaseConfirmationRepositoryMock.Verify(
+                repository => repository.GetPurchaseConfirmationAsync(reservationId),
+                Times.Once
+            );
+
+            _mapperMock.Verify(
+                mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity),
                 Times.Once
             );
 
             _purchaseConfirmationPdfServiceMock.Verify(
-                p => p.GenerateConfirmationPdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()),
+                pdfService => pdfService.GenerateInvoicePdf(confirmationDto),
+                Times.Once
+            );
+
+            _purchaseConfirmationPdfServiceMock.Verify(
+                pdfService => pdfService.GenerateConfirmationPdf(confirmationDto),
                 Times.Once
             );
 
             _emailServiceMock.Verify(
-                e => e.SendInvoiceEmailAsync(
+                emailService => emailService.SendInvoiceEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
                     "ZUTEST001",
@@ -176,7 +214,7 @@ namespace zuli_backend.Tests
             );
 
             _emailServiceMock.Verify(
-                e => e.SendPurchaseConfirmationEmailAsync(
+                emailService => emailService.SendPurchaseConfirmationEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
                     "ZUTEST001",
@@ -192,7 +230,7 @@ namespace zuli_backend.Tests
             var reservationId = 999;
 
             _purchaseConfirmationRepositoryMock
-                .Setup(r => r.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
                 .ReturnsAsync((PurchaseConfirmationEntity?)null);
 
             Assert.That(
@@ -200,13 +238,18 @@ namespace zuli_backend.Tests
                 Throws.TypeOf<ZuliNotFoundException>()
             );
 
+            _mapperMock.Verify(
+                mapper => mapper.Map<PurchaseConfirmationPageDTO>(It.IsAny<PurchaseConfirmationEntity>()),
+                Times.Never
+            );
+
             _purchaseConfirmationPdfServiceMock.Verify(
-                p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()),
+                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
                 Times.Never
             );
 
             _emailServiceMock.Verify(
-                e => e.SendInvoiceEmailAsync(
+                emailService => emailService.SendInvoiceEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -221,23 +264,28 @@ namespace zuli_backend.Tests
         {
             var reservationId = 100;
             var confirmationEntity = BuildValidConfirmationEntity(reservationId);
+            var confirmationDto = BuildValidConfirmationDto(reservationId);
             var invoicePdf = new byte[] { 1, 2, 3 };
             var confirmationPdf = new byte[] { 4, 5, 6 };
 
             _purchaseConfirmationRepositoryMock
-                .Setup(r => r.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
                 .ReturnsAsync(confirmationEntity);
 
+            _mapperMock
+                .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
+                .Returns(confirmationDto);
+
             _purchaseConfirmationPdfServiceMock
-                .Setup(p => p.GenerateInvoicePdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()))
+                .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
                 .Returns(invoicePdf);
 
             _purchaseConfirmationPdfServiceMock
-                .Setup(p => p.GenerateConfirmationPdf(It.IsAny<zuli_Business.DTO.PurchaseConfirmationPageDTO>()))
+                .Setup(pdfService => pdfService.GenerateConfirmationPdf(confirmationDto))
                 .Returns(confirmationPdf);
 
             _emailServiceMock
-                .Setup(e => e.SendInvoiceEmailAsync(
+                .Setup(emailService => emailService.SendInvoiceEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -251,7 +299,7 @@ namespace zuli_backend.Tests
             );
 
             _emailServiceMock.Verify(
-                e => e.SendInvoiceEmailAsync(
+                emailService => emailService.SendInvoiceEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
                     "ZUTEST001",
@@ -261,7 +309,7 @@ namespace zuli_backend.Tests
             );
 
             _emailServiceMock.Verify(
-                e => e.SendPurchaseConfirmationEmailAsync(
+                emailService => emailService.SendPurchaseConfirmationEmailAsync(
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
@@ -298,6 +346,48 @@ namespace zuli_backend.Tests
                 Flights = new List<PurchaseConfirmationFlightEntity>
                 {
                     new PurchaseConfirmationFlightEntity
+                    {
+                        FlightId = Guid.NewGuid(),
+                        FlightNumber = "ZU-TEST",
+                        AirlineName = "zuliAirline",
+                        OriginAirportName = "Juan Santamaría International Airport",
+                        OriginAirportCode = "SJO",
+                        DestinationAirportName = "Tocumen International Airport",
+                        DestinationAirportCode = "PTY",
+                        DepartureDateTime = new DateTime(2026, 8, 18, 9, 20, 0),
+                        ArrivalDateTime = new DateTime(2026, 8, 18, 10, 45, 0)
+                    }
+                }
+            };
+        }
+
+        private static PurchaseConfirmationPageDTO BuildValidConfirmationDto(int reservationId)
+        {
+            return new PurchaseConfirmationPageDTO
+            {
+                ReservationId = reservationId,
+                ReservationCode = "ZUTEST001",
+                BuyerName = "Valeria Jimenez Castro",
+                BuyerEmail = "buyer@test.com",
+                BuyerPhone = "+506 8888 4721",
+                PaymentMethod = "TARJETA BANCARIA",
+                FlightClass = "Económica",
+                TotalAmount = 865m,
+                Passengers = new List<PurchaseConfirmationPassengerDTO>
+                {
+                    new PurchaseConfirmationPassengerDTO
+                    {
+                        FullName = "Mateo Rodriguez Vega",
+                        BirthDate = "1996-03-22",
+                        Gender = "Masculino",
+                        PassportCountry = "Costa Rica",
+                        CheckedBaggageQuantity = 1,
+                        CarryOnQuantity = 1
+                    }
+                },
+                Flights = new List<PurchaseConfirmationFlightDTO>
+                {
+                    new PurchaseConfirmationFlightDTO
                     {
                         FlightId = Guid.NewGuid(),
                         FlightNumber = "ZU-TEST",
