@@ -2,14 +2,16 @@
 @tailwind utilities;
 
 @theme {
+  --font-heading: 'Manrope', sans-serif;
+  --font-body: 'Work Sans', sans-serif;
   --color-brand-500: #3b82f6;
-  --color-primary: #711717;
+  --color-primary: #7A0C12;
   --color-secondary: #E9E9E9;
     --color-surface: #fff7f5;
     --color-content: #1f2937;
   --color-body: #F3F3F3;
   --color-select: #2B0909;
-  --color-gold: #8F8029;
+  --color-gold: #C9A24F;
   --color-white: #FFFF;
   --color-purple: #e8def8;
   --radius-base: 12px;
@@ -24,7 +26,14 @@
   --color-border-medium: #d1d5db;
     --color-error-soft: #fef2f2;
   --color-error-border: #fecaca;
+  --color-primary-dark: #5C0007;
+  --color-input-bg: #FBEDED;
+  --color-border-soft: #B9A7A7;
+  --color-sumary: #7A0C12;
+  --color-font: #4B1E1E;
+  --color-text-box: #F4F1F1;
 }
+
 
 @layer components {
   .page-shell {
@@ -48,4 +57,13 @@
 body {
   margin: 0;
   background-color: var(--color-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  background-color: var(--color-secondary);
 }
+h1, h2, h3, h4, h5, h6 {
+
+font-family: var(--font-heading);
+
+}
+

@@ -181,7 +181,13 @@ onMounted(() => {
 
 const handleSelectDeparture = (selection) => {
     if (!searchStore.searchParams.IsRoundTrip) {
-        alert(`Viaje de ida seleccionado con éxito.\nRuta ID: ${selection.flight.pathIds}\n\n(Pendiente: Redirigir a información de pasajeros)`);
+        router.push({
+            name: 'buyTicket',
+            query: {
+                flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
+                seats: searchStore.searchParams.Seats
+            }
+        });
         return;
     }
     
@@ -195,7 +201,18 @@ const clearDepartureSelection = () => {
 };
 
 const handleSelectReturn = (selection) => {
-    alert(`Viaje ida y vuelta seleccionado:\nIda ID: ${selectedDepartureFlight.value.flight.pathIds}\nRegreso ID: ${selection.flight.pathIds}\n\n(Pendiente: Redirigir a información de pasajeros)`);
+    router.push({
+        name: 'buyTicket',
+        query: {
+            flightData: JSON.stringify({
+                flight: selectedDepartureFlight.value.flight,
+                flightClass: selectedDepartureFlight.value.travelClass
+            }),
+            seats: searchStore.searchParams.Seats,
+            roundTrip: 'true',
+            returnFlight: JSON.stringify(selection.flight)
+        }
+    });
 };
 
 const changePage = (page) => {

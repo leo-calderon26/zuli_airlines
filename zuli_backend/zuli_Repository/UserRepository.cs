@@ -22,11 +22,11 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
-                    p.Email,
+                    pe.Email,
                     au.BusinessEmail,
                     au.BusinessId,
                     au.UserRole,
@@ -38,6 +38,7 @@ namespace zuli_Repository
                     au.ActivationTokenHash
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE au.BusinessEmail = @BusinessEmail;
             ";
 
@@ -55,11 +56,11 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
-                    p.Email,
+                    pe.Email,
                     au.BusinessEmail,
                     au.BusinessId,
                     au.UserRole,
@@ -71,7 +72,8 @@ namespace zuli_Repository
                     au.ActivationTokenHash
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
-                WHERE p.NationalId = @NationalId;
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
+                WHERE au.NationalId = @NationalId;
             ";
 
             return await connection.QuerySingleOrDefaultAsync<AppUser>(
@@ -88,11 +90,11 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
-                    p.Email,
+                    pe.Email,
                     au.BusinessEmail,
                     au.BusinessId,
                     au.UserRole,
@@ -104,6 +106,7 @@ namespace zuli_Repository
                     au.ActivationTokenHash
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE au.ActivationTokenHash = @ActivationTokenHash;
             ";
 
@@ -125,18 +128,18 @@ namespace zuli_Repository
             {
                 var personSql = @"
                     INSERT INTO Person (
-                        NationalId,
                         FirstName,
                         FirstLastName,
                         SecondLastName,
-                        Email
+                        BirthDate,
+                        Gender
                     )
                     VALUES (
-                        @NationalId,
                         @FirstName,
                         @FirstLastName,
                         @SecondLastName,
-                        @Email
+                        '',
+                        ''
                     );
 
                     SELECT CAST(SCOPE_IDENTITY() AS INT);
@@ -148,12 +151,22 @@ namespace zuli_Repository
                     transaction
                 );
 
+                if (!string.IsNullOrWhiteSpace(user.Email))
+                {
+                    var emailSql = @"
+                        INSERT INTO PersonEmail (PersonId, Email)
+                        VALUES (@PersonId, @Email);";
+
+                    await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email }, transaction);
+                }
+
                 user.PersonId = personId;
 
                 var userSql = @"
                     INSERT INTO AirlineUser (
                         UserId,
                         PersonId,
+                        NationalId,
                         BusinessEmail,
                         BusinessId,
                         UserRole,
@@ -167,6 +180,7 @@ namespace zuli_Repository
                     VALUES (
                         @UserId,
                         @PersonId,
+                        @NationalId,
                         @BusinessEmail,
                         @BusinessId,
                         @UserRole,
@@ -271,7 +285,7 @@ namespace zuli_Repository
             {
                 "email" => "au.BusinessEmail LIKE @Search",
 
-                "nationalId" => "p.NationalId LIKE @Search",
+                "nationalId" => "au.NationalId LIKE @Search",
 
                 "name" => @"
                     (
@@ -285,7 +299,7 @@ namespace zuli_Repository
                 _ => @"
                     (
                         au.BusinessEmail LIKE @Search
-                        OR p.NationalId LIKE @Search
+                        OR au.NationalId LIKE @Search
                         OR p.FirstName LIKE @Search
                         OR p.FirstLastName LIKE @Search
                         OR p.SecondLastName LIKE @Search
@@ -298,6 +312,7 @@ namespace zuli_Repository
                 SELECT COUNT(*)
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE {whereClause};
             ";
 
@@ -305,11 +320,11 @@ namespace zuli_Repository
                 SELECT
                     au.UserId,
                     au.PersonId,
-                    p.NationalId,
+                    au.NationalId,
                     p.FirstName,
                     p.FirstLastName,
                     p.SecondLastName,
-                    p.Email,
+                    pe.Email,
                     au.BusinessEmail,
                     au.BusinessId,
                     au.UserRole,
@@ -321,6 +336,7 @@ namespace zuli_Repository
                     au.ActivationTokenHash
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
                 WHERE {whereClause}
                 ORDER BY p.FirstName, p.FirstLastName, p.SecondLastName
                 OFFSET @Offset ROWS

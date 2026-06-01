@@ -17,6 +17,7 @@ namespace zuli_Business.Mappings
             config.NewConfig<List<RawFlightEntity>, FlightSearchResponseDTO>()
                 .MapWith(path => new FlightSearchResponseDTO
                 {
+                    FlightId = path.First().FlightId,
                     PathIds = string.Join(",", path.Select(f => f.FlightRouteId)),
                     Origin = path.First().Origin,
                     Destination = path.Last().Destination,
@@ -31,6 +32,10 @@ namespace zuli_Business.Mappings
                     Stops = path.Count - 1,
                     TotalTouristPrice = path.Sum(f => f.TouristPrice),
                     TotalFirstClassPrice = path.Sum(f => f.FirstClassPrice),
+                    CarryOnPrice = path.First().CarryOnPrice,
+                    CheckedPrice = path.First().CheckedPrice,
+                    MaxWeightPerBag = path.First().MaxWeightPerBag,
+                    CheckedBagMultiplier = path.First().CheckedBagMultiplier,
                     
                     Segments = path.Select((current, index) => new FlightSegmentDTO
                     {
