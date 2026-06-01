@@ -1,6 +1,6 @@
+using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
-using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
 
@@ -11,15 +11,18 @@ namespace zuli_Business
         private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
         private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
         private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
 
         public PurchaseConfirmationService(
             IPurchaseConfirmationRepository purchaseConfirmationRepository,
             IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IMapper mapper)
         {
             _purchaseConfirmationRepository = purchaseConfirmationRepository;
             _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
             _emailService = emailService;
+            _mapper = mapper;
         }
 
         public async Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(int reservationId)
@@ -31,7 +34,7 @@ namespace zuli_Business
                 return null;
             }
 
-            return MapToDto(confirmationEntity);
+            return _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
         }
 
         public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(int reservationId)
@@ -43,7 +46,7 @@ namespace zuli_Business
                 throw new ZuliNotFoundException("No se encontró la reserva indicada.");
             }
 
-            var confirmation = MapToDto(confirmationEntity);
+            var confirmation = _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
 
             ValidateConfirmationData(confirmation);
 
@@ -80,58 +83,6 @@ namespace zuli_Business
             confirmation.Message = "Reserva completada. Los detalles han sido enviados a su correo electrónico.";
 
             return confirmation;
-        }
-
-        private static PurchaseConfirmationPageDTO MapToDto(PurchaseConfirmationEntity entity)
-        {
-            return new PurchaseConfirmationPageDTO
-            {
-                ReservationId = entity.ReservationId,
-                ReservationCode = entity.ReservationCode,
-                BuyerName = entity.BuyerName,
-                BuyerEmail = entity.BuyerEmail,
-                BuyerPhone = entity.BuyerPhone,
-                PaymentMethod = entity.PaymentMethod,
-                FlightClass = entity.FlightClass,
-                TotalAmount = entity.TotalAmount,
-                Passengers = entity.Passengers
-                    .Select(MapPassengerToDto)
-                    .ToList(),
-                Flights = entity.Flights
-                    .Select(MapFlightToDto)
-                    .ToList()
-            };
-        }
-
-        private static PurchaseConfirmationPassengerDTO MapPassengerToDto(
-            PurchaseConfirmationPassengerEntity entity)
-        {
-            return new PurchaseConfirmationPassengerDTO
-            {
-                FullName = entity.FullName,
-                BirthDate = entity.BirthDate,
-                Gender = entity.Gender,
-                PassportCountry = entity.PassportCountry,
-                CheckedBaggageQuantity = entity.CheckedBaggageQuantity,
-                CarryOnQuantity = entity.CarryOnQuantity
-            };
-        }
-
-        private static PurchaseConfirmationFlightDTO MapFlightToDto(
-            PurchaseConfirmationFlightEntity entity)
-        {
-            return new PurchaseConfirmationFlightDTO
-            {
-                FlightId = entity.FlightId,
-                FlightNumber = entity.FlightNumber,
-                AirlineName = entity.AirlineName,
-                OriginAirportName = entity.OriginAirportName,
-                OriginAirportCode = entity.OriginAirportCode,
-                DestinationAirportName = entity.DestinationAirportName,
-                DestinationAirportCode = entity.DestinationAirportCode,
-                DepartureDateTime = entity.DepartureDateTime,
-                ArrivalDateTime = entity.ArrivalDateTime
-            };
         }
 
         private static void ValidateConfirmationData(PurchaseConfirmationPageDTO confirmation)
