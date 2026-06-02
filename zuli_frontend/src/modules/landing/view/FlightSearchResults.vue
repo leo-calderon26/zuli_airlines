@@ -193,22 +193,15 @@ onMounted(() => {
     searchStore.performSearch(params);
 });
 
-const handleSelectDeparture = async (selection) => {
-    const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
-    
-    if (!result.isAvailable && !result.isError) {
-        unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de ida seleccionado.";
-        showUnavailableModal.value = true;
-        return;
-    }
-    if (result.isError) return;
-
+const handleSelectDeparture = (selection) => {
+    const flightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
     if (!searchStore.searchParams.IsRoundTrip) {
         router.push({
             name: 'buyTicket',
             query: {
                 flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
-                seats: searchStore.searchParams.Seats
+                seats: searchStore.searchParams.Seats,
+                flightRouteId: flightRouteId ? String(flightRouteId) : undefined
             }
         });
         return;
@@ -223,16 +216,8 @@ const clearDepartureSelection = () => {
     changePage(1);
 };
 
-const handleSelectReturn = async (selection) => {
-    const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
-    
-    if (!result.isAvailable && !result.isError) {
-        unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de regreso seleccionado.";
-        showUnavailableModal.value = true;
-        return;
-    }
-    if (result.isError) return;
-
+const handleSelectReturn = (selection) => {
+    const returnFlightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
     router.push({
         name: 'buyTicket',
         query: {
@@ -242,7 +227,13 @@ const handleSelectReturn = async (selection) => {
             }),
             seats: searchStore.searchParams.Seats,
             roundTrip: 'true',
-            returnFlight: JSON.stringify(selection.flight)
+            returnFlight: JSON.stringify(selection.flight),
+            flightRouteId: (() => {
+                const value = selectedDepartureFlight.value?.flight?.segments?.[0]?.flightId
+                    ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
+                return value ? String(value) : undefined;
+            })(),
+            returnFlightRouteId: returnFlightRouteId ? String(returnFlightRouteId) : undefined
         }
     });
 };
