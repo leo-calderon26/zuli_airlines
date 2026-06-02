@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using zuli_Business.DTO;
@@ -11,12 +12,15 @@ namespace zuli_Business
     {
         private readonly EmailSettingsDTO _emailSettings;
         private readonly ILogger<SmtpEmailService> _logger;
+        private readonly IEmailTemplateService _emailTemplateService;
 
         public SmtpEmailService(
             IConfiguration configuration,
-            ILogger<SmtpEmailService> logger)
+            ILogger<SmtpEmailService> logger,
+            IEmailTemplateService emailTemplateService)
         {
             _logger = logger;
+            _emailTemplateService = emailTemplateService;
 
             _emailSettings = configuration
                 .GetSection("EmailSettings")
@@ -31,19 +35,157 @@ namespace zuli_Business
             string fullName,
             string activationLink)
         {
-            using var message = new MailMessage();
-
-            message.From = new MailAddress(
-                _emailSettings.FromEmail,
-                _emailSettings.FromName
+            string body = _emailTemplateService.BuildActivationEmailBody(
+                fullName,
+                activationLink
             );
 
-            message.To.Add(toEmail);
-            message.Subject = "Activación de cuenta - Zuli Airlines";
-            message.IsBodyHtml = true;
-            message.Body = BuildActivationEmailBody(fullName, activationLink);
+            await SendEmailAsync(
+                toEmail,
+                "Activación de cuenta - Zuli Airlines",
+                body
+            );
 
-            using var smtpClient = new SmtpClient(
+            _logger.LogInformation(
+                "Activation email sent to {Email}",
+                toEmail
+            );
+        }
+
+        public async Task SendInvoiceEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            byte[] invoicePdf)
+        {
+            string body = _emailTemplateService.BuildInvoiceEmailBody(
+                buyerName,
+                reservationCode
+            );
+
+            await SendEmailWithPdfAttachmentAsync(
+                toEmail,
+                $"Factura de compra - Reserva {reservationCode}",
+                body,
+                invoicePdf,
+                $"Factura-{reservationCode}.pdf"
+            );
+
+            _logger.LogInformation(
+                "Invoice email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
+
+        public async Task SendPurchaseConfirmationEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            byte[] confirmationPdf)
+        {
+            string body = _emailTemplateService.BuildPurchaseConfirmationEmailBody(
+                buyerName,
+                reservationCode
+            );
+
+            await SendEmailWithPdfAttachmentAsync(
+                toEmail,
+                $"Confirmación de compra - Reserva {reservationCode}",
+                body,
+                confirmationPdf,
+                $"Confirmacion-{reservationCode}.pdf"
+            );
+
+            _logger.LogInformation(
+                "Purchase confirmation email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
+
+        private async Task SendEmailAsync(
+            string toEmail,
+            string subject,
+            string body)
+        {
+            using var message = CreateMailMessage(
+                toEmail,
+                subject,
+                body
+            );
+
+            await SendMessageAsync(message);
+        }
+
+        private async Task SendEmailWithPdfAttachmentAsync(
+            string toEmail,
+            string subject,
+            string body,
+            byte[] pdfFile,
+            string fileName)
+        {
+            using var message = CreateMailMessage(
+                toEmail,
+                subject,
+                body
+            );
+
+            AddPdfAttachment(
+                message,
+                pdfFile,
+                fileName
+            );
+
+            await SendMessageAsync(message);
+        }
+
+        private MailMessage CreateMailMessage(
+            string toEmail,
+            string subject,
+            string body)
+        {
+            var message = new MailMessage
+            {
+                From = new MailAddress(
+                    _emailSettings.FromEmail,
+                    _emailSettings.FromName
+                ),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            message.To.Add(toEmail);
+
+            return message;
+        }
+
+        private static void AddPdfAttachment(
+            MailMessage message,
+            byte[] pdfFile,
+            string fileName)
+        {
+            var pdfStream = new MemoryStream(pdfFile);
+
+            var attachment = new Attachment(
+                pdfStream,
+                fileName,
+                MediaTypeNames.Application.Pdf
+            );
+
+            message.Attachments.Add(attachment);
+        }
+
+        private async Task SendMessageAsync(MailMessage message)
+        {
+            using var smtpClient = CreateSmtpClient();
+            await smtpClient.SendMailAsync(message);
+        }
+
+        private SmtpClient CreateSmtpClient()
+        {
+            return new SmtpClient(
                 _emailSettings.SmtpHost,
                 _emailSettings.SmtpPort
             )
@@ -54,13 +196,6 @@ namespace zuli_Business
                     _emailSettings.SmtpPassword
                 )
             };
-
-            await smtpClient.SendMailAsync(message);
-
-            _logger.LogInformation(
-                "Activation email sent to {Email}",
-                toEmail
-            );
         }
 
         private void ValidateEmailSettings()
@@ -94,57 +229,6 @@ namespace zuli_Business
             {
                 throw new InvalidOperationException("EmailSettings:FromName is not configured.");
             }
-        }
-
-        private static string BuildActivationEmailBody(string fullName, string activationLink)
-        {
-            string safeFullName = WebUtility.HtmlEncode(fullName);
-            string safeActivationLink = WebUtility.HtmlEncode(activationLink);
-
-            return $@"
-                <html>
-                    <body style='font-family: Arial, sans-serif; color: #1f2937; background-color: #f3f3f3; padding: 24px;'>
-                        <div style='max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;'>
-                            <div style='background-color: #711717; padding: 20px; text-align: center;'>
-                                <h2 style='color: #ffffff; margin: 0;'>Zuli Airlines</h2>
-                            </div>
-
-                            <div style='padding: 28px;'>
-                                <h3>Activación de cuenta</h3>
-
-                                <p>Hola {safeFullName},</p>
-
-                                <p>
-                                    Se ha creado una cuenta para usted en el sistema administrativo de Zuli Airlines.
-                                </p>
-
-                                <p>
-                                    Para activar su cuenta, ingrese al siguiente enlace y configure su contraseña.
-                                </p>
-
-                                <p style='text-align: center; margin: 32px 0;'>
-                                    <a href='{safeActivationLink}'
-                                       style='display: inline-block; padding: 12px 24px; background-color: #711717; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;'>
-                                        Activar cuenta
-                                    </a>
-                                </p>
-
-                                <p>
-                                    Si el botón no funciona, copie y pegue este enlace en su navegador:
-                                </p>
-
-                                <p style='word-break: break-all; color: #711717;'>
-                                    {safeActivationLink}
-                                </p>
-
-                                <br />
-
-                                <p>Atentamente,</p>
-                                <p><strong>Zuli Airlines</strong></p>
-                            </div>
-                        </div>
-                    </body>
-                </html>";
         }
     }
 }

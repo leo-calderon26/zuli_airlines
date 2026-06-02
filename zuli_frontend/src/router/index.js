@@ -33,6 +33,8 @@ import UserCreate from "../modules/user/view/UserCreate.vue";
 import UserEdit from "../modules/user/view/UserEdit.vue";
 import UserActivation from "../modules/user/view/UserActivation.vue";
 
+import PurchaseConfirmationView from "../modules/purchaseConfirmation/view/PurchaseConfirmationView.vue";
+
 
 const router = createRouter({
     history: createWebHistory(),
@@ -191,6 +193,12 @@ const router = createRouter({
             name: "buyTicket",
             component: BuyTicketView,
             meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/purchase-confirmation/:reservationCode",
+            name: "purchaseConfirmation",
+            component: PurchaseConfirmationView,
+            meta: { requiresAuth: false, adminRequired: false }
         }
     ]
 });

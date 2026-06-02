@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
+
 
 using zuli_Business;
 using zuli_Business.DTO;
@@ -137,6 +139,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 builder.Services.AddScoped<ITicketService, TicketService>();
@@ -144,6 +147,11 @@ builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
 builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
+
+builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
+builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
+builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
+builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>,PurchaseConfirmationValidator>();
 
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
@@ -163,6 +171,8 @@ config.Scan(typeof(FlightService).Assembly);
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 
