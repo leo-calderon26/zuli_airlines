@@ -42,29 +42,29 @@ namespace zuli_backend.Tests
         [Test]
         public async Task GetConfirmationPageAsync_ExistingReservation_ReturnsConfirmationData()
         {
-            var reservationId = 100;
-            var confirmationEntity = BuildValidConfirmationEntity(reservationId);
-            var confirmationDto = BuildValidConfirmationDto(reservationId);
+            var reservationCode = "ZUTEST001";
+            var confirmationEntity = BuildValidConfirmationEntity();
+            var confirmationDto = BuildValidConfirmationDto();
 
             _purchaseConfirmationRepositoryMock
-                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
 
             _mapperMock
                 .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
                 .Returns(confirmationDto);
 
-            var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationId);
+            var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.ReservationId, Is.EqualTo(reservationId));
-            Assert.That(result.ReservationCode, Is.EqualTo("ZUTEST001"));
+            Assert.That(result!.ReservationId, Is.EqualTo(100));
+            Assert.That(result.ReservationCode, Is.EqualTo(reservationCode));
             Assert.That(result.BuyerEmail, Is.EqualTo("buyer@test.com"));
             Assert.That(result.Passengers.Count, Is.EqualTo(1));
             Assert.That(result.Flights.Count, Is.EqualTo(1));
 
             _purchaseConfirmationRepositoryMock.Verify(
-                repository => repository.GetPurchaseConfirmationAsync(reservationId),
+                repository => repository.GetPurchaseConfirmationAsync(reservationCode),
                 Times.Once
             );
 
@@ -90,20 +90,21 @@ namespace zuli_backend.Tests
         }
 
         [Test]
-        public async Task GetConfirmationPageAsync_ReservationDoesNotExist_ReturnsNull()
+        public void GetConfirmationPageAsync_ReservationDoesNotExist_ThrowsZuliNotFoundException()
         {
-            var reservationId = 999;
+            var reservationCode = "INVALID01";
 
             _purchaseConfirmationRepositoryMock
-                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync((PurchaseConfirmationEntity?)null);
 
-            var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationId);
-
-            Assert.That(result, Is.Null);
+            Assert.That(
+                async () => await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode),
+                Throws.TypeOf<ZuliNotFoundException>()
+            );
 
             _purchaseConfirmationRepositoryMock.Verify(
-                repository => repository.GetPurchaseConfirmationAsync(reservationId),
+                repository => repository.GetPurchaseConfirmationAsync(reservationCode),
                 Times.Once
             );
 
@@ -131,14 +132,14 @@ namespace zuli_backend.Tests
         [Test]
         public async Task CompleteConfirmationAsync_ValidReservation_GeneratesPdfsAndSendsEmails()
         {
-            var reservationId = 100;
-            var confirmationEntity = BuildValidConfirmationEntity(reservationId);
-            var confirmationDto = BuildValidConfirmationDto(reservationId);
+            var reservationCode = "ZUTEST001";
+            var confirmationEntity = BuildValidConfirmationEntity();
+            var confirmationDto = BuildValidConfirmationDto();
             var invoicePdf = new byte[] { 1, 2, 3 };
             var confirmationPdf = new byte[] { 4, 5, 6 };
 
             _purchaseConfirmationRepositoryMock
-                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
 
             _mapperMock
@@ -171,10 +172,11 @@ namespace zuli_backend.Tests
                 ))
                 .Returns(Task.CompletedTask);
 
-            var result = await _purchaseConfirmationService.CompleteConfirmationAsync(reservationId);
+            var result = await _purchaseConfirmationService.CompleteConfirmationAsync(reservationCode);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.ReservationId, Is.EqualTo(reservationId));
+            Assert.That(result.ReservationId, Is.EqualTo(100));
+            Assert.That(result.ReservationCode, Is.EqualTo(reservationCode));
             Assert.That(result.InvoiceEmailSent, Is.True);
             Assert.That(result.ConfirmationEmailSent, Is.True);
             Assert.That(result.EmailsSent, Is.True);
@@ -184,7 +186,7 @@ namespace zuli_backend.Tests
             );
 
             _purchaseConfirmationRepositoryMock.Verify(
-                repository => repository.GetPurchaseConfirmationAsync(reservationId),
+                repository => repository.GetPurchaseConfirmationAsync(reservationCode),
                 Times.Once
             );
 
@@ -207,7 +209,7 @@ namespace zuli_backend.Tests
                 emailService => emailService.SendInvoiceEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
-                    "ZUTEST001",
+                    reservationCode,
                     invoicePdf
                 ),
                 Times.Once
@@ -217,7 +219,7 @@ namespace zuli_backend.Tests
                 emailService => emailService.SendPurchaseConfirmationEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
-                    "ZUTEST001",
+                    reservationCode,
                     confirmationPdf
                 ),
                 Times.Once
@@ -227,14 +229,14 @@ namespace zuli_backend.Tests
         [Test]
         public void CompleteConfirmationAsync_ReservationDoesNotExist_ThrowsZuliNotFoundException()
         {
-            var reservationId = 999;
+            var reservationCode = "INVALID01";
 
             _purchaseConfirmationRepositoryMock
-                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync((PurchaseConfirmationEntity?)null);
 
             Assert.That(
-                async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationId),
+                async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationCode),
                 Throws.TypeOf<ZuliNotFoundException>()
             );
 
@@ -262,14 +264,14 @@ namespace zuli_backend.Tests
         [Test]
         public void CompleteConfirmationAsync_EmailFails_ThrowsZuliEmailException()
         {
-            var reservationId = 100;
-            var confirmationEntity = BuildValidConfirmationEntity(reservationId);
-            var confirmationDto = BuildValidConfirmationDto(reservationId);
+            var reservationCode = "ZUTEST001";
+            var confirmationEntity = BuildValidConfirmationEntity();
+            var confirmationDto = BuildValidConfirmationDto();
             var invoicePdf = new byte[] { 1, 2, 3 };
             var confirmationPdf = new byte[] { 4, 5, 6 };
 
             _purchaseConfirmationRepositoryMock
-                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationId))
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
 
             _mapperMock
@@ -294,7 +296,7 @@ namespace zuli_backend.Tests
                 .ThrowsAsync(new Exception("SMTP error"));
 
             Assert.That(
-                async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationId),
+                async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationCode),
                 Throws.TypeOf<ZuliEmailException>()
             );
 
@@ -302,7 +304,7 @@ namespace zuli_backend.Tests
                 emailService => emailService.SendInvoiceEmailAsync(
                     "buyer@test.com",
                     "Valeria Jimenez Castro",
-                    "ZUTEST001",
+                    reservationCode,
                     invoicePdf
                 ),
                 Times.Once
@@ -319,11 +321,11 @@ namespace zuli_backend.Tests
             );
         }
 
-        private static PurchaseConfirmationEntity BuildValidConfirmationEntity(int reservationId)
+        private static PurchaseConfirmationEntity BuildValidConfirmationEntity()
         {
             return new PurchaseConfirmationEntity
             {
-                ReservationId = reservationId,
+                ReservationId = 100,
                 ReservationCode = "ZUTEST001",
                 BuyerName = "Valeria Jimenez Castro",
                 BuyerEmail = "buyer@test.com",
@@ -361,11 +363,11 @@ namespace zuli_backend.Tests
             };
         }
 
-        private static PurchaseConfirmationPageDTO BuildValidConfirmationDto(int reservationId)
+        private static PurchaseConfirmationPageDTO BuildValidConfirmationDto()
         {
             return new PurchaseConfirmationPageDTO
             {
-                ReservationId = reservationId,
+                ReservationId = 100,
                 ReservationCode = "ZUTEST001",
                 BuyerName = "Valeria Jimenez Castro",
                 BuyerEmail = "buyer@test.com",
