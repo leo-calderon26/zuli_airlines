@@ -10,6 +10,7 @@ namespace zuli_Business.Interface
         Task<BasicResponseDTO> CreateAirport(AirportDTO Airport);
         Task<List<AirportSuggestionDTO>> GetAirportSuggestions(string searchTerm);
         Task<AirportPaginatedResponseDTO> GetAirportsPaginated(int pageNumber, int pageSize);
+        Task<BasicResponseDTO> UpdateAirportAsync(string code, AirportDTO airport);
 
     }
 }

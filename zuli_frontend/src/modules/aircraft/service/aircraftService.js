@@ -41,3 +41,15 @@ export const createAircraft = async (aircraftData) => {
         throw error;
     }
 };
+
+export const updateAircraft = async (aircraftId, aircraftData) => {
+    try {
+        const response = await axios.put(`${API_URL}/${aircraftId}`, aircraftData, {
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error al actualizar aeronave:", error);
+        throw error;
+    }
+};

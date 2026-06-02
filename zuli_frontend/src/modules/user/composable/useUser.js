@@ -4,6 +4,16 @@ import userService from "../services/userService";
 export function useUser() {
     const store = useUserStore();
 
+    const createUser = async (userData) => {
+        return await userService.createUser(userData);
+    };
+
+    const updateUser = async (userId, userData) => {
+        const response = await userService.updateUser(userId, userData);
+        store.updateUser(userId, userData);
+        return response;
+    };
+
     const fetchUsersPaginated = async (pageNumber = 1, pageSize = 10, search = "", searchType = "name") => {
         const response = await userService.getUsers({ page: pageNumber, pageSize, search, searchType });
         store.setPaginatedData(
@@ -20,6 +30,8 @@ export function useUser() {
     };
 
     return {
+        createUser,
+        updateUser,
         fetchUsersPaginated,
         changePage,
     };

@@ -1,4 +1,4 @@
-import { getAircrafts, createAircraft, getAircraftsPaginated } from "../service/aircraftService";
+import { getAircrafts, createAircraft, getAircraftsPaginated, updateAircraft as updateAircraftRequest } from "../service/aircraftService";
 import { useAircraftStore } from "../store/aircraftStore";
 
 export function useAircraft() {
@@ -22,9 +22,15 @@ export function useAircraft() {
     };
 
     const addAircraft = async (aircraftData) => {
-        const newAircraft = await createAircraft(aircraftData);
-        store.addAircraft(newAircraft);
-        return newAircraft;
+        const response = await createAircraft(aircraftData);
+        await fetchAircraftsPaginated(store.pageNumber, store.pageSize);
+        return response;
+    };
+
+    const updateAircraft = async (aircraftId, aircraftData) => {
+        const response = await updateAircraftRequest(aircraftId, aircraftData);
+        await fetchAircraftsPaginated(store.pageNumber, store.pageSize);
+        return response;
     };
 
     const changePage = async (pageNumber) => {
@@ -35,6 +41,7 @@ export function useAircraft() {
         fetchAircrafts,
         fetchAircraftsPaginated,
         addAircraft,
+        updateAircraft,
         changePage,
         aircrafts: store.aircrafts
     };

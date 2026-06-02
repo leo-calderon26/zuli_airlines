@@ -42,6 +42,7 @@ onMounted(() => {
     <main class="flex-1 pb-8">
       <div class="page-shell">
         <form class="form-card" @submit.prevent="submit">
+          
           <div class="form-grid">
             <AppAutocomplete
               v-model="form.origin"
@@ -127,66 +128,46 @@ onMounted(() => {
             </div>
           </div>
 
-        <div class="border border-border-soft bg-text-box p-8">
-          <h3 class="text-2xl font-bold text-font mb-6">Frecuencia semanal</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <label
-              v-for="day in daysOfWeek"
-              :key="day.value"
-              class="flex items-center gap-3 p-3 border border-border-soft rounded-base cursor-pointer transition hover:border-primary"
-              :class="{ 'border-primary bg-primary/5': form.frequency.includes(day.value) }"
-            >
-              <input
-                v-model="form.frequency"
-                type="checkbox"
-                :value="day.value"
-                class="h-4 w-4 accent-sumary"
+          <div class="border border-border-soft bg-text-box p-8 mt-6">
+            <h3 class="text-2xl font-bold text-font mb-6">Precios</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AppInput
+                v-model="form.touristPrice"
+                label="Precio Turista ($)"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                :error="errors.fields.touristPrice"
               />
-              <span class="text-sm text-font font-medium">{{ day.label }}</span>
-            </label>
-          </div>
-          <p v-if="errors.fields.frequency" class="mt-3 text-sm text-error">{{ errors.fields.frequency }}</p>
-        </div>
-          <div class="border border-border-soft bg-text-box p-8">
-          <h3 class="text-2xl font-bold text-font mb-6">Precios</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AppInput
-              v-model="form.touristPrice"
-              label="Precio Turista ($)"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              :error="errors.fields.touristPrice"
-            />
-            <AppInput
-              v-model="form.firstClassPrice"
-              label="Precio Primera Clase ($)"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              :error="errors.fields.firstClassPrice"
-            />
-            <AppInput
-              v-model="form.carryOnPrice"
-              label="Precio Equipaje de Mano ($)"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              :error="errors.fields.carryOnPrice"
-            />
-            <AppInput
-              v-model="form.checkedPrice"
-              label="Precio Equipaje Documentado ($)"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              :error="errors.fields.checkedPrice"
-            />
-          </div>
+              <AppInput
+                v-model="form.firstClassPrice"
+                label="Precio Primera Clase ($)"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                :error="errors.fields.firstClassPrice"
+              />
+              <AppInput
+                v-model="form.carryOnPrice"
+                label="Precio Equipaje de Mano ($)"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                :error="errors.fields.carryOnPrice"
+              />
+              <AppInput
+                v-model="form.checkedPrice"
+                label="Precio Equipaje Documentado ($)"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                :error="errors.fields.checkedPrice"
+              />
+            </div>
           </div>
 
         <div class="flex justify-end">

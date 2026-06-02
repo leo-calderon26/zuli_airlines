@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAirport } from '../composable/useAirport';
 import { getCountries, getCitiesByCountry } from '../service/locationService';
@@ -9,13 +9,24 @@ import AppButton from '../../../shared/AppButton.vue';
 import AppInput from '../../../shared/AppInput.vue';
 import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
-
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
 import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/20/solid';
 
+const props = defineProps({
+    airport: {
+        type: Object,
+        default: null
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const router = useRouter();
-const { addAirport } = useAirport();
+const { addAirport, updateAirport } = useAirport();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
+const isAdministrator = () => (sessionStorage.getItem('userRole') ?? '') === 'Administrator';
 
 const countries = ref([]);
 const cities = ref([]);
@@ -29,8 +40,61 @@ const form = reactive({
     city: ''
 });
 
+function syncForm(airport) {
+    if (!airport) {
+        return;
+    }
+
+    form.airportCode = airport.airportCode ?? '';
+    form.name = airport.name ?? '';
+    form.country = airport.country ?? '';
+    form.city = airport.city ?? '';
+}
+
+async function syncLocationSelection(airport) {
+    if (!airport || !countries.value.length) {
+        return;
+    }
+
+    const matchedCountry = countries.value.find((country) => country.countryName === airport.country);
+
+    if (!matchedCountry) {
+        return;
+    }
+
+    selectedCountryId.value = matchedCountry.id;
+    isCitiesLoading.value = true;
+
+    try {
+        cities.value = await getCitiesByCountry(matchedCountry.id);
+    } finally {
+        isCitiesLoading.value = false;
+    }
+
+    if (airport.city) {
+        const matchedCity = cities.value.find((city) => city.cityName === airport.city);
+        form.city = matchedCity ? matchedCity.cityName : airport.city;
+    }
+}
+
+function canEditField() {
+    if (!props.isEdit) {
+        return true;
+    }
+
+    return isAdministrator();
+}
+
+watch(
+    () => props.airport,
+    (airport) => {
+        syncForm(airport);
+    },
+    { immediate: true, deep: true }
+);
 onMounted(async () => {
     countries.value = await getCountries();
+    await syncLocationSelection(props.airport);
 });
 
 const onCountryChange = async () => {
@@ -86,9 +150,14 @@ async function submit() {
             businessId: data.businessId,
         };
 
-        await addAirport(airportPayload);
-        onSuccess('El aeropuerto se ha creado correctamente');
-    }, 'Error al crear el aeropuerto');
+        if (props.isEdit) {
+            await updateAirport(props.airport?.airportCode?.toUpperCase().trim() ?? form.airportCode.toUpperCase().trim(), airportPayload);
+            onSuccess('El aeropuerto se ha actualizado correctamente');
+        } else {
+            await addAirport(airportPayload);
+            onSuccess('El aeropuerto se ha creado correctamente');
+        }
+    }, props.isEdit ? 'Error al actualizar el aeropuerto' : 'Error al crear el aeropuerto');
 
     if (errors.fields.airportCode) {
         form.airportCode = '';
@@ -102,17 +171,20 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
+        <p v-if="props.isEdit && !isAdministrator()" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Como operario, puedes ver este aeropuerto pero no editarlo.
+        </p>
+
         <div class="form-grid">
-            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" />
+            <AppInput v-model="form.airportCode" label="Código del Aeropuerto (ej. SJO)" :error="errors.fields.airportCode" maxlength="10" :disabled="props.isEdit" />
 
-            <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" />
-
+            <AppInput v-model="form.name" label="Nombre del Aeropuerto" :error="errors.fields.name" :disabled="!canEditField()" />
             <div class="flex flex-col relative">
-                <label class="mb-2 block text-sm font-medium text-content" :class="{ '!text-error': errors.fields?.country }">
+                <label class="mb-2 block text-sm font-medium text-content" :class="{ 'text-error!': errors.fields?.country }">
                     País <span class="text-error">*</span>
                 </label>
                 
-                <Listbox v-model="selectedCountryId" @update:modelValue="onCountryChange">
+                <Listbox v-model="selectedCountryId" :disabled="!canEditField()" @update:modelValue="onCountryChange">
                     <div class="relative">
                         <ListboxButton 
                             class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -150,11 +222,11 @@ function onSuccessClose() {
             </div>
 
             <div class="flex flex-col relative">
-                <label class="mb-2 block text-sm font-medium text-content" :class="{ '!text-error': errors.fields?.city }">
+                <label class="mb-2 block text-sm font-medium text-content" :class="{ 'text-error!': errors.fields?.city }">
                     Ciudad <span class="text-error">*</span>
                 </label>
 
-                <Listbox v-model="form.city" :disabled="!selectedCountryId || isCitiesLoading">
+                <Listbox v-model="form.city" :disabled="!canEditField() || !selectedCountryId || isCitiesLoading">
                     <div class="relative">
                         <ListboxButton 
                             class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
@@ -195,7 +267,7 @@ function onSuccessClose() {
         </div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Crear</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading" :disabled="props.isEdit && !isAdministrator()">{{ props.isEdit ? 'Guardar' : 'Crear' }}</AppButton>
         </div>
     </form>
 

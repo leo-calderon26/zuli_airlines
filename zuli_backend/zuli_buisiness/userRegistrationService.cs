@@ -2,6 +2,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -16,7 +18,7 @@ namespace zuli_Business
     {
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
-        private readonly RegisterUserValidator _registerUserValidator;
+        private readonly FluentValidation.IValidator<RegisterUserRequestDTO> _registerUserValidator;
         private readonly ActivateAccountValidator _activateAccountValidator;
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
@@ -24,7 +26,7 @@ namespace zuli_Business
         public UserRegistrationService(
             IUserRepository userRepository,
             IEmailService emailService,
-            RegisterUserValidator registerUserValidator,
+            FluentValidation.IValidator<RegisterUserRequestDTO> registerUserValidator,
             ActivateAccountValidator activateAccountValidator,
             IConfiguration configuration)
         {
@@ -34,13 +36,15 @@ namespace zuli_Business
             _activateAccountValidator = activateAccountValidator;
             _configuration = configuration;
             _passwordHasher = new PasswordHasher<AppUser>();
+            // logger removed
         }
 
         public async Task<RegisterUserResponseDTO> RegisterUserAsync(
             RegisterUserRequestDTO request,
             Guid adminUserId)
         {
-            _registerUserValidator.Validate(request);
+            var validationResult = await _registerUserValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
 
             string nationalId = request.NationalId.Trim();
             string businessEmail = request.BusinessEmail.Trim().ToLower();
@@ -49,35 +53,32 @@ namespace zuli_Business
             string secondLastName = request.SecondLastName.Trim();
             string userRole = request.UserRole.Trim();
 
+            // logging removed
+
             await ValidateUniqueUserAsync(nationalId, businessEmail);
 
             string activationToken = GenerateSecureToken();
             string activationTokenHash = HashToken(activationToken);
 
-            var user = new AppUser
+            var user = request.Adapt<AppUser>();
+            user.UserId = Guid.NewGuid();
+            user.ManagedByAdminId = adminUserId;
+            user.ActivationTokenHash = activationTokenHash;
+
+            if (string.IsNullOrWhiteSpace(user.BusinessId))
             {
-                UserId = Guid.NewGuid(),
+                int num = RandomNumberGenerator.GetInt32(10000000, 100000000);
+                user.BusinessId = num.ToString();
+            }
 
-                NationalId = nationalId,
-                FirstName = firstName,
-                FirstLastName = firstLastName,
-                SecondLastName = secondLastName,
-                Email = null,
-
-                BusinessEmail = businessEmail,
-                BusinessId = nationalId,
-                UserRole = userRole,
-                PasswordHash = null,
-
-                IsActive = false,
-                FailedLoginAttempts = 0,
-                LockoutEnd = null,
-
-                ManagedByAdminId = adminUserId,
-                ActivationTokenHash = activationTokenHash
-            };
-
-            await _userRepository.CreatePendingUserAsync(user);
+            try
+            {
+                await _userRepository.CreatePendingUserAsync(user);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             string fullName = $"{user.FirstName} {user.FirstLastName} {user.SecondLastName}";
             string activationLink = BuildActivationLink(activationToken);
@@ -128,6 +129,45 @@ namespace zuli_Business
             {
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Cuenta activada correctamente."
+            };
+        }
+
+        public async Task<BasicResponseDTO> UpdateUserAsync(Guid userId, RegisterUserRequestDTO request)
+        {
+            var validationResult = await _registerUserValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
+
+            AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
+
+            if (existingUser == null)
+            {
+                throw new ZuliNotFoundException($"No existe un usuario con id {userId}.");
+            }
+
+            string businessEmail = request.BusinessEmail.Trim().ToLower();
+            AppUser? userByEmail = await _userRepository.GetByBusinessEmailAsync(businessEmail);
+
+            if (userByEmail != null && userByEmail.UserId != userId)
+            {
+                ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
+            }
+
+            string nationalId = request.NationalId.Trim();
+            AppUser? userByNationalId = await _userRepository.GetByNationalIdAsync(nationalId);
+
+            if (userByNationalId != null && userByNationalId.UserId != userId)
+            {
+                ThrowValidationError("nationalId", "Ya existe una persona registrada con esa cédula.");
+            }
+
+            request.Adapt(existingUser, TypeAdapterConfig.GlobalSettings);
+
+            await _userRepository.UpdateUserAsync(existingUser);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Message = "Usuario actualizado correctamente."
             };
         }
 
@@ -222,18 +262,7 @@ namespace zuli_Business
                 PageSize = normalizedPageSize,
                 TotalItems = result.TotalItems,
                 TotalPages = totalPages,
-                Users = result.Users.Select(user => new UserListItemDTO
-                {
-                    UserId = user.UserId,
-                    PersonId = user.PersonId,
-                    NationalId = user.NationalId,
-                    FirstName = user.FirstName,
-                    FirstLastName = user.FirstLastName,
-                    SecondLastName = user.SecondLastName,
-                    BusinessEmail = user.BusinessEmail,
-                    UserRole = user.UserRole,
-                    IsActive = user.IsActive
-                }).ToList()
+                Users = result.Users.Select(user => user.Adapt<UserListItemDTO>()).ToList()
             };
         }
         private static string NormalizeSearchType(string? searchType)

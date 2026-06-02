@@ -28,6 +28,16 @@ export const useAircraftStore = defineStore("aircraft", () => {
         aircrafts.value.push(createAircraftPayload(aircraft));
     };
 
+    const updateAircraft = (aircraftId, aircraft) => {
+        const index = aircrafts.value.findIndex((item) => item.aircraftId === aircraftId);
+
+        if (index === -1) {
+            return;
+        }
+
+        aircrafts.value[index] = createAircraftPayload({ ...aircraft, aircraftId });
+    };
+
     const setPaginatedData = (data, page, size, total, pages) => {
         aircrafts.value = data.map(createAircraftPayload);
         pageNumber.value = page;
@@ -48,6 +58,7 @@ export const useAircraftStore = defineStore("aircraft", () => {
         totalPages,
         setAircraft,
         addAircraft,
+        updateAircraft,
         setPaginatedData,
         setPageNumber,
     };

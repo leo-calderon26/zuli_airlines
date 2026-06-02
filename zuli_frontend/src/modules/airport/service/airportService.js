@@ -38,3 +38,8 @@ export const createAirport = async (airportData) => {
         throw error;
     }
 };
+
+export const updateAirport = async (code, airportData) => {
+    const response = await axios.put(`${API_URL}/${code}`, airportData, { withCredentials: true });
+  return response.data;
+};
