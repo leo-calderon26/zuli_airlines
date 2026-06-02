@@ -39,7 +39,6 @@ onMounted(() => {
             if (route.query.roundTrip === 'true' && route.query.returnFlight) {
                 store.isRoundTrip = true;
                 store.returnFlight = JSON.parse(route.query.returnFlight);
-                store.setReturnFlightRouteId(route.query.returnFlightRouteId);
             }
         } catch (e) {
             console.error('Error parsing flight data', e);

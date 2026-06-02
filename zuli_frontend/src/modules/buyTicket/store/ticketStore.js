@@ -143,7 +143,6 @@ export const useTicketStore = defineStore("ticket", () => {
         try {
             console.log('[ticketStore] building payload');
             const payload = {
-                flightId: selectedFlight.value.flightId,
                 flightClass: selectedClass.value,
                 flightRoutes: flightRoutes.value.map((fr) => {
                     return {
@@ -188,7 +187,6 @@ export const useTicketStore = defineStore("ticket", () => {
 
             if (isRoundTrip.value && returnFlight.value) {
                 payload.returnFlightId = returnFlight.value.flightId ?? returnFlight.value.segments?.[0]?.flightId;
-                payload.returnFlightRouteId = returnFlightRouteId.value;
             }
 
             purchaseResult.value = await purchaseTickets(payload);

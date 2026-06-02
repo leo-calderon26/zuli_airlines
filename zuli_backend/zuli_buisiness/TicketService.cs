@@ -47,9 +47,17 @@ namespace zuli_Business
                 }
             }
 
-            var flight = await _flightRepository.GetFlightById(request.FlightId.Value);
-            if (flight == null)
-                throw new ZuliNotFoundException("Vuelo no encontrado");
+            if (request.FlightIdList.Count == 0)
+                throw new ZuliNotFoundException("No se encontraron vuelos para la ruta solicitada");
+
+            var outboundFlights = new List<FlightEntity>();
+            foreach (var fid in request.FlightIdList)
+            {
+                var flight = await _flightRepository.GetFlightById(fid);
+                if (flight == null)
+                    throw new ZuliNotFoundException("Vuelo no encontrado");
+                outboundFlights.Add(flight);
+            }
 
             FlightEntity? returnFlight = null;
             if (request.ReturnFlightId != null)
@@ -57,7 +65,7 @@ namespace zuli_Business
                 returnFlight = await _flightRepository.GetFlightById(request.ReturnFlightId.Value);
             }
 
-            var totalPayment = CalculateTotalPayment(request, flight, returnFlight);
+            var totalPayment = CalculateTotalPayment(request, outboundFlights, returnFlight);
             var reservationCode = GenerateReservationCode();
 
             var buyerId = await CreateBuyer(request.Buyer);
@@ -85,7 +93,7 @@ namespace zuli_Business
 
         private async Task CreateAllBoardingPasses(string reservationCode, List<int> passengerIds, TicketPurchaseRequestDTO request)
         {
-            var flightIds = new List<Guid> { request.FlightId!.Value };
+            var flightIds = new List<Guid>(request.FlightIdList);
             if (request.ReturnFlightId != null)
                 flightIds.Add(request.ReturnFlightId.Value);
 
@@ -103,27 +111,49 @@ namespace zuli_Business
             }
         }
 
-        private static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, FlightEntity flight, FlightEntity? returnFlight = null)
+        private static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> outboundFlights, FlightEntity? returnFlight = null)
         {
             var isFirstClass = request.FlightClass.Equals("Primera Clase", StringComparison.OrdinalIgnoreCase);
 
-            static decimal FlightTotal(FlightEntity f, PassengerTicketDTO p, bool firstClass)
+            decimal outboundBasePrice = outboundFlights.Sum(f => isFirstClass ? f.FirstClassPrice : f.TouristPrice);
+            var firstOutbound = outboundFlights.FirstOrDefault();
+            var checkedPrice = firstOutbound?.CheckedPrice ?? 0;
+            var carryOnPrice = firstOutbound?.CarryOnPrice ?? 0;
+            var multiplier = firstOutbound?.CheckedBagMultiplier > 0 ? firstOutbound.CheckedBagMultiplier : 1m;
+
+            decimal baggageTotal = 0;
+            foreach (var p in request.Passengers)
             {
-                var classPrice = firstClass ? f.FirstClassPrice : f.TouristPrice;
-                var checkedPrice = f.CheckedPrice ?? 0;
-                var carryOnPrice = f.CarryOnPrice ?? 0;
-                var multiplier = f.CheckedBagMultiplier > 0 ? f.CheckedBagMultiplier : 1m;
-                return classPrice + (p.CheckedBaggage * checkedPrice * multiplier) + (p.CarryOn * carryOnPrice);
+                for (int i = 1; i <= p.CheckedBaggage; i++)
+                {
+                    baggageTotal += checkedPrice * multiplier;
+                }
+                baggageTotal += p.CarryOn * carryOnPrice;
             }
 
-            var outboundTotal = request.Passengers.Sum(p => FlightTotal(flight, p, isFirstClass));
+            decimal total = (outboundBasePrice * request.Passengers.Count) + baggageTotal;
 
             if (returnFlight != null)
             {
-                outboundTotal += request.Passengers.Sum(p => FlightTotal(returnFlight, p, isFirstClass));
+                decimal returnBasePrice = isFirstClass ? returnFlight.FirstClassPrice : returnFlight.TouristPrice;
+                var retCheckedPrice = returnFlight.CheckedPrice ?? 0;
+                var retCarryOnPrice = returnFlight.CarryOnPrice ?? 0;
+                var retMultiplier = returnFlight.CheckedBagMultiplier > 0 ? returnFlight.CheckedBagMultiplier : 1m;
+
+                decimal returnBaggageTotal = 0;
+                foreach (var p in request.Passengers)
+                {
+                    for (int i = 1; i <= p.CheckedBaggage; i++)
+                    {
+                        returnBaggageTotal += retCheckedPrice * retMultiplier;
+                    }
+                    returnBaggageTotal += p.CarryOn * retCarryOnPrice;
+                }
+
+                total += (returnBasePrice * request.Passengers.Count) + returnBaggageTotal;
             }
 
-            return outboundTotal;
+            return total;
         }
 
         private async Task<List<int>> CreateAllPassengers(List<PassengerTicketDTO> passengers)
