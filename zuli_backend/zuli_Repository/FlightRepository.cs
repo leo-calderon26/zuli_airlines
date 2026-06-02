@@ -14,7 +14,7 @@ namespace zuli_Repository
             _context = context;
         }
 
-        public async Task<Guid> CreateFlight(int FlightRouteId)
+        public async Task<Guid> CreateFlight(int FlightRouteId, string DepartureDate)
         {
             using var connection = _context.CreateConnection();
 
@@ -22,8 +22,22 @@ namespace zuli_Repository
 
             return await connection.ExecuteScalarAsync<Guid>(sql, new
             {
-                FlightRouteId
+                FlightRouteId,
+                DepartureDate
             }, commandType: System.Data.CommandType.StoredProcedure);
+        }
+
+        public async Task<Guid> GetFlightByRoute(int FlightRouteId, string DepartureDate)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"SELECT Id from flight WHERE FlightRouteId = @FlightRouteId AND CAST(FlightDate AS DATE) = @DepartureDate";
+
+            return await connection.QueryFirstOrDefaultAsync<Guid>(sql, new
+            {
+                FlightRouteId = FlightRouteId,
+                DepartureDate = DepartureDate
+            });
         }
 
         public async Task<IEnumerable<FlightEntity>> GetAllFlights()

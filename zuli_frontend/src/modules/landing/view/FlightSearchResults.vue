@@ -193,15 +193,25 @@ onMounted(() => {
     searchStore.performSearch(params);
 });
 
-const handleSelectDeparture = (selection) => {
-    const flightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
+const handleSelectDeparture = async (selection) => {
+    const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
+    
+    const flightRouteSegments = await searchStore.getFlightRouteData(selection.flight);
+
+    if (!result.isAvailable && !result.isError) {
+        unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de ida seleccionado.";
+        showUnavailableModal.value = true;
+        return;
+    }
+    if (result.isError) return;
+
     if (!searchStore.searchParams.IsRoundTrip) {
         router.push({
             name: 'buyTicket',
             query: {
                 flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
                 seats: searchStore.searchParams.Seats,
-                flightRouteId: flightRouteId ? String(flightRouteId) : undefined
+                flightRouteData: JSON.stringify({ flightRouteSegments })
             }
         });
         return;

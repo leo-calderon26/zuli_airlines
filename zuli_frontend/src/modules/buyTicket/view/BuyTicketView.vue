@@ -30,12 +30,11 @@ const contactErrors = computed(() => ({
 }));
 
 onMounted(() => {
-    if (route.query.flightData) {
+    if (route.query) {
         try {
             const flightData = JSON.parse(route.query.flightData);
             store.setFlight(flightData.flight, flightData.flightClass || 'Turista');
-            console.log(route.query.flightRouteId);
-            store.setFlightRouteId(route.query.flightRouteId);
+            store.setFlightRoutes(JSON.parse(route.query.flightRouteData));
             store.setPassengers(parseInt(route.query.seats) || 1);
             if (route.query.roundTrip === 'true' && route.query.returnFlight) {
                 store.isRoundTrip = true;
