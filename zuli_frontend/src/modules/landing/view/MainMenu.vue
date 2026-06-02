@@ -21,7 +21,7 @@
 
 <script>
 import PublicNavBar from '../components/PublicNavBar.vue';
-import PublicBottomBar from '../components/PublicBottomBar.vue';
+import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
     export default {
         components: {
             PublicNavBar,

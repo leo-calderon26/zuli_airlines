@@ -33,6 +33,16 @@ export const useAirportStore = defineStore("airport", () => {
         airports.value.push(createAirportPayload(airport));
     };
 
+    const updateAirport = (airportCode, airport) => {
+        const index = airports.value.findIndex((item) => item.airportCode === airportCode);
+
+        if (index === -1) {
+            return;
+        }
+
+        airports.value[index] = createAirportPayload(airport);
+    };
+
     const setPageNumber = (page) => {
         pageNumber.value = page;
     };
@@ -45,6 +55,7 @@ export const useAirportStore = defineStore("airport", () => {
         totalPages,
         setPaginatedData,
         addAirport,
+        updateAirport,
         setPageNumber,
     };
 });

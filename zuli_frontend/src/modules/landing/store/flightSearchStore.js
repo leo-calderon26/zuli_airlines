@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { searchFlights } from "../service/flightSearchService";
+import { searchFlights, checkFlightAvailability } from "../service/flightSearchService";
 
 export const useFlightSearchStore = defineStore("flightSearch", () => {
     const searchParams = ref({
@@ -38,12 +38,35 @@ export const useFlightSearchStore = defineStore("flightSearch", () => {
         await performSearch({ Page: newPage });
     };
 
+    const verifyFlightAvailability = async (flight, seats) => {
+        isLoading.value = true;
+        try {
+            const segments = flight.segments.map(s => ({
+                flightRouteId: s.flightId, 
+                departureDate: s.departureDateText 
+            }));
+
+            await checkFlightAvailability({ seats, segments });
+            return { isAvailable: true };
+
+        } catch (err) {
+            if (err.response?.status === 422 || err.response?.status === 404) {
+                return { isAvailable: false };
+            }
+            error.value = "Ocurrió un error al verificar la disponibilidad.";
+            return { isAvailable: false, isError: true };
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     return {
         searchParams,
         flightResults,
         isLoading,
         error,
         performSearch,
-        changePage
+        changePage,
+        verifyFlightAvailability
     };
 });

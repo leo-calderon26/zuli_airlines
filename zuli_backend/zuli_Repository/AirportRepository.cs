@@ -56,14 +56,14 @@ namespace zuli_Repository
 
             return count > 0;
         }
-         public async Task<IEnumerable<AirportEntity>> SearchAirportsByTerm(string searchTerm)
+        public async Task<IEnumerable<AirportEntity>> SearchAirportsByTerm(string searchTerm)
         {
             using var connection = _context.CreateConnection();
 
-            var parameters = new 
-            { 
+            var parameters = new
+            {
                 Term = $"%{searchTerm}%",
-                ExactTerm = $"{searchTerm}%" 
+                ExactTerm = $"{searchTerm}%"
             };
 
             var sql = @"
@@ -109,6 +109,35 @@ namespace zuli_Repository
 
             var airports = (await connection.QueryAsync<AirportEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
             return (airports, totalCount);
+        }
+
+        public async Task<AirportEntity?> GetByCodeAsync(string airportCode)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = "SELECT AirportCode, Name, Country, City, AdminId FROM Airport WHERE AirportCode = @airportCode";
+            var airport = await connection.QuerySingleOrDefaultAsync<AirportEntity>(sql, new { airportCode = airportCode?.Trim() });
+
+            return airport;
+        }
+
+        public async Task UpdateAirportAsync(AirportEntity airport)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                UPDATE Airport
+                SET Name = @Name, Country = @Country, City = @City, AdminId = @AdminId
+                WHERE AirportCode = @AirportCode";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                AirportCode = airport.AirportCode,
+                Name = airport.Name,
+                Country = airport.Country,
+                City = airport.City,
+                AdminId = airport.AdminId
+            });
         }
 
     }

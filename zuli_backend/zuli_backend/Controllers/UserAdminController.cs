@@ -9,10 +9,7 @@ namespace zuli_backend.Controllers
 {
     [Route("api/admin/users")]
     [ApiController]
-    [Authorize(
-        AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme,
-        Roles = "Administrator"
-    )]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class UserAdminController : ControllerBase
     {
         private readonly IUserRegistrationService _userRegistrationService;
@@ -23,6 +20,7 @@ namespace zuli_backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequestDTO request)
         {
             string? adminUserIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -44,6 +42,7 @@ namespace zuli_backend.Controllers
             return Ok(response);
         }
         [HttpGet]
+        [Authorize(Roles = "Administrator,Operator")]
         public async Task<IActionResult> GetUsers(
             [FromQuery] string? searchType,
             [FromQuery] string? search,
@@ -56,6 +55,15 @@ namespace zuli_backend.Controllers
                 page,
                 pageSize
             );
+
+            return Ok(response);
+        }
+
+        [HttpPut("{userId:guid}")]
+        [Authorize(Roles = "Administrator,Operator")]
+        public async Task<IActionResult> UpdateUserAsync(Guid userId, [FromBody] RegisterUserRequestDTO request)
+        {
+            BasicResponseDTO response = await _userRegistrationService.UpdateUserAsync(userId, request);
 
             return Ok(response);
         }

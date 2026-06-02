@@ -11,5 +11,6 @@ namespace zuli_Business.Interface
         Task<IEnumerable<FlightDTO>> GetAllFlights();
         Task<FlightDTO> GetFlightById(Guid id);
         Task<FlightPaginatedResponseDTO> Search(FlightSearchRequestDTO request);
+        Task<BasicResponseDTO> CheckAvailability(FlightAvailabilityRequestDTO request);
     }
 }

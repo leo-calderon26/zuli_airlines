@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAircraft } from '../composable/useAircraft';
 import ErrorModal from '../../../shared/ErrorModal.vue';
@@ -9,9 +9,21 @@ import AppInput from '../../../shared/AppInput.vue';
 import { useForm } from '../../../shared/useForm.js';
 import authService from "../../auth/services/authService";
 
+const props = defineProps({
+    aircraft: {
+        type: Object,
+        default: null
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
+
 const router = useRouter();
-const { addAircraft } = useAircraft();
+const { addAircraft, updateAircraft } = useAircraft();
 const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
+const isAdministrator = computed(() => (sessionStorage.getItem('userRole') ?? '') === 'Administrator');
 
 const form = reactive({
     model: '',
@@ -24,11 +36,40 @@ const form = reactive({
 
 const modelPattern = /^[A-Za-z0-9-]{1,15}$/;
 
+function syncForm(aircraft) {
+    if (!aircraft) {
+        return;
+    }
+
+    form.model = aircraft.model ?? '';
+    form.weight = aircraft.weight ?? '';
+    form.numberEconomyClassRows = aircraft.numberEconomyClassRows ?? 0;
+    form.numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy ?? 0;
+    form.numberFirstClassRows = aircraft.numberFirstClassRows ?? 0;
+    form.numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst ?? 0;
+}
+
+watch(
+    () => props.aircraft,
+    (aircraft) => {
+        syncForm(aircraft);
+    },
+    { immediate: true, deep: true }
+);
+
 const totalSeats = computed(() => {
     const econ = Number(form.numberEconomyClassRows) * Number(form.numberSeatingRowsEconomy);
     const first = Number(form.numberFirstClassRows) * Number(form.numberSeatingRowsFirst);
     return Number.isFinite(econ + first) ? econ + first : 0;
 });
+
+function canEditField() {
+    if (!props.isEdit) {
+        return true;
+    }
+
+    return isAdministrator.value;
+}
 
 function isIntegerLike(value) {
     return Number.isInteger(Number(value)) && String(value) !== '';
@@ -76,9 +117,14 @@ async function submit() {
             businessId: data.businessId,
         };
 
-        await addAircraft(aircraft);
-        onSuccess('La aeronave se ha creado correctamente');
-    }, 'Error al crear la aeronave');
+        if (props.isEdit) {
+            await updateAircraft(props.aircraft?.aircraftId, aircraft);
+            onSuccess('La aeronave se ha actualizado correctamente');
+        } else {
+            await addAircraft(aircraft);
+            onSuccess('La aeronave se ha creado correctamente');
+        }
+    }, props.isEdit ? 'Error al actualizar la aeronave' : 'Error al crear la aeronave');
 }
 
 function onSuccessClose() {
@@ -88,32 +134,36 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
+        <p v-if="props.isEdit && !isAdministrator" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Como operario, puedes ver esta aeronave pero no editarla.
+        </p>
+
         <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" />
+                <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" :disabled="!canEditField()" />
                 <AppInput :model-value="totalSeats" label="Capacidad (Calculada)" disabled />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" />
+                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" :disabled="!canEditField()" />
                 <div></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
-                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
+                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" :disabled="!canEditField()" />
+                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" :disabled="!canEditField()" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
-                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
+                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" :disabled="!canEditField()" />
+                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" :disabled="!canEditField()" />
             </div>
         </div>
 
         <div v-if="errors.fields.totalSeats" class="mt-2 text-sm text-error">{{ errors.fields.totalSeats }}</div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading">Guardar aeronave</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading" :disabled="props.isEdit && !isAdministrator">{{ props.isEdit ? 'Guardar' : 'Guardar aeronave' }}</AppButton>
         </div>
     </form>
 

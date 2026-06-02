@@ -25,6 +25,32 @@ const userService = {
         return data;
     },
 
+    async updateUser(userId, userData) {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                nationalId: userData.nationalId,
+                businessEmail: userData.businessEmail,
+                firstName: userData.firstName,
+                firstLastName: userData.firstLastName,
+                secondLastName: userData.secondLastName,
+                userRole: userData.userRole
+            })
+        });
+
+        const data = await readResponseBody(response);
+
+        if (!response.ok) {
+            throw buildRequestError(response, data);
+        }
+
+        return data;
+    },
+
     async getUsers(filters) {
         const query = new URLSearchParams({
             searchType: filters.searchType,

@@ -1,6 +1,7 @@
 import { ref } from "vue"
 import { getAirports, getAirportsPaginated, createAirport } from "../service/airportService"
 import { useAirportStore } from "../store/airportStore";
+import { updateAirport as updateAirportRequest } from "../service/airportService";
 
 export function useAirport() {
     const store = useAirportStore();
@@ -10,6 +11,12 @@ export function useAirport() {
         const data = await getAirports()
         airports.value = data
     }
+
+    const updateAirport = async (code, airportData) => {
+        await updateAirportRequest(code, airportData);
+        store.updateAirport(code, airportData);
+        return airportData;
+    };
 
     const fetchAirportsPaginated = async (pageNumber = 1, pageSize = 10) => {
         const response = await getAirportsPaginated(pageNumber, pageSize);
@@ -23,9 +30,9 @@ export function useAirport() {
     };
 
     const addAirport = async (airportData) => {
-        const newAirport = await createAirport(airportData);
-        store.addAirport(newAirport);
-        return newAirport;
+        await createAirport(airportData);
+        store.addAirport(airportData);
+        return airportData;
     };
 
     const changePage = async (pageNumber) => {
@@ -37,6 +44,7 @@ export function useAirport() {
         fetchAirports,
         addAirport,
         fetchAirportsPaginated,
-        changePage
+        changePage,
+        updateAirport
     };
 }

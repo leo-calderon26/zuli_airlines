@@ -7,9 +7,11 @@ import FlightList from "../modules/flight/view/FlightList.vue"
 
 import AircraftList from "../modules/aircraft/view/AircraftList.vue";
 import AircraftCreate from "../modules/aircraft/view/AircraftCreate.vue"
+import AircraftEdit from "../modules/aircraft/view/AircraftEdit.vue"
 
 import AirportList from "../modules/airport/view/AirportList.vue";
 import AirportCreate from '../modules/airport/view/AirportCreate.vue'
+import AirportEdit from '../modules/airport/view/AirportEdit.vue'
 
 import MainMenu from '../modules/administrativeLandingPage/view/MainMenu.vue'
 import Routes from '../modules/route/view/Routes.vue'
@@ -28,6 +30,7 @@ import BuyTicketView from '../modules/buyTicket/view/BuyTicketView.vue'
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 import UserList from "../modules/user/view/UserList.vue";
 import UserCreate from "../modules/user/view/UserCreate.vue";
+import UserEdit from "../modules/user/view/UserEdit.vue";
 import UserActivation from "../modules/user/view/UserActivation.vue";
 
 import PurchaseConfirmationView from "../modules/purchaseConfirmation/view/PurchaseConfirmationView.vue";
@@ -67,6 +70,12 @@ const router = createRouter({
             meta: {requiresAuth: true, adminRequired: true}
         },
         {
+            path: "/admin/edit-aircraft/:aircraftId",
+            name: "editAircraft",
+            component: AircraftEdit,
+            meta: {requiresAuth: true, adminRequired: false}
+        },
+        {
             path: "/admin/flights",
             name: "flights",
             component: FlightCreate,
@@ -81,6 +90,12 @@ const router = createRouter({
             name: "createAirport",
             component: AirportCreate,
             meta: {requiresAuth: true, adminRequired: true}
+        },
+        {
+            path: "/admin/edit-airport/:airportCode",
+            name: "editAirport",
+            component: AirportEdit,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/check-in",
@@ -137,6 +152,12 @@ const router = createRouter({
             meta: {requiresAuth: true, adminRequired: true},
             component: UserCreate
             
+        },
+        {
+            path: "/admin/edit-user/:userId",
+            name: "userEdit",
+            component: UserEdit,
+            meta: {requiresAuth: true, adminRequired: false}
         },
         {
             path: "/users/activation",

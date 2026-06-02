@@ -6,6 +6,7 @@ namespace zuli_Business.Interface
     {
         Task<RegisterUserResponseDTO> RegisterUserAsync(RegisterUserRequestDTO request, Guid adminUserId);
         Task<BasicResponseDTO> ActivateAccountAsync(ActivateAccountRequestDTO request);
+        Task<BasicResponseDTO> UpdateUserAsync(Guid userId, RegisterUserRequestDTO request);
 
         Task<UserSearchResponseDTO> GetUsersAsync(
             string? searchType,

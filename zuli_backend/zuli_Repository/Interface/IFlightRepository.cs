@@ -11,5 +11,6 @@ namespace zuli_Repository.Interface
         Task<int> CreateFlight(FlightEntity flight);
         Task<IEnumerable<FlightEntity>> GetAllFlights();
         Task<FlightEntity?> GetFlightById(Guid id);
+        Task<int> CheckAvailability(int flightRouteId, DateTime targetDate, int seats);
     }
 }

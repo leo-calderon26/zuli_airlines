@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -16,40 +18,32 @@ namespace zuli_Business
         // Inyeccion de dependencias
         private readonly IAircraftRepository _repository;
         private readonly IUserRepository _userRepository;
-        private readonly AircraftValidator _validator;
-        public AircraftService(IAircraftRepository repository, IUserRepository userRepository)
+        private readonly FluentValidation.IValidator<AircraftDTO> _validator;
+
+        public AircraftService(
+            IAircraftRepository repository,
+            IUserRepository userRepository,
+            FluentValidation.IValidator<AircraftDTO> validator)
         {
             _repository = repository;
             _userRepository = userRepository;
-            _validator = new AircraftValidator();
+            _validator = validator;
         }
 
         public async Task<BasicResponseDTO> CreateAircraft(AircraftDTO aircraft)
         {
-            _validator.ValidateAircraftInfo(aircraft);
+            var validationResult = await _validator.ValidateAsync(aircraft);
+            validationResult.ThrowIfInvalid();
 
             if (!await _userRepository.IsAdmin(aircraft.businessId))
             {
                 throw new ZuliNotFoundException($"El Usuario que esta intentando crear la aeronave y no tiene permisos {aircraft.businessId}");
             }
-            if (!string.IsNullOrEmpty(aircraft.model.ToLower()) && await _repository.AlreadyExistByModel(aircraft.model))
-            {
-                throw new ZuliNotFoundException($"Ya existe una aeronave con el mismo nombre {aircraft.model}");
-            }
 
             var userId = await _userRepository.GetUserId(aircraft.businessId);
 
-            var newAircraft = new AircraftEntity
-            {
-                AdminId = userId,
-                model = aircraft.model,
-                weight = aircraft.weight,
-                numberEconomyClassRows = aircraft.numberEconomyClassRows,
-                numberSeatingRowsEconomy = aircraft.numberSeatingRowsEconomy,
-                numberFirstClassRows = aircraft.numberFirstClassRows,
-                numberSeatingRowsFirst = aircraft.numberSeatingRowsFirst,
-                baggageCapacity = aircraft.baggageCapacity,
-            };
+            var newAircraft = aircraft.Adapt<AircraftEntity>();
+            newAircraft.AdminId = userId;
 
             await _repository.CreateAircraft(newAircraft);
 
@@ -64,18 +58,7 @@ namespace zuli_Business
         {
             var aircraft = await _repository.GetAll();
 
-            return aircraft.Select(item => new AircraftDTO
-            {
-                aircraftId = item.aircraftId,
-                model = item.model,
-                weight = item.weight,
-                baggageCapacity = item.baggageCapacity,
-                numberEconomyClassRows = item.numberEconomyClassRows,
-                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
-                numberFirstClassRows = item.numberFirstClassRows,
-                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
-            }
-            ).ToList();
+            return aircraft.Select(item => item.Adapt<AircraftDTO>()).ToList();
         }
 
         public async Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize)
@@ -84,17 +67,7 @@ namespace zuli_Business
 
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            var aircraftDTOs = aircrafts.Select(item => new AircraftDTO
-            {
-                aircraftId = item.aircraftId,
-                model = item.model,
-                weight = item.weight,
-                baggageCapacity = item.baggageCapacity,
-                numberEconomyClassRows = item.numberEconomyClassRows,
-                numberSeatingRowsEconomy = item.numberSeatingRowsEconomy,
-                numberFirstClassRows = item.numberFirstClassRows,
-                numberSeatingRowsFirst = item.numberSeatingRowsFirst,
-            }).ToList();
+            var aircraftDTOs = aircrafts.Select(item => item.Adapt<AircraftDTO>()).ToList();
 
             return new AircraftPaginatedResponseDTO<AircraftDTO>
             {
@@ -103,6 +76,34 @@ namespace zuli_Business
                 TotalRecords = totalCount,
                 TotalPages = totalPages,
                 Data = aircraftDTOs
+            };
+        }
+
+        public async Task<BasicResponseDTO> UpdateAircraftAsync(Guid aircraftId, AircraftDTO aircraft)
+        {
+            var validationResult = await _validator.ValidateAsync(aircraft);
+            validationResult.ThrowIfInvalid();
+
+            if (!await _userRepository.IsAdmin(aircraft.businessId))
+            {
+                throw new ZuliUnauthorizedException($"No tiene permisos para actualizar la aeronave {aircraftId}");
+            }
+
+            var existingAircraft = await _repository.GetById(aircraftId);
+            if (existingAircraft == null)
+            {
+                throw new ZuliNotFoundException($"La aeronave con ID {aircraftId} no existe.");
+            }
+
+
+            aircraft.Adapt(existingAircraft, TypeAdapterConfig.GlobalSettings);
+
+            await _repository.UpdateAircraftAsync(existingAircraft);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = 200,
+                Message = "Se actualizó la aeronave correctamente"
             };
         }
     }

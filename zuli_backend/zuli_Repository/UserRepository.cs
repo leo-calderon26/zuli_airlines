@@ -18,6 +18,8 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // (logging removed)
+
             var sql = @"
                 SELECT
                     au.UserId,
@@ -52,6 +54,8 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // (logging removed)
+
             var sql = @"
                 SELECT
                     au.UserId,
@@ -82,9 +86,47 @@ namespace zuli_Repository
             );
         }
 
+        public async Task<AppUser?> GetByUserIdAsync(Guid userId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            // (logging removed)
+
+            var sql = @"
+                SELECT
+                    au.UserId,
+                    au.PersonId,
+                    au.BusinessId AS NationalId,
+                    p.FirstName,
+                    p.FirstLastName,
+                    p.SecondLastName,
+                    pe.Email,
+                    au.BusinessEmail,
+                    au.BusinessId,
+                    au.UserRole,
+                    au.PasswordHash,
+                    au.IsActive,
+                    au.FailedLoginAttempts,
+                    au.LockoutEnd,
+                    au.ManagedByAdminId,
+                    au.ActivationTokenHash
+                FROM AirlineUser au
+                LEFT JOIN Person p ON au.PersonId = p.PersonId
+                LEFT JOIN PersonEmail pe ON au.PersonId = pe.PersonId
+                WHERE au.UserId = @UserId;
+            ";
+
+            return await connection.QuerySingleOrDefaultAsync<AppUser>(
+                sql,
+                new { UserId = userId }
+            );
+        }
+
         public async Task<AppUser?> GetByActivationTokenHashAsync(string activationTokenHash)
         {
             using var connection = _dapperContext.CreateConnection();
+
+            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -126,6 +168,7 @@ namespace zuli_Repository
 
             try
             {
+                // (logging removed)
                 var personSql = @"
                     INSERT INTO Person (
                         FirstName,
@@ -151,6 +194,8 @@ namespace zuli_Repository
                     transaction
                 );
 
+                // (logging removed)
+
                 if (!string.IsNullOrWhiteSpace(user.Email))
                 {
                     var emailSql = @"
@@ -158,6 +203,8 @@ namespace zuli_Repository
                         VALUES (@PersonId, @Email);";
 
                     await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email }, transaction);
+
+                    // (logging removed)
                 }
 
                 user.PersonId = personId;
@@ -195,9 +242,11 @@ namespace zuli_Repository
 
                 await connection.ExecuteAsync(userSql, user, transaction);
 
+                // (logging removed)
+
                 transaction.Commit();
             }
-            catch
+            catch (Exception)
             {
                 transaction.Rollback();
                 throw;
@@ -235,6 +284,27 @@ namespace zuli_Repository
             ";
 
             await connection.ExecuteAsync(sql, user);
+        }
+
+        public async Task UpdateUserAsync(AppUser user)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            await connection.ExecuteAsync(
+                "dbo.sp_updateUser",
+                new
+                {
+                    user.UserId,
+                    user.PersonId,
+                    user.NationalId,
+                    user.FirstName,
+                    user.FirstLastName,
+                    user.SecondLastName,
+                    user.BusinessEmail,
+                    user.UserRole
+                },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
         }
         public async Task<bool> IsAdmin(string businesId)
         {
@@ -283,7 +353,7 @@ namespace zuli_Repository
 
             string whereClause = searchType switch
             {
-                "email" => "au.BusinessEmail LIKE @Search",
+                "email" => "(au.BusinessEmail LIKE @Search OR pe.Email LIKE @Search)",
 
                 "nationalId" => "au.NationalId LIKE @Search",
 
@@ -305,6 +375,7 @@ namespace zuli_Repository
                         OR p.SecondLastName LIKE @Search
                         OR CONCAT(p.FirstName, ' ', p.FirstLastName) LIKE @Search
                         OR CONCAT(p.FirstName, ' ', p.FirstLastName, ' ', p.SecondLastName) LIKE @Search
+                        OR pe.Email LIKE @Search
                     )"
             };
 

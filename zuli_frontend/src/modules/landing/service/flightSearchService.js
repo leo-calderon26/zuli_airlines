@@ -26,3 +26,13 @@ export const searchFlights = async (searchParams) => {
         throw error;
     }
 };
+
+export const checkFlightAvailability = async (availabilityData) => {
+    try {
+        const response = await axios.post(`${FLIGHT_API_URL}/check-availability`, availabilityData);
+        return response.data;
+    } catch (error) {
+        console.error("Error al verificar disponibilidad:", error);
+        throw error;
+    }
+};
