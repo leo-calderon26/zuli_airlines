@@ -7,8 +7,8 @@ namespace zuli_Business.DTO
     public class TicketPurchaseRequestDTO
     {
         public Guid? FlightId { get; set; }
-
-        public int FlightRouteId { get; set; }
+        public List<Guid> FlightIdList { get; set; } = new();
+        public List<SummarizedFlightRoute> FlightRoutes { get; set; } = new();
 
         [Required(ErrorMessage = "La clase de vuelo es requerida")]
         [StringLength(20, ErrorMessage = "La clase no puede exceder 20 caracteres")]

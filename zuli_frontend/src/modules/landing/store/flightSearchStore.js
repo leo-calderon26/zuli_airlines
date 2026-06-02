@@ -60,6 +60,15 @@ export const useFlightSearchStore = defineStore("flightSearch", () => {
         }
     };
 
+    const getFlightRouteData = async (flight) => {
+        const segments = flight.segments.map(s => ({
+            flightRouteId: s.flightId, 
+            departureDate: s.departureDateText
+        }));
+        return segments;
+    };
+
+
     return {
         searchParams,
         flightResults,
@@ -67,6 +76,7 @@ export const useFlightSearchStore = defineStore("flightSearch", () => {
         error,
         performSearch,
         changePage,
-        verifyFlightAvailability
+        verifyFlightAvailability,
+        getFlightRouteData
     };
 });

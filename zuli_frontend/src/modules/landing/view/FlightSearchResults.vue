@@ -196,7 +196,7 @@ onMounted(() => {
 const handleSelectDeparture = async (selection) => {
     const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
     
-    console.log(searchStore.segments);
+    const flightRouteSegments = await searchStore.getFlightRouteData(selection.flight);
 
     if (!result.isAvailable && !result.isError) {
         unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de ida seleccionado.";
@@ -211,7 +211,7 @@ const handleSelectDeparture = async (selection) => {
             query: {
                 flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
                 seats: searchStore.searchParams.Seats,
-                flightRouteId: flightRouteId ? String(flightRouteId) : undefined
+                flightRouteData: JSON.stringify({ flightRouteSegments })
             }
         });
         return;
