@@ -1,3 +1,4 @@
+using FluentValidation;
 using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
@@ -12,17 +13,20 @@ namespace zuli_Business
         private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+        private readonly IValidator<PurchaseConfirmationPageDTO> _purchaseConfirmationValidator;
 
         public PurchaseConfirmationService(
             IPurchaseConfirmationRepository purchaseConfirmationRepository,
             IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
             IEmailService emailService,
-            IMapper mapper)
+            IMapper mapper,
+            IValidator<PurchaseConfirmationPageDTO> purchaseConfirmationValidator)
         {
             _purchaseConfirmationRepository = purchaseConfirmationRepository;
             _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
             _emailService = emailService;
             _mapper = mapper;
+            _purchaseConfirmationValidator = purchaseConfirmationValidator;
         }
 
         public async Task<PurchaseConfirmationPageDTO> GetConfirmationPageAsync(string reservationCode)
@@ -85,47 +89,21 @@ namespace zuli_Business
             return confirmation;
         }
 
-        private static void ValidateConfirmationData(PurchaseConfirmationPageDTO confirmation)
+        private void ValidateConfirmationData(PurchaseConfirmationPageDTO confirmation)
         {
-            if (string.IsNullOrWhiteSpace(confirmation.ReservationCode))
+            var validationResult = _purchaseConfirmationValidator.Validate(confirmation);
+
+            if (validationResult.IsValid)
             {
-                throw new ZuliValidationException(
-                    "reservationCode",
-                    "La reserva no tiene código de reserva."
-                );
+                return;
             }
 
-            if (string.IsNullOrWhiteSpace(confirmation.BuyerEmail))
-            {
-                throw new ZuliValidationException(
-                    "buyerEmail",
-                    "La reserva no tiene correo del comprador."
-                );
-            }
+            var firstError = validationResult.Errors.First();
 
-            if (string.IsNullOrWhiteSpace(confirmation.BuyerName))
-            {
-                throw new ZuliValidationException(
-                    "buyerName",
-                    "La reserva no tiene nombre del comprador."
-                );
-            }
-
-            if (confirmation.Passengers.Count == 0)
-            {
-                throw new ZuliValidationException(
-                    "passengers",
-                    "La reserva no tiene pasajeros asociados."
-                );
-            }
-
-            if (confirmation.Flights.Count == 0)
-            {
-                throw new ZuliValidationException(
-                    "flights",
-                    "La reserva no tiene vuelos asociados."
-                );
-            }
+            throw new ZuliValidationException(
+                firstError.PropertyName,
+                firstError.ErrorMessage
+            );
         }
     }
 }

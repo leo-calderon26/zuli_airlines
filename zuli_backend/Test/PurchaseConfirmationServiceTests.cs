@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using MapsterMapper;
 using Moq;
 using NUnit.Framework;
@@ -20,6 +22,7 @@ namespace zuli_backend.Tests
         private Mock<IPurchaseConfirmationPdfService> _purchaseConfirmationPdfServiceMock;
         private Mock<IEmailService> _emailServiceMock;
         private Mock<IMapper> _mapperMock;
+        private Mock<IValidator<PurchaseConfirmationPageDTO>> _purchaseConfirmationValidatorMock;
 
         private PurchaseConfirmationService _purchaseConfirmationService;
 
@@ -30,12 +33,14 @@ namespace zuli_backend.Tests
             _purchaseConfirmationPdfServiceMock = new Mock<IPurchaseConfirmationPdfService>();
             _emailServiceMock = new Mock<IEmailService>();
             _mapperMock = new Mock<IMapper>();
+            _purchaseConfirmationValidatorMock = new Mock<IValidator<PurchaseConfirmationPageDTO>>();
 
             _purchaseConfirmationService = new PurchaseConfirmationService(
                 _purchaseConfirmationRepositoryMock.Object,
                 _purchaseConfirmationPdfServiceMock.Object,
                 _emailServiceMock.Object,
-                _mapperMock.Object
+                _mapperMock.Object,
+                _purchaseConfirmationValidatorMock.Object
             );
         }
 
@@ -57,7 +62,7 @@ namespace zuli_backend.Tests
             var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.ReservationId, Is.EqualTo(100));
+            Assert.That(result.ReservationId, Is.EqualTo(100));
             Assert.That(result.ReservationCode, Is.EqualTo(reservationCode));
             Assert.That(result.BuyerEmail, Is.EqualTo("buyer@test.com"));
             Assert.That(result.Passengers.Count, Is.EqualTo(1));
@@ -71,6 +76,11 @@ namespace zuli_backend.Tests
             _mapperMock.Verify(
                 mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity),
                 Times.Once
+            );
+
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(It.IsAny<PurchaseConfirmationPageDTO>()),
+                Times.Never
             );
 
             _purchaseConfirmationPdfServiceMock.Verify(
@@ -90,7 +100,7 @@ namespace zuli_backend.Tests
         }
 
         [Test]
-        public async Task GetConfirmationPageAsync_ReservationDoesNotExist_ReturnsNull()
+        public void GetConfirmationPageAsync_ReservationDoesNotExist_ThrowsZuliNotFoundException()
         {
             var reservationCode = "INVALID01";
 
@@ -98,9 +108,10 @@ namespace zuli_backend.Tests
                 .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync((PurchaseConfirmationEntity?)null);
 
-            var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode);
-
-            Assert.That(result, Is.Null);
+            Assert.That(
+                async () => await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode),
+                Throws.TypeOf<ZuliNotFoundException>()
+            );
 
             _purchaseConfirmationRepositoryMock.Verify(
                 repository => repository.GetPurchaseConfirmationAsync(reservationCode),
@@ -109,6 +120,11 @@ namespace zuli_backend.Tests
 
             _mapperMock.Verify(
                 mapper => mapper.Map<PurchaseConfirmationPageDTO>(It.IsAny<PurchaseConfirmationEntity>()),
+                Times.Never
+            );
+
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(It.IsAny<PurchaseConfirmationPageDTO>()),
                 Times.Never
             );
 
@@ -144,6 +160,10 @@ namespace zuli_backend.Tests
             _mapperMock
                 .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
                 .Returns(confirmationDto);
+
+            _purchaseConfirmationValidatorMock
+                .Setup(validator => validator.Validate(confirmationDto))
+                .Returns(new ValidationResult());
 
             _purchaseConfirmationPdfServiceMock
                 .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
@@ -191,6 +211,11 @@ namespace zuli_backend.Tests
 
             _mapperMock.Verify(
                 mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity),
+                Times.Once
+            );
+
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(confirmationDto),
                 Times.Once
             );
 
@@ -244,6 +269,66 @@ namespace zuli_backend.Tests
                 Times.Never
             );
 
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(It.IsAny<PurchaseConfirmationPageDTO>()),
+                Times.Never
+            );
+
+            _purchaseConfirmationPdfServiceMock.Verify(
+                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
+                Times.Never
+            );
+
+            _emailServiceMock.Verify(
+                emailService => emailService.SendInvoiceEmailAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<byte[]>()
+                ),
+                Times.Never
+            );
+        }
+
+        [Test]
+        public void CompleteConfirmationAsync_InvalidConfirmationData_ThrowsZuliValidationException()
+        {
+            var reservationCode = "ZUTEST001";
+            var confirmationEntity = BuildValidConfirmationEntity();
+            var confirmationDto = BuildValidConfirmationDto();
+
+            var validationResult = new ValidationResult(
+                new List<ValidationFailure>
+                {
+                    new ValidationFailure(
+                        "buyerEmail",
+                        "La reserva no tiene correo del comprador."
+                    )
+                }
+            );
+
+            _purchaseConfirmationRepositoryMock
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
+                .ReturnsAsync(confirmationEntity);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
+                .Returns(confirmationDto);
+
+            _purchaseConfirmationValidatorMock
+                .Setup(validator => validator.Validate(confirmationDto))
+                .Returns(validationResult);
+
+            Assert.That(
+                async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationCode),
+                Throws.TypeOf<ZuliValidationException>()
+            );
+
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(confirmationDto),
+                Times.Once
+            );
+
             _purchaseConfirmationPdfServiceMock.Verify(
                 pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
                 Times.Never
@@ -277,6 +362,10 @@ namespace zuli_backend.Tests
                 .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
                 .Returns(confirmationDto);
 
+            _purchaseConfirmationValidatorMock
+                .Setup(validator => validator.Validate(confirmationDto))
+                .Returns(new ValidationResult());
+
             _purchaseConfirmationPdfServiceMock
                 .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
                 .Returns(invoicePdf);
@@ -297,6 +386,11 @@ namespace zuli_backend.Tests
             Assert.That(
                 async () => await _purchaseConfirmationService.CompleteConfirmationAsync(reservationCode),
                 Throws.TypeOf<ZuliEmailException>()
+            );
+
+            _purchaseConfirmationValidatorMock.Verify(
+                validator => validator.Validate(confirmationDto),
+                Times.Once
             );
 
             _emailServiceMock.Verify(

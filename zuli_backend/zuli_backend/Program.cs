@@ -139,6 +139,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 builder.Services.AddScoped<ITicketService, TicketService>();
@@ -150,7 +151,7 @@ builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
 builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
-
+builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>,PurchaseConfirmationValidator>();
 
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
