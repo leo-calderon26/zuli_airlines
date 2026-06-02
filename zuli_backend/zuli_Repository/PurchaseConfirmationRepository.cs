@@ -1,4 +1,5 @@
 using Dapper;
+using System.Data;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -16,7 +17,26 @@ namespace zuli_Repository
 
         public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(string reservationCode)
         {
-            const string reservationQuery = @"
+            using var connection = _context.CreateConnection();
+
+            var confirmation = await GetReservationAsync(connection, reservationCode);
+
+            if (confirmation == null)
+            {
+                return null;
+            }
+
+            confirmation.Passengers = await GetPassengersAsync(connection, reservationCode);
+            confirmation.Flights = await GetFlightsAsync(connection, reservationCode);
+
+            return confirmation;
+        }
+
+        private static async Task<PurchaseConfirmationEntity?> GetReservationAsync(
+            IDbConnection connection,
+            string reservationCode)
+        {
+            const string query = @"
                 SELECT
                     r.ReservationId,
                     r.ReservationCode,
@@ -42,7 +62,17 @@ namespace zuli_Repository
                 WHERE r.ReservationCode = @reservationCode;
             ";
 
-            const string passengersQuery = @"
+            return await connection.QueryFirstOrDefaultAsync<PurchaseConfirmationEntity>(
+                query,
+                new { reservationCode }
+            );
+        }
+
+        private static async Task<List<PurchaseConfirmationPassengerEntity>> GetPassengersAsync(
+            IDbConnection connection,
+            string reservationCode)
+        {
+            const string query = @"
                 SELECT
                     CONCAT(
                         passengerPerson.FirstName,
@@ -92,7 +122,19 @@ namespace zuli_Repository
                 ORDER BY passengerPerson.FirstName, passengerPerson.FirstLastName;
             ";
 
-            const string flightsQuery = @"
+            var passengers = await connection.QueryAsync<PurchaseConfirmationPassengerEntity>(
+                query,
+                new { reservationCode }
+            );
+
+            return passengers.ToList();
+        }
+
+        private static async Task<List<PurchaseConfirmationFlightEntity>> GetFlightsAsync(
+            IDbConnection connection,
+            string reservationCode)
+        {
+            const string query = @"
                 SELECT DISTINCT
                     f.Id AS FlightId,
                     CONCAT('ZU-', RIGHT(CONVERT(VARCHAR(36), f.Id), 4)) AS FlightNumber,
@@ -120,32 +162,12 @@ namespace zuli_Repository
                 ORDER BY DepartureDateTime;
             ";
 
-            using var connection = _context.CreateConnection();
-
-            var confirmation = await connection.QueryFirstOrDefaultAsync<PurchaseConfirmationEntity>(
-                reservationQuery,
-                new { reservationCode }
-            );
-
-            if (confirmation == null)
-            {
-                return null;
-            }
-
-            var passengers = await connection.QueryAsync<PurchaseConfirmationPassengerEntity>(
-                passengersQuery,
-                new { reservationCode }
-            );
-
             var flights = await connection.QueryAsync<PurchaseConfirmationFlightEntity>(
-                flightsQuery,
+                query,
                 new { reservationCode }
             );
 
-            confirmation.Passengers = passengers.ToList();
-            confirmation.Flights = flights.ToList();
-
-            return confirmation;
+            return flights.ToList();
         }
     }
 }
