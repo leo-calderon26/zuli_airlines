@@ -70,7 +70,7 @@
                 </div>
 
                 <div v-else-if="searchStore.searchParams.IsRoundTrip">
-                    
+
                     <div class="bg-surface-muted border border-border-light rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
                         
                         <div class="flex-1 w-full md:w-auto text-center md:text-left">
@@ -143,7 +143,13 @@
                     </div>
                 </div>
             </div>
-
+            
+            <ErrorModal 
+                v-model="showUnavailableModal" 
+                title="Vuelo no disponible" 
+                :message="unavailableMessage" 
+                @close="onUnavailableModalClose" 
+            />
         </main>
     </div>
 </template>
@@ -154,6 +160,7 @@ import { useRoute, useRouter } from 'vue-router';
 import PublicNavBar from '../components/PublicNavBar.vue';
 import FlightCard from '../components/FlightCard.vue';
 import AppButton from '../../../shared/AppButton.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
 import { useFlightSearchStore } from '../store/flightSearchStore';
 
 const route = useRoute();
@@ -161,6 +168,13 @@ const router = useRouter();
 const searchStore = useFlightSearchStore();
 
 const selectedDepartureFlight = ref(null);
+const showUnavailableModal = ref(false);
+const unavailableMessage = ref('');
+
+const onUnavailableModalClose = async () => {
+    showUnavailableModal.value = false;
+    await searchStore.performSearch(searchStore.searchParams);
+};
 
 onMounted(() => {
     const params = {
@@ -179,8 +193,18 @@ onMounted(() => {
     searchStore.performSearch(params);
 });
 
-const handleSelectDeparture = (selection) => {
-    const flightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
+const handleSelectDeparture = async (selection) => {
+    const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
+    
+    console.log(searchStore.segments);
+
+    if (!result.isAvailable && !result.isError) {
+        unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de ida seleccionado.";
+        showUnavailableModal.value = true;
+        return;
+    }
+    if (result.isError) return;
+
     if (!searchStore.searchParams.IsRoundTrip) {
         router.push({
             name: 'buyTicket',
@@ -202,8 +226,16 @@ const clearDepartureSelection = () => {
     changePage(1);
 };
 
-const handleSelectReturn = (selection) => {
-    const returnFlightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
+const handleSelectReturn = async (selection) => {
+    const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
+    
+    if (!result.isAvailable && !result.isError) {
+        unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de regreso seleccionado.";
+        showUnavailableModal.value = true;
+        return;
+    }
+    if (result.isError) return;
+
     router.push({
         name: 'buyTicket',
         query: {
