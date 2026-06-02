@@ -16,6 +16,8 @@ export const useTicketStore = defineStore("ticket", () => {
     const returnFlight = ref(null);
     const selectedClass = ref("Ecomica");
     const seatsCount = ref(1);
+    const flightRouteId = ref(null);
+    const returnFlightRouteId = ref(null);
 
     const purchaseResult = ref(null);
     const isLoading = ref(false);
@@ -90,6 +92,16 @@ export const useTicketStore = defineStore("ticket", () => {
         seatsCount.value = flight.availableSeats || 1;
     };
 
+    const setFlightRouteId = (routeId) => {
+        const parsed = Number(routeId);
+        flightRouteId.value = Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const setReturnFlightRouteId = (routeId) => {
+        const parsed = Number(routeId);
+        returnFlightRouteId.value = Number.isFinite(parsed) ? parsed : null;
+    };
+
     const setPassengers = (count) => {
         while (passengers.value.length < count) {
             passengers.value.push({
@@ -133,6 +145,7 @@ export const useTicketStore = defineStore("ticket", () => {
             const payload = {
                 flightId: selectedFlight.value.flightId,
                 flightClass: selectedClass.value,
+                flightRouteId: flightRouteId.value,
                 passengers: passengers.value.map((p) => {
                     const baggageItems = [];
                     const checkedCount = p.checkedBaggage || 0;
@@ -170,6 +183,7 @@ export const useTicketStore = defineStore("ticket", () => {
 
             if (isRoundTrip.value && returnFlight.value) {
                 payload.returnFlightId = returnFlight.value.flightId ?? returnFlight.value.segments?.[0]?.flightId;
+                payload.returnFlightRouteId = returnFlightRouteId.value;
             }
 
             purchaseResult.value = await purchaseTickets(payload);
@@ -201,6 +215,8 @@ export const useTicketStore = defineStore("ticket", () => {
         returnFlight.value = null;
         selectedClass.value = "";
         seatsCount.value = 1;
+        flightRouteId.value = null;
+        returnFlightRouteId.value = null;
         purchaseResult.value = null;
         isLoading.value = false;
         error.value = null;
@@ -220,6 +236,10 @@ export const useTicketStore = defineStore("ticket", () => {
         returnFlight,
         selectedClass,
         seatsCount,
+        flightRouteId,
+        returnFlightRouteId,
+        setFlightRouteId,
+        setReturnFlightRouteId,
         purchaseResult,
         isLoading,
         error,

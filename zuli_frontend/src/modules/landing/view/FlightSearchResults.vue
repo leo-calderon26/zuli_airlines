@@ -180,12 +180,14 @@ onMounted(() => {
 });
 
 const handleSelectDeparture = (selection) => {
+    const flightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
     if (!searchStore.searchParams.IsRoundTrip) {
         router.push({
             name: 'buyTicket',
             query: {
                 flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
-                seats: searchStore.searchParams.Seats
+                seats: searchStore.searchParams.Seats,
+                flightRouteId: flightRouteId ? String(flightRouteId) : undefined
             }
         });
         return;
@@ -201,6 +203,7 @@ const clearDepartureSelection = () => {
 };
 
 const handleSelectReturn = (selection) => {
+    const returnFlightRouteId = selection?.flight?.segments?.[0]?.flightId ?? selection?.flight?.pathIds?.split(',')?.[0];
     router.push({
         name: 'buyTicket',
         query: {
@@ -210,7 +213,13 @@ const handleSelectReturn = (selection) => {
             }),
             seats: searchStore.searchParams.Seats,
             roundTrip: 'true',
-            returnFlight: JSON.stringify(selection.flight)
+            returnFlight: JSON.stringify(selection.flight),
+            flightRouteId: (() => {
+                const value = selectedDepartureFlight.value?.flight?.segments?.[0]?.flightId
+                    ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
+                return value ? String(value) : undefined;
+            })(),
+            returnFlightRouteId: returnFlightRouteId ? String(returnFlightRouteId) : undefined
         }
     });
 };

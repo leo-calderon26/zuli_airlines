@@ -8,7 +8,7 @@ namespace zuli_Repository.Interface
     public interface IFlightRepository
     {
         Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask);
-        Task<int> CreateFlight(FlightEntity flight);
+        Task<Guid> CreateFlight(int flightRouteId);
         Task<IEnumerable<FlightEntity>> GetAllFlights();
         Task<FlightEntity?> GetFlightById(Guid id);
     }

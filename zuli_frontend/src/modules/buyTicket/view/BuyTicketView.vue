@@ -34,10 +34,13 @@ onMounted(() => {
         try {
             const flightData = JSON.parse(route.query.flightData);
             store.setFlight(flightData.flight, flightData.flightClass || 'Turista');
+            console.log(route.query.flightRouteId);
+            store.setFlightRouteId(route.query.flightRouteId);
             store.setPassengers(parseInt(route.query.seats) || 1);
             if (route.query.roundTrip === 'true' && route.query.returnFlight) {
                 store.isRoundTrip = true;
                 store.returnFlight = JSON.parse(route.query.returnFlight);
+                store.setReturnFlightRouteId(route.query.returnFlightRouteId);
             }
         } catch (e) {
             console.error('Error parsing flight data', e);

@@ -36,7 +36,9 @@ namespace zuli_Business
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
         {
             if (request.FlightId == null)
-                throw new ZuliNotFoundException("Vuelo no encontrado");
+            {
+                request.FlightId = await _flightRepository.CreateFlight(request.FlightRouteId);
+            }
 
             var flight = await _flightRepository.GetFlightById(request.FlightId.Value);
             if (flight == null)
