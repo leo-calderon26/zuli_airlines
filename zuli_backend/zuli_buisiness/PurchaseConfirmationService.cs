@@ -25,21 +25,21 @@ namespace zuli_Business
             _mapper = mapper;
         }
 
-        public async Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(int reservationId)
+        public async Task<PurchaseConfirmationPageDTO> GetConfirmationPageAsync(string reservationCode)
         {
-            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationId);
+            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationCode);
 
             if (confirmationEntity == null)
             {
-                return null;
+                throw new ZuliNotFoundException("No se encontró la reserva indicada.");
             }
 
             return _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
         }
 
-        public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(int reservationId)
+        public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(string reservationCode)
         {
-            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationId);
+            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationCode);
 
             if (confirmationEntity == null)
             {
