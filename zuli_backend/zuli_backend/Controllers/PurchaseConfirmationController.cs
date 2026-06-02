@@ -15,17 +15,27 @@ namespace zuli_backend.Controllers
             _service = service;
         }
 
-        [HttpGet("{reservationCode}")]
-        public async Task<ActionResult<PurchaseConfirmationPageDTO>> GetConfirmationPage(string reservationCode)
+        [HttpGet("{reservationId}")]
+        public async Task<ActionResult<PurchaseConfirmationPageDTO>> GetConfirmationPage(int reservationId)
         {
-            var confirmation = await _service.GetConfirmationPageAsync(reservationCode);
+            var confirmation = await _service.GetConfirmationPageAsync(reservationId);
+
+            if (confirmation == null)
+            {
+                return NotFound(new
+                {
+                    message = "No se encontró la reserva indicada."
+                });
+            }
+
             return Ok(confirmation);
         }
 
-        [HttpPost("Complete/{reservationCode}")]
-        public async Task<ActionResult<PurchaseConfirmationPageDTO>> CompleteConfirmation(string reservationCode)
+        [HttpPost("Complete/{reservationId}")]
+        public async Task<ActionResult<PurchaseConfirmationPageDTO>> CompleteConfirmation(int reservationId)
         {
-            var confirmation = await _service.CompleteConfirmationAsync(reservationCode);
+            var confirmation = await _service.CompleteConfirmationAsync(reservationId);
+
             return Ok(confirmation);
         }
     }

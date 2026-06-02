@@ -4,8 +4,8 @@ namespace zuli_Business.Interface
 {
     public interface IPurchaseConfirmationService
     {
-        Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(string reservationCode);
+        Task<PurchaseConfirmationPageDTO?> GetConfirmationPageAsync(int reservationId);
 
-        Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(string reservationCode);
+        Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(int reservationId);
     }
 }
