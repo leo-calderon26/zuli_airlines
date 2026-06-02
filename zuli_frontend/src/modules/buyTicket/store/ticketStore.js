@@ -303,6 +303,10 @@ export const useTicketStore = defineStore("ticket", () => {
                     reservationOrigin: "Web"
                 };
 
+            if (isRoundTrip.value && returnFlight.value) {
+                payload.returnFlightId = returnFlight.value.flightId ?? returnFlight.value.segments?.[0]?.flightId;
+            }
+
             purchaseResult.value = await purchaseTickets(payload);
         } catch (err) {
             const data = err.response?.data;

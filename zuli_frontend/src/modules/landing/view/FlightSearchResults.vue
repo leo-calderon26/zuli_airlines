@@ -328,12 +328,12 @@ const handleSelectReturn = async (selection) => {
             seats: searchStore.searchParams.Seats,
             roundTrip: 'true',
             returnFlight: JSON.stringify(selection.flight),
-            flightRouteData: JSON.stringify({
-                flightRouteSegments: selectedDepartureFlightRoutes.value
-            }),
-            returnFlightRouteData: JSON.stringify({
-                flightRouteSegments: returnFlightRouteSegments
-            })
+            flightRouteId: (() => {
+                const value = selectedDepartureFlight.value?.flight?.segments?.[0]?.flightId
+                    ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
+                return value ? String(value) : undefined;
+            })(),
+
         }
     });
 };

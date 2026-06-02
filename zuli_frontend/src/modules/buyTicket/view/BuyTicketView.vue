@@ -57,18 +57,13 @@
                 const returnFlight = JSON.parse(route.query.returnFlight);
 
                 store.isRoundTrip = true;
-                store.returnFlight = returnFlight;
-
-                if (route.query.returnFlightRouteData) {
-                    store.addFlightRoutes(JSON.parse(route.query.returnFlightRouteData));
-                } else {
-                    store.addFlightRoutes(returnFlight);
-                }
+                store.returnFlight = JSON.parse(route.query.returnFlight);
             }
-        } catch (error) {
-            console.error('Error parsing flight data', error);
+        } catch (e) {
+            console.error('Error parsing flight data', e);
         }
-    });
+    }
+});
 
     function handleAddPassenger() {
         store.setPassengers(store.passengers.length + 1);
