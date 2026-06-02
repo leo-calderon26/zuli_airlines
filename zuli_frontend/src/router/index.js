@@ -174,7 +174,7 @@ const router = createRouter({
             meta: {requiresAuth: false, adminRequired: false}
         },
         {
-            path: "/purchase-confirmation/:reservationId",
+            path: "/purchase-confirmation/:reservationCode",
             name: "purchaseConfirmation",
             component: PurchaseConfirmationView,
             meta: { requiresAuth: false, adminRequired: false }

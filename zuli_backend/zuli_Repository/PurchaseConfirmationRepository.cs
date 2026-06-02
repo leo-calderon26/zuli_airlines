@@ -14,7 +14,7 @@ namespace zuli_Repository
             _context = context;
         }
 
-        public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(int reservationId)
+        public async Task<PurchaseConfirmationEntity?> GetPurchaseConfirmationAsync(string reservationCode)
         {
             const string reservationQuery = @"
                 SELECT
@@ -39,7 +39,7 @@ namespace zuli_Repository
                     ON b.PersonId = buyerPerson.PersonId
                 LEFT JOIN dbo.PersonEmail buyerEmail
                     ON buyerPerson.PersonId = buyerEmail.PersonId
-                WHERE r.ReservationId = @reservationId;
+                WHERE r.ReservationCode = @reservationCode;
             ";
 
             const string passengersQuery = @"
@@ -56,7 +56,9 @@ namespace zuli_Repository
                     ISNULL(passport.PassportCountry, '') AS PassportCountry,
                     ISNULL(baggageSummary.CheckedBaggageQuantity, 0) AS CheckedBaggageQuantity,
                     ISNULL(baggageSummary.CarryOnQuantity, 0) AS CarryOnQuantity
-                FROM dbo.PassengerReservation pr
+                FROM dbo.Reservation r
+                INNER JOIN dbo.PassengerReservation pr
+                    ON r.ReservationId = pr.ReservationId
                 INNER JOIN dbo.Person passengerPerson
                     ON pr.PassengerId = passengerPerson.PersonId
                 LEFT JOIN dbo.Passport passport
@@ -86,7 +88,7 @@ namespace zuli_Repository
                 ) baggageSummary
                     ON pr.PassengerId = baggageSummary.PassengerId
                     AND pr.ReservationId = baggageSummary.ReservationId
-                WHERE pr.ReservationId = @reservationId
+                WHERE r.ReservationCode = @reservationCode
                 ORDER BY passengerPerson.FirstName, passengerPerson.FirstLastName;
             ";
 
@@ -114,7 +116,7 @@ namespace zuli_Repository
                     ON fr.DepartureAirport = departureAirport.AirportCode
                 INNER JOIN dbo.Airport arrivalAirport
                     ON fr.ArrivalAirport = arrivalAirport.AirportCode
-                WHERE r.ReservationId = @reservationId
+                WHERE r.ReservationCode = @reservationCode
                 ORDER BY DepartureDateTime;
             ";
 
@@ -122,7 +124,7 @@ namespace zuli_Repository
 
             var confirmation = await connection.QueryFirstOrDefaultAsync<PurchaseConfirmationEntity>(
                 reservationQuery,
-                new { reservationId }
+                new { reservationCode }
             );
 
             if (confirmation == null)
@@ -132,12 +134,12 @@ namespace zuli_Repository
 
             var passengers = await connection.QueryAsync<PurchaseConfirmationPassengerEntity>(
                 passengersQuery,
-                new { reservationId }
+                new { reservationCode }
             );
 
             var flights = await connection.QueryAsync<PurchaseConfirmationFlightEntity>(
                 flightsQuery,
-                new { reservationId }
+                new { reservationCode }
             );
 
             confirmation.Passengers = passengers.ToList();
