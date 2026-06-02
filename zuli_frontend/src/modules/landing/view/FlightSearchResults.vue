@@ -251,7 +251,7 @@ const handleSelectReturn = async (selection) => {
                     ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
                 return value ? String(value) : undefined;
             })(),
-            returnFlightRouteId: returnFlightRouteId ? String(returnFlightRouteId) : undefined
+
         }
     });
 };
