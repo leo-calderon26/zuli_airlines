@@ -132,15 +132,15 @@ const confirmation = ref(null)
 const isLoading = ref(false)
 const pageError = ref('')
 
-const reservationId = computed(() => route.params.reservationId)
+const reservationCode = computed(() => route.params.reservationCode)
 
 onMounted(async () => {
   await loadConfirmation()
 })
 
 async function loadConfirmation() {
-  if (!reservationId.value) {
-    pageError.value = 'No se recibió el identificador de la reserva.'
+  if (!reservationCode.value) {
+    pageError.value = 'No se recibió el código de la reserva.'
     return
   }
 
@@ -151,8 +151,8 @@ async function loadConfirmation() {
     const shouldCompletePurchase = route.query.complete === 'true'
 
     confirmation.value = shouldCompletePurchase
-      ? await completePurchaseConfirmation(reservationId.value)
-      : await getPurchaseConfirmation(reservationId.value)
+      ? await completePurchaseConfirmation(reservationCode.value)
+      : await getPurchaseConfirmation(reservationCode.value)
   } catch (error) {
     pageError.value = getErrorMessage(error)
   } finally {
