@@ -2,6 +2,7 @@ using Mapster;
 using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Business.Validation.Strategies;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -35,8 +36,16 @@ namespace zuli_Business
 
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
         {
-            if (request.FlightId == null)
-                throw new ZuliNotFoundException("Vuelo no encontrado");
+            for (int i = 0; i < request.FlightRoutes.Count; i++) {
+                var flightId = await _flightRepository.GetFlightByRoute(request.FlightRoutes[i].FlightRouteId, request.FlightRoutes[i].DepartureDate);
+                if (flightId == Guid.Empty)
+                {
+                    request.FlightIdList.Add(await _flightRepository.CreateFlight(request.FlightRoutes[i].FlightRouteId, request.FlightRoutes[i].DepartureDate));
+                }
+                else {
+                    request.FlightIdList.Add(flightId);
+                }
+            }
 
             var flight = await _flightRepository.GetFlightById(request.FlightId.Value);
             if (flight == null)

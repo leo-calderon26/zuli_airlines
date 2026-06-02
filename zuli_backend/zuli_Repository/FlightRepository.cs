@@ -14,62 +14,29 @@ namespace zuli_Repository
             _context = context;
         }
 
-        public async Task<int> CreateFlight(FlightEntity flight)
+        public async Task<Guid> CreateFlight(int FlightRouteId, string DepartureDate)
         {
             using var connection = _context.CreateConnection();
 
-            var sql = @"
-                INSERT INTO Flight (
-                    Id,
-                    Status,
-                    FlightDate,
-                    TouristPrice,
-                    FirstClassPrice,
-                    RealDepartureTime,
-                    RealArrivalTime,
-                    AircraftId,
-                    RealArrivalAirport,
-                    RealDepartureAirport,
-                    Duration,
-                    CarryOnPrice,
-                    CheckedPrice,
-                    AvailableSeats,
-                    FlightRouteId
-                ) VALUES (
-                    @Id,
-                    @Status,
-                    @FlightDate,
-                    @TouristPrice,
-                    @FirstClassPrice,
-                    @RealDepartureTime,
-                    @RealArrivalTime,
-                    @AircraftId,
-                    @RealArrivalAirport,
-                    @RealDepartureAirport,
-                    @Duration,
-                    @CarryOnPrice,
-                    @CheckedPrice,
-                    @AvailableSeats,
-                    @FlightRouteId
-                )";
+            var sql = "dbo.sp_CreateFlight";
 
-            return await connection.ExecuteAsync(sql, new
+            return await connection.ExecuteScalarAsync<Guid>(sql, new
             {
-                flight.Id,
-                flight.Status,
-                flight.FlightDate,
-                flight.TouristPrice,
-                flight.FirstClassPrice,
-                flight.RealDepartureTime,
-                flight.RealArrivalTime,
-                flight.AircraftId,
-                flight.RealArrivalAirport,
-                flight.RealDepartureAirport,
-                flight.Duration,
-                flight.CarryOnPrice,
-                flight.CheckedPrice,
-                flight.AvailableSeats,
-                flight.FlightRouteId
+                FlightRouteId,
+                DepartureDate
+            }, commandType: System.Data.CommandType.StoredProcedure);
+        }
+
+        public async Task<Guid> GetFlightByRoute(int FlightRouteId, string DepartureDate)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"SELECT Id from flight WHERE FlightRouteId = @FlightRouteId AND CAST(FlightDate AS DATE) = @DepartureDate";
+
+            return await connection.QueryFirstOrDefaultAsync<Guid>(sql, new
+            {
+                FlightRouteId = FlightRouteId,
+                DepartureDate = DepartureDate
             });
         }
 
