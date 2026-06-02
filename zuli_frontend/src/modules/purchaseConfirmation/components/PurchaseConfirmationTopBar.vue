@@ -1,5 +1,5 @@
 <template>
-  <header class="flex h-[84px] w-full items-center bg-[var(--color-primary)] px-8 text-white">
+  <header class="flex h-[84px] w-full items-center bg-primary px-8 text-white">
     <div class="flex w-52 shrink-0 items-center">
       <button
         type="button"
