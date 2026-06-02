@@ -59,8 +59,6 @@ namespace zuli_Business
             newFlight.Id = Guid.NewGuid();
             newFlight.AdminId = adminId;
 
-            await _repository.CreateFlight(newFlight);
-
             if (!string.IsNullOrWhiteSpace(flight.ServiceDescription))
             {
                 await _serviceRepository.CreateService(new ServiceEntity

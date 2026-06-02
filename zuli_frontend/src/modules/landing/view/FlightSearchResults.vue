@@ -196,6 +196,8 @@ onMounted(() => {
 const handleSelectDeparture = async (selection) => {
     const result = await searchStore.verifyFlightAvailability(selection.flight, searchStore.searchParams.Seats);
     
+    const flightRouteSegments = await searchStore.getFlightRouteData(selection.flight);
+
     if (!result.isAvailable && !result.isError) {
         unavailableMessage.value = "Ya no hay espacios suficientes disponibles para el vuelo de ida seleccionado.";
         showUnavailableModal.value = true;
@@ -208,7 +210,8 @@ const handleSelectDeparture = async (selection) => {
             name: 'buyTicket',
             query: {
                 flightData: JSON.stringify({ flight: selection.flight, flightClass: selection.travelClass }),
-                seats: searchStore.searchParams.Seats
+                seats: searchStore.searchParams.Seats,
+                flightRouteData: JSON.stringify({ flightRouteSegments })
             }
         });
         return;
@@ -242,7 +245,13 @@ const handleSelectReturn = async (selection) => {
             }),
             seats: searchStore.searchParams.Seats,
             roundTrip: 'true',
-            returnFlight: JSON.stringify(selection.flight)
+            returnFlight: JSON.stringify(selection.flight),
+            flightRouteId: (() => {
+                const value = selectedDepartureFlight.value?.flight?.segments?.[0]?.flightId
+                    ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
+                return value ? String(value) : undefined;
+            })(),
+            returnFlightRouteId: returnFlightRouteId ? String(returnFlightRouteId) : undefined
         }
     });
 };
