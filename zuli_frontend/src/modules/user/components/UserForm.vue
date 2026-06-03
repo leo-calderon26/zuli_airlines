@@ -130,30 +130,31 @@ function onSuccessClose() {
 
 <template>
     <form class="relative z-10 w-full max-w-180 rounded-md bg-white px-9 py-9 shadow-md" @submit.prevent="submit">
-        <p v-if="props.isEdit && !isAdministrator" class="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Como operario, solo puedes editar el correo institucional. El formulario permanece visible, pero el resto de campos está bloqueado.
-        </p>
 
         <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
-            <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" :disabled="!canEditField('firstName')" />
-            <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" :disabled="!canEditField('firstLastName')" />
+            <div class="md:col-span-2">
+                <AppInput v-model="form.nationalId" label="Cédula" maxlength="9" placeholder="Ej. 123456789" :error="errors.fields.nationalId" :disabled="props.isEdit" />
+            </div>
+
+            <AppInput v-model="form.firstName" label="Primer Nombre" maxlength="50" placeholder="Ej. Jonathan" :error="errors.fields.firstName" :disabled="false" />
+            <AppInput v-model="form.firstLastName" label="Primer Apellido" maxlength="50" placeholder="Ej. Smith" :error="errors.fields.firstLastName" :disabled="false" />
 
             <div class="md:col-span-2">
-                <AppInput v-model="form.secondLastName" label="Segundo Apellido" maxlength="50" placeholder="Ej. Alexander" :error="errors.fields.secondLastName" :disabled="!canEditField('secondLastName')" />
+                <AppInput v-model="form.secondLastName" label="Segundo Apellido" maxlength="50" placeholder="Ej. Alexander" :error="errors.fields.secondLastName" :disabled="false" />
             </div>
         </div>
 
         <div class="mt-5">
-            <AppInput v-model="form.businessEmail" label="Correo" placeholder="j.smith@zuliairlines.com" type="email" :error="errors.fields.businessEmail" :disabled="!canEditField('businessEmail')" />
+            <AppInput v-model="form.businessEmail" label="Correo" placeholder="j.smith@zuliairlines.com" type="email" :error="errors.fields.businessEmail" :disabled="props.isEdit" />
         </div>
 
         <div class="mt-5">
             <label class="mb-2 block text-sm font-medium text-content">rol</label>
             <select
                 v-model="form.userRole"
-                class="h-10 w-full rounded-md border border-secondary bg-body px-4 text-[15px] text-content outline-none transition hover:cursor-pointer focus:border-primary"
+                class="h-10 w-full rounded-md border border-secondary bg-body px-4 text-[15px] text-content outline-none transition hover:cursor-pointer focus:border-primary disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-70"
                 :class="{ 'border-error text-error': errors.fields.userRole }"
-                :disabled="!canEditField('userRole')"
+                :disabled="props.isEdit && !isAdministrator"
             >
                 <option value="" disabled>Asignar Rol de Acceso</option>
                 <option value="Administrator">Administrador</option>
