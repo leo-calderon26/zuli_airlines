@@ -135,7 +135,7 @@ namespace zuli_Business
             }
         }
 
-        private static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
+        internal static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
         {
             var isFirstClass = request.FlightClass.Equals(
                 "Primera Clase",
@@ -154,7 +154,7 @@ namespace zuli_Business
             return total;
         }
 
-        private static decimal CalculateFlightPassengerTotal(FlightEntity flight, PassengerTicketDTO passenger,
+        internal static decimal CalculateFlightPassengerTotal(FlightEntity flight, PassengerTicketDTO passenger,
             bool isFirstClass)
         {
             var classPrice = isFirstClass
@@ -166,8 +166,13 @@ namespace zuli_Business
             var multiplier = flight.CheckedBagMultiplier > 0 ? flight.CheckedBagMultiplier
                 : 1m;
 
-            return classPrice + (passenger.CheckedBaggage * checkedPrice * multiplier)
-                              + (passenger.CarryOn * carryOnPrice);
+            decimal checkedBaggageTotal = 0;
+            for (int i = 1; i <= passenger.CheckedBaggage; i++)
+            {
+                checkedBaggageTotal += checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+            }
+
+            return classPrice + checkedBaggageTotal + (passenger.CarryOn * carryOnPrice);
         }
 
         private async Task SendPurchaseEmails(string reservationCode)

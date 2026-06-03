@@ -10,7 +10,7 @@ namespace zuli_Business
 {
     public class PurchaseConfirmationPdfService : IPurchaseConfirmationPdfService
     {
-        private static readonly CultureInfo _cultureInfo = new("es-CR");
+        private static readonly CultureInfo _cultureInfo = new("en-US");
 
         public byte[] GenerateInvoicePdf(PurchaseConfirmationPageDTO confirmation)
         {
