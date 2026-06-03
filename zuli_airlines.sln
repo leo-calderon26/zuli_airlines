@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zuli_Repository", "zuli_bac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "zuli_backend\Test\Test.csproj", "{87A704FB-19CA-4C07-B73F-9A9C6DF034B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "zuli_backend\Tests\Tests.csproj", "{EE6566DB-9CD7-4146-8DCA-933314B34695}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "zuli_backend\Tests\Tests.csproj", "{541FC120-9B0E-4FEF-B1A6-120E00C299B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,10 +44,10 @@ Global
 		{87A704FB-19CA-4C07-B73F-9A9C6DF034B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87A704FB-19CA-4C07-B73F-9A9C6DF034B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87A704FB-19CA-4C07-B73F-9A9C6DF034B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE6566DB-9CD7-4146-8DCA-933314B34695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE6566DB-9CD7-4146-8DCA-933314B34695}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE6566DB-9CD7-4146-8DCA-933314B34695}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE6566DB-9CD7-4146-8DCA-933314B34695}.Release|Any CPU.Build.0 = Release|Any CPU
+		{541FC120-9B0E-4FEF-B1A6-120E00C299B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{541FC120-9B0E-4FEF-B1A6-120E00C299B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{541FC120-9B0E-4FEF-B1A6-120E00C299B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{541FC120-9B0E-4FEF-B1A6-120E00C299B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
