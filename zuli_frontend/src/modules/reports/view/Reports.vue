@@ -1,19 +1,8 @@
 <template>
     <div class="landing-page">
-        <AdminNavBar />
                 <h1 class="message">Reportes en mantenimiento</h1>
     </div>
 </template>
-
-<script>
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
-
-export default {
-    components: {
-        AdminNavBar
-    }
-}
-</script>
 
 <style scoped>
     .landing-page {

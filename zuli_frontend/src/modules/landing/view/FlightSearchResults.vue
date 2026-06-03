@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col min-h-screen bg-body">
-        <PublicNavBar />
         
         <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
             
@@ -157,7 +156,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PublicNavBar from '../components/PublicNavBar.vue';
 import FlightCard from '../components/FlightCard.vue';
 import AppButton from '../../../shared/AppButton.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
@@ -187,7 +185,7 @@ onMounted(() => {
         DirectFlightsOnly: route.query.directOnly === 'true',
         FlightClass: route.query.flightClass || 'Turista',
         Page: 1,
-        PageSize: 2
+        PageSize: 3
     };
     
     searchStore.performSearch(params);
@@ -251,7 +249,7 @@ const handleSelectReturn = async (selection) => {
                     ?? selectedDepartureFlight.value?.flight?.pathIds?.split(',')?.[0];
                 return value ? String(value) : undefined;
             })(),
-            returnFlightRouteId: returnFlightRouteId ? String(returnFlightRouteId) : undefined
+
         }
     });
 };

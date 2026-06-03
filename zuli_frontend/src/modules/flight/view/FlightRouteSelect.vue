@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
 import { useFlightRoute } from '../../route/composable/useFlightRoute';
 import { useFlightRouteStore } from '../../route/store/flightRouteStore';
 
@@ -64,6 +63,8 @@ function selectRoute(route) {
             routeId: route.flightRouteId,
             departure: route.departureAirport,
             arrival: route.arrivalAirport,
+            duration: route.estimatedDuration,
+            frequency: route.frequency,
         },
     });
 }
@@ -75,7 +76,6 @@ onMounted(async () => {
 
 <template>
     <div class="flex flex-col">
-        <PublicNavBar />
         <main class="flex-1 pb-8">
             <div class="page-shell">
                 <div class="mb-6">

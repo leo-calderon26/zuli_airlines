@@ -73,7 +73,7 @@ onMounted(async () => {
                 :to="{
                     name: 'editAircraft',
                     params: { aircraftId: aircraft.aircraftId },
-                    state: { aircraft }
+                    state: { aircraft: JSON.parse(JSON.stringify(aircraft)) }
                 }"
                 @click="cacheAircraftForEdit(aircraft)"
                 class="font-medium text-gold hover:underline"

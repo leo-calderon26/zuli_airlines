@@ -1,6 +1,5 @@
 <template>
     <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
-        <AdminNavBar />
         <main class="flex-1 bg-[var(--color-secondary)] px-6 pb-32 pt-8">
             <section class="relative mx-auto flex min-h-[690px] max-w-6xl justify-center pt-8">
                 <div class="absolute left-[7%] right-[5%] top-[175px] h-px bg-[var(--color-purple)]"></div>
@@ -20,7 +19,6 @@
 <script setup>
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
-import AdminNavBar from "../../../shared/AdminNavBar.vue";
 import ErrorModal from "../../../shared/ErrorModal.vue";
 import SuccessModal from "../../../shared/SuccessModal.vue";
 import AppButton from "../../../shared/AppButton.vue";

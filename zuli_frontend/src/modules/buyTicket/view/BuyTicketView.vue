@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import PublicNavBar from '../../landing/components/PublicNavBar.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import PassengerForm from '../components/PassengerForm.vue';
@@ -39,7 +38,6 @@ onMounted(() => {
             if (route.query.roundTrip === 'true' && route.query.returnFlight) {
                 store.isRoundTrip = true;
                 store.returnFlight = JSON.parse(route.query.returnFlight);
-                store.setReturnFlightRouteId(route.query.returnFlightRouteId);
             }
         } catch (e) {
             console.error('Error parsing flight data', e);
@@ -63,7 +61,6 @@ const handlePurchase = async () => {
 
 <template>
     <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
-        <PublicNavBar />
 
         <main class="flex-1 w-full max-w-7xl mx-auto grid grid-cols-12 gap-10 py-10 px-4">
             <div v-if="!store.selectedFlight" class="col-span-12 border border-border-soft bg-text-box p-12 text-center">

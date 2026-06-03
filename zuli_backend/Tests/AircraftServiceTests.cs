@@ -69,19 +69,7 @@ namespace zuli_backend.Tests
             _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(existingAircraft), Times.Once);
         }
 
-        [Test]
-        public void UpdateAircraft_NonAdminUser_ThrowsUnauthorizedAndDoesNotUpdate()
-        {
-            var aircraftId = Guid.NewGuid();
-            var request = BuildValidAircraftDto();
 
-            _userRepositoryMock.Setup(r => r.IsAdmin(request.businessId!)).ReturnsAsync(false);
-
-            Assert.That(async () => await _service.UpdateAircraftAsync(aircraftId, request), Throws.TypeOf<ZuliUnauthorizedException>());
-
-            _aircraftRepositoryMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
-            _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
-        }
 
         [Test]
         public void UpdateAircraft_AircraftDoesNotExist_ThrowsNotFound()
@@ -114,10 +102,17 @@ namespace zuli_backend.Tests
                 numberSeatingRowsFirst = -1
             };
 
+
+            _aircraftRepositoryMock
+                .Setup(r => r.GetById(aircraftId))
+                .ReturnsAsync(new AircraftEntity { aircraftId = aircraftId });
+
+
             Assert.That(async () => await _service.UpdateAircraftAsync(aircraftId, request), Throws.TypeOf<ZuliValidationException>());
 
+
+            _aircraftRepositoryMock.Verify(r => r.GetById(aircraftId), Times.Once);
             _userRepositoryMock.Verify(r => r.IsAdmin(It.IsAny<string>()), Times.Never);
-            _aircraftRepositoryMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
             _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
         }
 

@@ -15,7 +15,7 @@ namespace zuli_Business
 {
     public class AircraftService : IAircraftService
     {
-        // Inyeccion de dependencias
+
         private readonly IAircraftRepository _repository;
         private readonly IUserRepository _userRepository;
         private readonly FluentValidation.IValidator<AircraftDTO> _validator;
@@ -81,13 +81,7 @@ namespace zuli_Business
 
         public async Task<BasicResponseDTO> UpdateAircraftAsync(Guid aircraftId, AircraftDTO aircraft)
         {
-            var validationResult = await _validator.ValidateAsync(aircraft);
-            validationResult.ThrowIfInvalid();
 
-            if (!await _userRepository.IsAdmin(aircraft.businessId))
-            {
-                throw new ZuliUnauthorizedException($"No tiene permisos para actualizar la aeronave {aircraftId}");
-            }
 
             var existingAircraft = await _repository.GetById(aircraftId);
             if (existingAircraft == null)
@@ -95,6 +89,12 @@ namespace zuli_Business
                 throw new ZuliNotFoundException($"La aeronave con ID {aircraftId} no existe.");
             }
 
+            var context = new ValidationContext<AircraftDTO>(aircraft);
+
+            context.RootContextData["OriginalAircraft"] = existingAircraft; //datos originales
+
+            var validationResult = await _validator.ValidateAsync(context);
+            validationResult.ThrowIfInvalid();
 
             aircraft.Adapt(existingAircraft, TypeAdapterConfig.GlobalSettings);
 

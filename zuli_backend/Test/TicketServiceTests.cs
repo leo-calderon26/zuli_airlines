@@ -56,12 +56,13 @@ namespace zuli_backend.Test
         }
 
         [Test]
-        public void Purchase_NullFlightId_ThrowsZuliNotFoundException()
+        public void Purchase_EmptyFlightRoutes_ThrowsZuliNotFoundException()
         {
-            var request = BuildValidRequest(flightId: null);
+            var request = BuildValidRequest(flightRoutes: new List<SummarizedFlightRoute>());
 
             Assert.That(async () => await _ticketService.Purchase(request), Throws.TypeOf<ZuliNotFoundException>());
 
+            _flightRepoMock.Verify(r => r.GetFlightByRoute(It.IsAny<int>(), It.IsAny<string>()), Times.Never);
             _flightRepoMock.Verify(r => r.GetFlightById(It.IsAny<Guid>()), Times.Never);
             _personRepoMock.Verify(r => r.CreatePerson(It.IsAny<PersonEntity>()), Times.Never);
         }
@@ -70,6 +71,10 @@ namespace zuli_backend.Test
         public void Purchase_FlightNotFound_ThrowsZuliNotFoundException()
         {
             var request = BuildValidRequest();
+
+            _flightRepoMock
+                .Setup(r => r.GetFlightByRoute(It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_flightId);
 
             _flightRepoMock
                 .Setup(r => r.GetFlightById(_flightId))
@@ -96,7 +101,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId);
+            var request = BuildValidRequest();
 
             var result = await _ticketService.Purchase(request);
 
@@ -133,7 +138,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId, returnFlightId: _returnFlightId);
+            var request = BuildValidRequest(returnFlightId: _returnFlightId);
 
             var result = await _ticketService.Purchase(request);
 
@@ -163,7 +168,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId, passengerCount: 2);
+            var request = BuildValidRequest(passengerCount: 2);
 
             var result = await _ticketService.Purchase(request);
 
@@ -194,7 +199,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId, checkedBaggage: 2);
+            var request = BuildValidRequest(checkedBaggage: 2);
 
             var result = await _ticketService.Purchase(request);
 
@@ -222,7 +227,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId, carryOn: 1);
+            var request = BuildValidRequest(carryOn: 1);
 
             var result = await _ticketService.Purchase(request);
 
@@ -249,7 +254,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId, flightClass: "Primera Clase");
+            var request = BuildValidRequest(flightClass: "Primera Clase");
 
             var result = await _ticketService.Purchase(request);
 
@@ -274,7 +279,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId);
+            var request = BuildValidRequest();
 
             await _ticketService.Purchase(request);
 
@@ -301,7 +306,7 @@ namespace zuli_backend.Test
                 .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
                 .ReturnsAsync(100);
 
-            var request = BuildValidRequest(flightId: _flightId);
+            var request = BuildValidRequest();
 
             await _ticketService.Purchase(request);
 
@@ -311,7 +316,7 @@ namespace zuli_backend.Test
         }
 
         private TicketPurchaseRequestDTO BuildValidRequest(
-            Guid? flightId = null,
+            List<SummarizedFlightRoute>? flightRoutes = null,
             Guid? returnFlightId = null,
             string flightClass = "Turista",
             int passengerCount = 1,
@@ -349,7 +354,10 @@ namespace zuli_backend.Test
 
             return new TicketPurchaseRequestDTO
             {
-                FlightId = flightId,
+                FlightRoutes = flightRoutes ?? new List<SummarizedFlightRoute>
+                {
+                    new SummarizedFlightRoute { FlightRouteId = 1, DepartureDate = "2026-07-15" }
+                },
                 ReturnFlightId = returnFlightId,
                 FlightClass = flightClass,
                 Passengers = passengers,
@@ -393,6 +401,10 @@ namespace zuli_backend.Test
 
         private void SetupFlightMocks(FlightEntity? flight, FlightEntity? returnFlight)
         {
+            _flightRepoMock
+                .Setup(r => r.GetFlightByRoute(It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(_flightId);
+
             _flightRepoMock
                 .Setup(r => r.GetFlightById(_flightId))
                 .ReturnsAsync(flight);
