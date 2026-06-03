@@ -18,6 +18,7 @@ export const useTicketStore = defineStore("ticket", () => {
     const returnFlight = ref(null);
     const selectedClass = ref("Ecomica");
     const seatsCount = ref(1);
+    const maxPassengers = ref(1);
     const flightRoutes = ref([]);
 
     const purchaseResult = ref(null);
@@ -342,6 +343,7 @@ export const useTicketStore = defineStore("ticket", () => {
         returnFlight.value = null;
         selectedClass.value = "";
         seatsCount.value = 1;
+        maxPassengers.value = 1;
         flightRoutes.value = [];
         purchaseResult.value = null;
         isLoading.value = false;
@@ -362,6 +364,7 @@ export const useTicketStore = defineStore("ticket", () => {
         returnFlight,
         selectedClass,
         seatsCount,
+        maxPassengers,
         flightRoutes,
         purchaseResult,
         isLoading,
