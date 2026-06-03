@@ -8,8 +8,8 @@
           <li class="px-4 first:pl-0">
             <router-link
               to="/admin/aircrafts"
+              exact-active-class="nav-active"
               class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
-              :class="isSectionActive('/admin/aircrafts') ? 'nav-active' : ''"
             >
               Aeronaves
             </router-link>
@@ -17,8 +17,8 @@
           <li class="px-4">
             <router-link
               to="/admin/airports"
+              exact-active-class="nav-active"
               class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
-              :class="isSectionActive('/admin/airports') ? 'nav-active' : ''"
             >
               Aeropuertos
             </router-link>
@@ -26,8 +26,8 @@
           <li class="px-4">
             <router-link
               to="/admin/routes"
+              exact-active-class="nav-active"
               class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
-              :class="isSectionActive('/admin/routes') ? 'nav-active' : ''"
             >
               Rutas
             </router-link>
@@ -35,20 +35,20 @@
           <li class="px-4">
             <router-link
               to="/admin/users"
+              exact-active-class="nav-active"
               class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
-              :class="isSectionActive('/admin/users') ? 'nav-active' : ''"
             >
               Usuarios
             </router-link>
           </li>
           <li class="px-4">
-            <router-link
-              to="/admin/reports"
-              class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
-              :class="isSectionActive('/admin/reports') ? 'nav-active' : ''"
+            <AppButton
+              variant="ghost"
+              @click="showMaintenanceModal = true"
+              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
             >
               Reportes
-            </router-link>
+            </AppButton>
           </li>
         </ul>
       </nav>
@@ -62,16 +62,21 @@
       </router-link>
     </div>
   </header>
+
+  <ErrorModal 
+    v-model="showMaintenanceModal" 
+    title="En Mantenimiento" 
+    message="El módulo de Reportes se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
+    buttonText="Entendido"
+  />
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
+import ErrorModal from './ErrorModal.vue';
+import AppButton from './AppButton.vue';
 
-const route = useRoute();
-
-function isSectionActive(sectionPath) {
-  return route.path === sectionPath || route.path.startsWith(`${sectionPath}/`);
-}
+const showMaintenanceModal = ref(false);
 </script>
 
 <style>
@@ -150,7 +155,6 @@ nav ul li + li {
 
 .nav-active {
   background-color: rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
 }
 
 </style>

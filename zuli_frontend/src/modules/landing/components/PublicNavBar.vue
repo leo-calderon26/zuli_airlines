@@ -15,31 +15,31 @@
             </router-link>
           </li>
           <li class="px-4">
-            <router-link
-              to="/check-in"
-              exact-active-class="nav-active"
-              class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
+            <AppButton
+              variant="ghost"
+              @click="openMaintenance('Check-in')"
+              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
             >
               Check-in
-            </router-link>
+            </AppButton>
           </li>
           <li class="px-4">
-            <router-link
-              to="/consulta"
-              exact-active-class="nav-active"
-              class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
+            <AppButton
+              variant="ghost"
+              @click="openMaintenance('Consulta')"
+              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
             >
               Consulta
-            </router-link>
+            </AppButton>
           </li>
           <li class="px-4">
-            <router-link
-              to="/ayuda"
-              exact-active-class="nav-active"
-              class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
+            <AppButton
+              variant="ghost"
+              @click="openMaintenance('Ayuda')"
+              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
             >
               Ayuda
-            </router-link>
+            </AppButton>
           </li>
         </ul>
       </nav>
@@ -53,12 +53,26 @@
       </router-link>
     </div>
   </header>
+  <ErrorModal 
+    v-model="showMaintenanceModal" 
+    title="En Mantenimiento" 
+    :message="`La sección de ${selectedFeature} se encuentra actualmente en mantenimiento. Por favor, intente más tarde.`" 
+    buttonText="Entendido"
+  />
 </template>
 
-<script>
-    export default {
-        
-    }
+<script setup>
+import { ref } from 'vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import AppButton from '../../../shared/AppButton.vue';
+
+const showMaintenanceModal = ref(false);
+const selectedFeature = ref('');
+
+const openMaintenance = (feature) => {
+  selectedFeature.value = feature;
+  showMaintenanceModal.value = true;
+};
 </script>
 
 <style scoped>
