@@ -1,12 +1,13 @@
 <script setup>
-import { computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import SuccessModal from '../../../shared/SuccessModal.vue';
-import ErrorModal from '../../../shared/ErrorModal.vue';
-import PassengerForm from '../components/PassengerForm.vue';
-import FlightSummary from '../components/FlightSummary.vue';
-import { useTicketStore } from '../store/ticketStore';
-import { useTicketPurchase } from '../composable/useTicketPurchase';
+    import { computed, onMounted } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
+    import PublicNavBar from '../../../shared/PublicNavBar.vue';
+    import SuccessModal from '../../../shared/SuccessModal.vue';
+    import ErrorModal from '../../../shared/ErrorModal.vue';
+    import PassengerForm from '../components/PassengerForm.vue';
+    import FlightSummary from '../components/FlightSummary.vue';
+    import { useTicketStore } from '../store/ticketStore';
+    import { useTicketPurchase } from '../composable/useTicketPurchase';
 
     const route = useRoute();
     const router = useRouter();

@@ -26,8 +26,6 @@ namespace zuli_Business.DTO
 
         [StringLength(20, ErrorMessage = "El origen no puede exceder 20 caracteres")]
         public string ReservationOrigin { get; set; } = "Web";
-
-        public Guid? ReturnFlightId { get; set; }
     }
 
     public class BuyerTicketDTO
