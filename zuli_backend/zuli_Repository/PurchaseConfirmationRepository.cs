@@ -139,7 +139,7 @@ namespace zuli_Repository
             const string query = @"
                 SELECT DISTINCT
                     f.Id AS FlightId,
-                    CONCAT('ZU-', RIGHT('0000' + CAST(fr.FlightRouteId AS VARCHAR(4)), 4)) AS FlightNumber,
+                    CONCAT('ZU-',fr.FlightRouteId) AS FlightNumber,
                     airline.AirlineName,
                     departureAirport.Name AS OriginAirportName,
                     departureAirport.AirportCode AS OriginAirportCode,

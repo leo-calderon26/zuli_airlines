@@ -54,12 +54,12 @@ function updatePassenger(index, field, value) {
             <h3 class="text-2xl font-bold text-font mb-6 flex items-center gap-2"><img src="../assets/sit.png" alt="" class="h-6 w-6 icon-font" />Categoría de Viaje</h3>
             <div class="grid grid-cols-2 gap-6">
                 <div
-                    @click="$emit('update:flightClass', 'Economica')"
+                    @click="$emit('update:flightClass', 'Turista')"
                     class="bg-text-box border p-6 cursor-pointer transition"
-                    :class="flightClass === 'Economica' ? 'border-2 border-sumary' : 'border-border-soft hover:border-sumary'"
+                    :class="flightClass === 'Turista' ? 'border-2 border-sumary' : 'border-border-soft hover:border-sumary'"
                 >
                     <p class="text-base font-semibold mt-0.5 mb-1 opacity-70 uppercase tracking-wide">Estándar</p>
-                    <p class="font-bold text-xl">Economica</p>
+                    <p class="font-bold text-xl">Turista</p>
                     <p class="text-base mt-1 opacity-80">Cabina principal</p>
                 </div>
                 <div
