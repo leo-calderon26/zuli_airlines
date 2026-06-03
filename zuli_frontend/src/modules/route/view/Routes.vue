@@ -134,6 +134,26 @@ onMounted(() => {
                 <p v-if="errors.fields.aircraftId" class="mt-1 text-sm text-error">{{ errors.fields.aircraftId }}</p>
                 <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
               </div>
+
+              <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-content">Frecuencia</label>
+                <div class="flex flex-wrap gap-4">
+                  <label
+                    v-for="day in daysOfWeek"
+                    :key="day.value"
+                    class="flex items-center gap-2 cursor-pointer select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="day.value"
+                      v-model="form.frequency"
+                      class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span class="text-sm text-content">{{ day.label }}</span>
+                  </label>
+                </div>
+                <p v-if="errors.fields.frequency" class="mt-1 text-sm text-error">{{ errors.fields.frequency }}</p>
+              </div>
             </div>
           </div>
 

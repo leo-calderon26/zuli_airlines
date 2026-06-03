@@ -63,6 +63,8 @@ function selectRoute(route) {
             routeId: route.flightRouteId,
             departure: route.departureAirport,
             arrival: route.arrivalAirport,
+            duration: route.estimatedDuration,
+            frequency: route.frequency,
         },
     });
 }
