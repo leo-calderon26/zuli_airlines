@@ -1,5 +1,4 @@
 <script setup>
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import authService from '../../auth/services/authService';
 
 import { useRouter } from "vue-router";
@@ -18,7 +17,6 @@ const signOut = async () => {
 </script>
 
 <template>
-    <AdminNavBar />
     <div class="py-8 px-4 mx-auto max-w-screen-2xl text-center lg:py-16">
         
         <button type="button" class="inline-flex items-center justify-center text-white bg-primary hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium rounded-base text-base px-5 py-3 focus:outline-none" @click="signOut">

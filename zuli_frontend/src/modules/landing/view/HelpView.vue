@@ -1,22 +1,9 @@
 <template>
   <div class="landing-page">
-    <PublicNavBar />
     <h1 class = "message">Ayuda en mantenimiento</h1>
-    <PublicBottomBar />
   </div>
   
 </template>
-
-<script>
-import PublicNavBar from '../components/PublicNavBar.vue';
-import PublicBottomBar from '../../../shared/PublicBottomBar.vue';
-
-export default {
-  components: {
-    PublicNavBar
-  }
-}
-</script>
 
 <style scoped>
 .landing-page {

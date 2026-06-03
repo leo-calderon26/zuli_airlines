@@ -13,7 +13,7 @@ export const useFlightSearchStore = defineStore("flightSearch", () => {
         DirectFlightsOnly: false,
         FlightClass: 'Turista',
         Page: 1,
-        PageSize: 2
+        PageSize: 3
     });
 
     const flightResults = ref(null);

@@ -98,7 +98,6 @@
 
 <template>
     <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
-        <PublicNavBar />
 
         <main class="flex-1 w-full max-w-7xl mx-auto grid grid-cols-12 gap-10 py-10 px-4">
             <div v-if="!store.selectedFlight"

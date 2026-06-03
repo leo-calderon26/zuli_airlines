@@ -6,7 +6,6 @@ namespace zuli_Business.DTO
 {
     public class TicketPurchaseRequestDTO
     {
-        public Guid? FlightId { get; set; }
         public List<Guid> FlightIdList { get; set; } = new();
         public List<SummarizedFlightRoute> FlightRoutes { get; set; } = new();
 

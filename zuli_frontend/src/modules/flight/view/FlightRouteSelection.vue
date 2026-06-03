@@ -1,6 +1,5 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import PublicNavBar from "../../../shared/PublicNavBar.vue";
 import { useFlightRoute } from "../../route/composable/useFlightRoute";
 
 const {
@@ -64,7 +63,6 @@ function chooseRoute(routeId) {
 
 <template>
     <div class="flex flex-col">
-        <PublicNavBar />
 
         <main class="flex-1 pb-8">
             <div class="page-shell">
