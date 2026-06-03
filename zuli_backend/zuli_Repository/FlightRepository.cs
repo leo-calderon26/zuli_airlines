@@ -196,5 +196,44 @@ namespace zuli_Repository
                 Seats = seats 
             });
         }
+        public async Task<decimal> GetRemainingBaggageCapacity(Guid flightId)
+        {
+            using var connection = _context.CreateConnection();
+
+            const string sql = @"
+                SELECT
+                    CAST(a.BaggageCapacity AS DECIMAL(18, 2))
+                    - ISNULL(SUM(
+                        CASE
+                            WHEN LOWER(ISNULL(b.Type, '')) LIKE '%maleta%'
+                            OR LOWER(ISNULL(b.Type, '')) LIKE '%checked%'
+                            OR LOWER(ISNULL(b.Type, '')) LIKE '%fact%'
+                            OR LOWER(ISNULL(b.Type, '')) LIKE '%document%'
+                            THEN ISNULL(b.Weight, 0)
+                            ELSE 0
+                        END
+                    ), 0) AS RemainingBaggageCapacity
+                FROM dbo.Flight f
+                INNER JOIN dbo.Aircraft a
+                    ON f.AircraftId = a.AircraftId
+                LEFT JOIN dbo.BoardingPass bp
+                    ON f.Id = bp.FlightId
+                LEFT JOIN dbo.Reservation r
+                    ON bp.ReservationCode = r.ReservationCode
+                LEFT JOIN dbo.Baggage b
+                    ON r.ReservationId = b.ReservationId
+                    AND bp.PassengerId = b.PassengerId
+                WHERE f.Id = @flightId
+                GROUP BY a.BaggageCapacity;
+            ";
+
+            return await connection.QuerySingleOrDefaultAsync<decimal>(
+                sql,
+                new
+                {
+                    flightId
+                }
+            );
+        }
     }
 }

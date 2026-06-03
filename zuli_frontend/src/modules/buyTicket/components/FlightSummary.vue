@@ -112,14 +112,9 @@
                 Equipaje (ida)
             </p>
 
-            <div v-if="totalCheckedBags > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">Maletas documentadas</span>
-                <span class="font-semibold">
-                    <template v-for="(price, idx) in checkedBagPrices.slice(0, totalCheckedBags)"
-                              :key="idx">
-                        {{ idx + 1 }}ra: ${{ price }}{{ idx < totalCheckedBags - 1 ? ', ' : '' }}
-                    </template>
-                </span>
+            <div class="flex justify-between text-sm">
+                <span class="opacity-70">Maleta documentada</span>
+                <span class="font-semibold">${{ Number(checkedPrice || 0).toFixed(2) }} c/u</span>
             </div>
 
             <div class="flex justify-between text-sm">

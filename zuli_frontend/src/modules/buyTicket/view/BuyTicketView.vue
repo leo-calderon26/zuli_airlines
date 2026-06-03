@@ -87,7 +87,6 @@
         if (!reservationCode) {
             return;
         }
-
         router.push({
             name: 'purchaseConfirmation',
             params: {
@@ -180,9 +179,10 @@
 
         <SuccessModal v-model="showSuccessModal" />
 
-        <ErrorModal v-model="showErrorModal"
-                    :errors="store.error?.validationErrors">
-            {{ store.error?.message || 'Error al procesar la compra' }}
-        </ErrorModal>
+        <ErrorModal
+            v-model="showErrorModal"
+            :message="store.error?.message || 'Error al procesar la compra'"
+            :errors="store.error?.validationErrors"
+        />
     </div>
 </template>
