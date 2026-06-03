@@ -112,9 +112,9 @@ const props = defineProps({
 })
 
 const formattedTotal = computed(() => {
-  return new Intl.NumberFormat('es-ES', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'USD',
   }).format(props.totalAmount ?? 0)
 })
 </script>
