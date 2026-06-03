@@ -9,7 +9,7 @@
             </li>
             <li class="flex-1">
                 <button type="button" class="flex w-full items-center justify-center px-3 py-4 text-center text-sm font-semibold text-white transition"
-                    :class="activeTab === 'roundTrip' ? 'bg-black/25' : 'hover:bg-white/10'" @click="activeTab = 'roundTrip'">
+                    :class="activeTab === 'roundTrip' ? 'bg-black/25' : 'hover:bg-white/10'" @click="showMaintenanceModal = true">
                     Viaje ida y vuelta
                 </button>
             </li>
@@ -99,6 +99,12 @@
                 </AppButton>
             </div>
         </div>
+        <ErrorModal 
+            v-model="showMaintenanceModal" 
+            title="En Mantenimiento" 
+            message="El módulo de Ida y Vuelta se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
+            buttonText="Entendido"
+        />
     </div>
 </template>
 
@@ -107,8 +113,10 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { searchAirportSuggestions } from '../service/flightSearchService';
 import AppButton from '../../../shared/AppButton.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
 
 const router = useRouter();
+const showMaintenanceModal = ref(false);
 
 const activeTab = ref('oneWay');
 const selectedFlightOption = ref('layover');
