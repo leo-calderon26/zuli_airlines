@@ -1,13 +1,15 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useFlightRoute } from "../composable/useFlightRoute";
 import { useFlightRouteStore } from "../store/flightRouteStore";
 import AppTable from '../../../shared/AppTable.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
 
 const router = useRouter();
 const flightRouteStore = useFlightRouteStore();
 const { fetchRoutesPaginated, changePage } = useFlightRoute();
+const showMaintenanceModal = ref(false);
 
 const dayLabels = [
   { bit: 1, label: "Lun" },
@@ -53,17 +55,7 @@ const formatDuration = (value) => {
 };
 
 const selectRoute = (route) => {
-  if (!route?.flightRouteId) return;
-  router.push({
-    name: "flights",
-    query: {
-      routeId: route.flightRouteId,
-      departure: route.departureAirport,
-      arrival: route.arrivalAirport,
-      duration: route.estimatedDuration,
-      frequency: route.frequency,
-    },
-  });
+  showMaintenanceModal.value = true;
 };
 
 onMounted(async () => {
@@ -138,4 +130,11 @@ onMounted(async () => {
         </td>
     </tr>
 </AppTable>
+
+<ErrorModal 
+    v-model="showMaintenanceModal" 
+    title="En Mantenimiento" 
+    message="La funcionalidad para gestionar vuelos a partir de esta ruta se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
+    buttonText="Entendido"
+/>
 </template>

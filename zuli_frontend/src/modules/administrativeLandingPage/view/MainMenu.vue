@@ -28,9 +28,14 @@
                                 </router-link>
                             </li>
                             <li class="hover:bg-purple">
-                                <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="User Icon" class="menuIcons" />
+                                <AppButton 
+                                    variant="link" 
+                                    @click="showMaintenanceModal = true" 
+                                    class="!block !p-3 !rounded-lg hover:!bg-neutral-secondary-medium !no-underline"
+                                >
+                                    <img :src="reportIcon" alt="Report Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Reportes</div>
-                                </router-link>
+                                </AppButton>
                             </li>
                         </ul>
                     </div>
@@ -38,10 +43,21 @@
                 <div class="size-14 grow-2"></div>
                 </div>
             </nav>
+
+        <ErrorModal 
+            v-model="showMaintenanceModal" 
+            title="En Mantenimiento" 
+            message="El módulo de Reportes se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
+            buttonText="Entendido"
+        />
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
+import AdminNavBar from '../../../shared/AdminNavBar.vue';
+import AppButton from '../../../shared/AppButton.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
 import aircraftIcon from '../../../assets/Aircraft.png';
 import airportIcon from '../../../assets/Airport.png';
 import routeIcon from '../../../assets/Route.png';
@@ -49,26 +65,14 @@ import flightIcon from '../../../assets/Flight.png';
 import userIcon from '../../../assets/User.png';
 import reportIcon from '../../../assets/Report.png';
 
-export default {
-    components: {
-    },
-    data() {
-        return {
-            aircraftIcon,
-            airportIcon,
-            routeIcon,
-            flightIcon,
-            userIcon,
-            reportIcon
-        };
-    }
-}
+const showMaintenanceModal = ref(false);
 </script>
 
 <style scoped>
     .menuIcons {
         width: 120px;
         height: clamp(48px, 8vw, 100px);
+        margin: 0 auto;
     }
 
 nav ul {
