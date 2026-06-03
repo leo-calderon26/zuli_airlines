@@ -1,7 +1,6 @@
 
 <template>
     <div class="flex flex-col">
-        <AdminNavBar />
             <nav class="bg-neutral-primary-soft border-default">
                 <div class="flex">
                 <div class="size-14 grow-2"></div>
@@ -56,7 +55,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import AppButton from '../../../shared/AppButton.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import aircraftIcon from '../../../assets/Aircraft.png';

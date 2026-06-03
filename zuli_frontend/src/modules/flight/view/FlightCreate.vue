@@ -1,5 +1,4 @@
 <script setup>
-import AdminNavBar from '../../../shared/AdminNavBar.vue'
 import LandingDropdownField from '../../landing/components/LandingDropdownField.vue'
 import ErrorModal from '../../../shared/ErrorModal.vue'
 import SuccessModal from '../../../shared/SuccessModal.vue'
@@ -250,7 +249,6 @@ async function submit() {
 </script>
 
 <template>
-  <AdminNavBar />
   <main class="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
     <section class="rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
       <div class="mb-6">
