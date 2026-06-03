@@ -81,7 +81,7 @@ export const useTicketStore = defineStore("ticket", () => {
                     const multiplier = flightOption.checkedBagMultiplier || 1.0;
 
                     for (let i = 1; i <= checkedBags; i++) {
-                        flightBaggage += checkedPrice * Math.pow(multiplier, i);
+                        flightBaggage += checkedPrice * Math.pow(multiplier, i - 1);
                     }
 
                     flightBaggage += carryOns * carryOnPrice;
@@ -92,7 +92,7 @@ export const useTicketStore = defineStore("ticket", () => {
                         const multiplier = segment.checkedBagMultiplier || 1.0;
 
                         for (let i = 1; i <= checkedBags; i++) {
-                            flightBaggage += checkedPrice * Math.pow(multiplier, i);
+                            flightBaggage += checkedPrice * Math.pow(multiplier, i - 1);
                         }
 
                         flightBaggage += carryOns * carryOnPrice;

@@ -146,7 +146,7 @@ namespace zuli_Business
                     decimal checkedBaggageTotal = 0;
                     for (int i = 1; i <= passenger.CheckedBaggageQuantity; i++)
                     {
-                        var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+                        var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i - 1);
                         checkedBaggageTotal += bagPrice;
                         passengerBreakdown.CheckedBags.Add(new BaggageBreakdownItemDTO
                         {
