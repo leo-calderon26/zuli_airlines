@@ -167,6 +167,15 @@ onMounted(() => {
                 placeholder="0.00"
                 :error="errors.fields.checkedPrice"
               />
+              <AppInput
+                v-model="form.multiplier"
+                label="Multiplicador de precio por equipaje"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                :error="errors.fields.multiplier"
+              />
             </div>
           </div>
 
