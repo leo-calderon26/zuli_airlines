@@ -22,6 +22,7 @@ const props = defineProps({
     carryOnPrice: { type: Number, default: 0 },
     checkedPrice: { type: Number, default: 0 },
     maxWeightPerBag: { type: Number, default: 23 },
+    maxPassengers: { type: Number, default: 1 },
     errors: { type: Array, default: () => [] },
     contactErrors: { type: Object, default: () => ({}) }
 });
@@ -79,7 +80,7 @@ function updatePassenger(index, field, value) {
             class="border border-border-soft bg-text-box p-8"
         >
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-font flex items-center gap-2"><img src="../assets/user.png" alt="" class="h-6 w-6 icon-font" />Pasajero {{ index + 1 }}</h3>
+                <h3 class="text-2xl font-bold text-font flex items-center gap-2"><img src="../assets/user.png" alt="" class="h-6 w-6 icon-font" />Pasajero {{ index + 1 }} de {{ maxPassengers }}</h3>
                 <AppButton
                     v-if="passengers.length > 1"
                     variant="ghost"
@@ -205,10 +206,11 @@ function updatePassenger(index, field, value) {
         </div>
 
         <AppButton
+            v-if="passengers.length < maxPassengers"
             variant="outline"
             class="!w-full !border-dashed !py-4"
             @click="$emit('add-passenger')"
-        >+ Añadir pasajero</AppButton>
+        >+ Añadir pasajero (faltan {{ maxPassengers - passengers.length }})</AppButton>
 
         <div class="border border-border-soft bg-text-box p-8">
             <h3 class="text-2xl font-bold text-font mb-6 flex items-center gap-2"><img src="../assets/email.png" alt="" class="h-6 w-6 icon-font" />Información del Comprador</h3>
