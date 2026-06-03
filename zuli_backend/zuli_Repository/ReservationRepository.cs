@@ -99,5 +99,72 @@ namespace zuli_Repository
 
             return exists == 1;
         }
+
+        public async Task<Dictionary<int, bool>> PassengersExistInFlights(
+            IEnumerable<Guid> flightIds,
+            List<PassengerCheckInfo> passengers)
+        {
+            using var connection = _context.CreateConnection();
+            var flightIdList = flightIds.ToList();
+
+            if (passengers.Count == 0)
+            {
+                return new Dictionary<int, bool>();
+            }
+
+            var (sql, parameters) = BuildPassengerExistsSql(flightIdList, passengers);
+
+            var results = await connection.QueryAsync<int>(sql, parameters);
+
+            var matchedIndices = results.ToHashSet();
+            var result = new Dictionary<int, bool>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                result[passengers[i].Index] = matchedIndices.Contains(i);
+            }
+
+            return result;
+        }
+
+        private static (string sql, DynamicParameters parameters) BuildPassengerExistsSql(
+            List<Guid> flightIds,
+            List<PassengerCheckInfo> passengers)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("FlightIds", flightIds);
+
+            var unions = new List<string>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                var p = passengers[i];
+                var prefix = $"{i}";
+
+                parameters.Add($"FirstName{prefix}", p.FirstName);
+                parameters.Add($"FirstLastName{prefix}", p.FirstLastName);
+                parameters.Add($"SecondLastName{prefix}", p.SecondLastName);
+                parameters.Add($"BirthDate{prefix}", p.BirthDate);
+                parameters.Add($"PassportCountry{prefix}", p.PassportCountry);
+
+                var union = $@"
+                SELECT {i} AS PassengerIndex
+                FROM dbo.BoardingPass bp
+                INNER JOIN dbo.Person p ON bp.PassengerId = p.PersonId
+                LEFT JOIN dbo.Passport passport ON p.PersonId = passport.PassengerId
+                WHERE bp.FlightId IN @FlightIds
+                AND LOWER(LTRIM(RTRIM(p.FirstName))) = LOWER(LTRIM(RTRIM(@FirstName{prefix})))
+                AND LOWER(LTRIM(RTRIM(p.FirstLastName))) = LOWER(LTRIM(RTRIM(@FirstLastName{prefix})))
+                AND LOWER(LTRIM(RTRIM(p.SecondLastName))) = LOWER(LTRIM(RTRIM(@SecondLastName{prefix})))
+                AND CAST(p.BirthDate AS DATE) = CAST(@BirthDate{prefix} AS DATE)
+                AND LOWER(LTRIM(RTRIM(ISNULL(passport.PassportCountry, '')))) = LOWER(LTRIM(RTRIM(@PassportCountry{prefix})))";
+
+                unions.Add(union);
+            }
+
+            var sql = string.Join(" UNION ALL ", unions);
+
+            return (sql, parameters);
+        }
     }
 }

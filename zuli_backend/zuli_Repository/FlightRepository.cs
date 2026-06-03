@@ -97,6 +97,33 @@ namespace zuli_Repository
             return await connection.QueryFirstOrDefaultAsync<FlightEntity>(sql, new { Id = id });
         }
 
+        public async Task<IEnumerable<FlightEntity>> GetFlightsByIds(IEnumerable<Guid> ids)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT 
+                    Id,
+                    Status,
+                    FlightDate,
+                    TouristPrice,
+                    FirstClassPrice,
+                    RealDepartureTime,
+                    RealArrivalTime,
+                    AircraftId,
+                    RealArrivalAirport,
+                    RealDepartureAirport,
+                    Duration,
+                    CarryOnPrice,
+                    CheckedPrice,
+                    AvailableSeats,
+                    FlightRouteId
+                FROM Flight
+                WHERE Id IN @Ids";
+
+            return await connection.QueryAsync<FlightEntity>(sql, new { Ids = ids });
+        }
+
         public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime targetDate, int seats, int targetDayMask)
         {
             using var connection = _context.CreateConnection();
