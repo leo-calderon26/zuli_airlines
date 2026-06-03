@@ -46,7 +46,8 @@ namespace zuli_Business
                 carryOnPrice = flightRoute.carryOnPrice,
                 checkedPrice = flightRoute.checkedPrice,
                 touristPrice = flightRoute.touristPrice,
-                firstClassPrice = flightRoute.firstClassPrice
+                firstClassPrice = flightRoute.firstClassPrice,
+                multiplier = flightRoute.multiplier,
             };
 
             if (await _flightRouteRepository.AlreadyExistFlightRoute(newFlightRoute))
