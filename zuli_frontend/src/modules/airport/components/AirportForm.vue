@@ -184,10 +184,10 @@ function onSuccessClose() {
                     País <span class="text-error">*</span>
                 </label>
                 
-                <Listbox v-model="selectedCountryId" :disabled="!canEditField()" @update:modelValue="onCountryChange">
+                <Listbox v-model="selectedCountryId" :disabled="props.isEdit" @update:modelValue="onCountryChange">
                     <div class="relative">
                         <ListboxButton 
-                            class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                             :class="{ 'border-error text-error': errors.fields?.country }"
                         >
                             <span class="block truncate">{{ form.country || 'Seleccione un país' }}</span>
@@ -226,7 +226,7 @@ function onSuccessClose() {
                     Ciudad <span class="text-error">*</span>
                 </label>
 
-                <Listbox v-model="form.city" :disabled="!canEditField() || !selectedCountryId || isCitiesLoading">
+                <Listbox v-model="form.city" :disabled="props.isEdit || !selectedCountryId || isCitiesLoading">
                     <div class="relative">
                         <ListboxButton 
                             class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"

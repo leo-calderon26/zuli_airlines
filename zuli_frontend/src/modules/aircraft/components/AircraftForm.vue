@@ -125,6 +125,10 @@ async function submit() {
             onSuccess('La aeronave se ha creado correctamente');
         }
     }, props.isEdit ? 'Error al actualizar la aeronave' : 'Error al crear la aeronave');
+
+    if (props.isEdit && showErrorModal.value) {
+        showErrorModal.value = false;
+    }
 }
 
 function onSuccessClose() {
@@ -134,41 +138,39 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
-        <p v-if="props.isEdit && !isAdministrator" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Como operario, puedes ver esta aeronave pero no editarla.
-        </p>
+
 
         <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" :disabled="!canEditField()" />
+                <AppInput v-model="form.model" label="Modelo" :error="errors.fields.model" :disabled="props.isEdit" />
                 <AppInput :model-value="totalSeats" label="Capacidad (Calculada)" disabled />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" :disabled="!canEditField()" />
+                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight"/>
                 <div></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" :disabled="!canEditField()" />
-                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" :disabled="!canEditField()" />
+                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
+                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" :disabled="!canEditField()" />
-                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" :disabled="!canEditField()" />
+                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
+                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
             </div>
         </div>
 
         <div v-if="errors.fields.totalSeats" class="mt-2 text-sm text-error">{{ errors.fields.totalSeats }}</div>
 
         <div class="mt-4">
-            <AppButton type="submit" variant="primary" :loading="isLoading" :disabled="props.isEdit && !isAdministrator">{{ props.isEdit ? 'Guardar' : 'Guardar aeronave' }}</AppButton>
+            <AppButton type="submit" variant="primary" :loading="isLoading" >{{ props.isEdit ? 'Guardar' : 'Guardar aeronave' }}</AppButton>
         </div>
     </form>
 
     <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
-    <ErrorModal v-model="showErrorModal" :message="errorMessage" />
+    <ErrorModal v-model="showErrorModal" :message="errorMessage" :errors="errors.fields" />
 </template>
 
 <style scoped>
