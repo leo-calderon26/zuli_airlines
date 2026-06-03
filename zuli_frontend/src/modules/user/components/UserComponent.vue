@@ -48,10 +48,11 @@ function cacheUserForEdit(user) {
 
 function goToUserEdit(user) {
     cacheUserForEdit(user);
+    const plainUser = JSON.parse(JSON.stringify(user));
     router.push({
         name: 'userEdit',
-        params: { userId: user.userId },
-        state: { user }
+        params: { userId: plainUser.userId },
+        state: { user: plainUser }
     });
 }
 

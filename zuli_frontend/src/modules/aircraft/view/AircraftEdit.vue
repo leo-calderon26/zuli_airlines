@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import AircraftForm from '../components/AircraftForm.vue';
 import { useAircraftStore } from '../store/aircraftStore';
 
@@ -44,7 +43,6 @@ if (!selectedAircraft.value) {
 
 <template>
     <div class="flex flex-col">
-        <AdminNavBar/>
         <main class="flex-1 pb-8">
             <div class="page-shell">
                 <div v-if="isLoading" class="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm">

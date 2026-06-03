@@ -65,7 +65,7 @@ onMounted(async () => {
                 :to="{
                     name: 'editAirport',
                     params: { airportCode: airport.airportCode },
-                    state: { airport }
+                    state: { airport: JSON.parse(JSON.stringify(airport)) }
                 }"
                 @click="cacheAirportForEdit(airport)"
                 class="font-medium text-gold hover:underline"
