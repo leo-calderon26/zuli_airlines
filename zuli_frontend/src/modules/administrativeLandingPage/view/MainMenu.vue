@@ -1,7 +1,6 @@
 
 <template>
     <div class="flex flex-col">
-        <AdminNavBar />
             <nav class="bg-neutral-primary-soft border-default">
                 <div class="flex">
                 <div class="size-14 grow-2"></div>
@@ -43,7 +42,6 @@
 </template>
 
 <script>
-import AdminNavBar from '../../../shared/AdminNavBar.vue';
 import aircraftIcon from '../../../assets/Aircraft.png';
 import airportIcon from '../../../assets/Airport.png';
 import routeIcon from '../../../assets/Route.png';
@@ -53,7 +51,6 @@ import reportIcon from '../../../assets/Report.png';
 
 export default {
     components: {
-        AdminNavBar
     },
     data() {
         return {

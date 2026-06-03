@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
 import AirportForm from '../components/AirportForm.vue';
 import AirportNavBar from '../components/AirportNavBar.vue';
 import { useAirportStore } from '../store/airportStore';
@@ -47,8 +46,6 @@ if (!selectedAirport.value) {
 
 <template>
     <div class="flex flex-col">
-        <PublicNavBar/>
-        <AirportNavBar/>
         <main class="flex-1 pb-8">
             <div class="page-shell">
                 <div v-if="isLoading" class="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm">

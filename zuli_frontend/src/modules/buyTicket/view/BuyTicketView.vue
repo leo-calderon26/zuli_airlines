@@ -1,13 +1,12 @@
 <script setup>
-    import { computed, onMounted } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
-    import PublicNavBar from '../../landing/components/PublicNavBar.vue';
-    import SuccessModal from '../../../shared/SuccessModal.vue';
-    import ErrorModal from '../../../shared/ErrorModal.vue';
-    import PassengerForm from '../components/PassengerForm.vue';
-    import FlightSummary from '../components/FlightSummary.vue';
-    import { useTicketStore } from '../store/ticketStore';
-    import { useTicketPurchase } from '../composable/useTicketPurchase';
+import { computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import PassengerForm from '../components/PassengerForm.vue';
+import FlightSummary from '../components/FlightSummary.vue';
+import { useTicketStore } from '../store/ticketStore';
+import { useTicketPurchase } from '../composable/useTicketPurchase';
 
     const route = useRoute();
     const router = useRouter();
@@ -93,7 +92,6 @@
 
 <template>
     <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
-        <PublicNavBar />
 
         <main class="flex-1 w-full max-w-7xl mx-auto grid grid-cols-12 gap-10 py-10 px-4">
             <div v-if="!store.selectedFlight"

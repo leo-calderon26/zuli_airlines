@@ -55,12 +55,6 @@
   </header>
 </template>
 
-<script>
-    export default {
-        
-    }
-</script>
-
 <style scoped>
 .nav-active {
   background-color: rgba(0, 0, 0, 0.25);

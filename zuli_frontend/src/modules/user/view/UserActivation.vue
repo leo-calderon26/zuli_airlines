@@ -1,7 +1,5 @@
 <template>
     <div class="flex min-h-svh flex-col bg-[var(--color-secondary)]">
-        <AdminNavBar />
-
         <main class="flex flex-1 items-start justify-center bg-[var(--color-secondary)] px-6 pb-36 pt-[140px]">
             <form
                 class="w-full max-w-[735px] overflow-hidden rounded-md bg-white shadow-sm"
@@ -76,14 +74,10 @@
             <ErrorModal v-model="showErrorModal" :message="errorMessage" />
             <SuccessModal v-model="showSuccessModal" :message="successMessage" @close="onSuccessClose" />
         </main>
-
-        <PublicBottomBar />
     </div>
 </template>
 
 <script>
-import AdminNavBar from "../../../shared/AdminNavBar.vue";
-import PublicBottomBar from "../../../shared/PublicBottomBar.vue";
 import ErrorModal from "../../../shared/ErrorModal.vue";
 import SuccessModal from "../../../shared/SuccessModal.vue";
 import AppButton from "../../../shared/AppButton.vue";
@@ -93,8 +87,6 @@ export default {
     name: "UserActivation",
 
     components: {
-        AdminNavBar,
-        PublicBottomBar,
         ErrorModal,
         SuccessModal,
         AppButton

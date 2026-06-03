@@ -1,6 +1,5 @@
 <script setup>
-import PublicNavBar from '../../../shared/PublicNavBar.vue';
-//import RouteNavBar from '../components/RouteNavBar.vue';
+import { onMounted } from 'vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
@@ -46,7 +45,6 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
-    <AdminNavBar />
     <main class="flex-1 pb-8">
       <div class="page-shell">
         <form class="space-y-6" @submit.prevent="submit">

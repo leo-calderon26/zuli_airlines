@@ -1,7 +1,6 @@
 
 <template>
     <div class="landing-page">
-        <PublicNavBar />
         <div class="background">
         </div>
         <div class="menuOptions">
@@ -15,20 +14,8 @@
                 </ul>
             </nav>
         </div>
-        <PublicBottomBar />
     </div>
 </template>
-
-<script>
-import PublicNavBar from '../components/PublicNavBar.vue';
-import PublicBottomBar from '../components/PublicBottomBar.vue';
-    export default {
-        components: {
-            PublicNavBar,
-            PublicBottomBar
-        }
-    }
-</script>
 
 <style scoped>
     .background {
