@@ -33,8 +33,8 @@ namespace zuli_Business.DTO
         [Required(ErrorMessage = "Es necesario ingresar el precio de las maletas facturadas")]
         [Range(1, int.MaxValue, ErrorMessage = "El precio de las maletas facturadas debe ser mayor que cero")]
         public decimal checkedPrice { get; set; }
-        [Required(ErrorMessage = "Es necesario ingresar el precio de clase Economica")]
-        [Range(1, int.MaxValue, ErrorMessage = "El precio de la clase Economica debe ser mayor que cero")]
+        [Required(ErrorMessage = "Es necesario ingresar el precio de clase Turista")]
+        [Range(1, int.MaxValue, ErrorMessage = "El precio de la clase Turista debe ser mayor que cero")]
         public decimal touristPrice { get; set; }
         [Required(ErrorMessage = "Es necesario ingresar el precio de la primera clase")]
         [Range(1, int.MaxValue, ErrorMessage = "El precio de la primera clase debe ser mayor que cero")]
