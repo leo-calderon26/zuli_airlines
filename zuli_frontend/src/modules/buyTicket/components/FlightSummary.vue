@@ -40,7 +40,7 @@
                 let segCheckedTotal = 0;
                 const checkedBags = [];
                 for (let i = 1; i <= checkedBagsCount; i++) {
-                    const price = (defaultCheckedPrice || 0) * Math.pow(defaultMult || 1, i);
+                    const price = (defaultCheckedPrice || 0) * Math.pow(defaultMult || 1, i - 1);
                     segCheckedTotal += price;
                     checkedBags.push({ number: i, price });
                 }
@@ -64,7 +64,7 @@
                     const mult = seg.checkedBagMultiplier !== undefined && seg.checkedBagMultiplier !== null ? seg.checkedBagMultiplier : (defaultMult || 1);
                     
                     for (let i = 1; i <= checkedBagsCount; i++) {
-                        const price = cp * Math.pow(mult, i);
+                        const price = cp * Math.pow(mult, i - 1);
                         segCheckedTotal += price;
                         checkedBags.push({ number: i, price });
                     }
