@@ -147,18 +147,18 @@ function onSuccessClose() {
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight"/>
+                <AppInput v-model="form.weight" label="Peso soportado por la aeronave (kg)" type="number" min="1" step="1" :error="errors.fields.weight" :disabled="props.isEdit && !isAdministrator"/>
                 <div></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" />
-                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" />
+                <AppInput v-model="form.numberEconomyClassRows" label="Filas clase económica" type="number" min="0" step="1" :error="errors.fields.numberEconomyClassRows" :disabled="props.isEdit && !isAdministrator" />
+                <AppInput v-model="form.numberSeatingRowsEconomy" label="Asientos por fila económica" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsEconomy" :disabled="props.isEdit && !isAdministrator" />
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" />
-                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" />
+                <AppInput v-model="form.numberFirstClassRows" label="Filas primera clase" type="number" min="0" step="1" :error="errors.fields.numberFirstClassRows" :disabled="props.isEdit && !isAdministrator" />
+                <AppInput v-model="form.numberSeatingRowsFirst" label="Asientos por fila primera clase" type="number" min="0" step="1" :error="errors.fields.numberSeatingRowsFirst" :disabled="props.isEdit && !isAdministrator"   />
             </div>
         </div>
 
