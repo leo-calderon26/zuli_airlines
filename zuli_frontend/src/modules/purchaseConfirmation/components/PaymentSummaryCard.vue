@@ -88,9 +88,14 @@
           :key="flight.flightNumber"
           class="rounded-[12px] bg-[#faf8f8] px-4 py-4"
         >
-          <p class="text-[14px] font-semibold text-[#554241]">
-            {{ flight.flightNumber }} ({{ flight.originAirportCode }} → {{ flight.destinationAirportCode }})
-          </p>
+          <div class="flex items-center justify-between">
+            <p class="text-[14px] font-semibold text-[#554241]">
+              {{ flight.flightNumber }}
+            </p>
+            <p class="text-[13px] text-[#8a7a79]">
+              {{ flight.originAirportCode }} → {{ flight.destinationAirportCode }}
+            </p>
+          </div>
           <div
             v-for="passenger in flight.passengers"
             :key="passenger.fullName"
@@ -100,15 +105,18 @@
               <span class="text-[#6b5a59]">Boleto - {{ passenger.fullName }}</span>
               <span class="font-medium text-content">{{ formatMoney(passenger.ticketPrice) }}</span>
             </div>
-            <div
-              v-for="bag in passenger.checkedBags"
-              :key="bag.bagNumber"
-              class="flex justify-between text-[13px] pl-3"
-            >
-              <span class="text-[#8a7a79]">Maleta #{{ bag.bagNumber }}</span>
-              <span class="text-[#8a7a79]">{{ formatMoney(bag.price) }}</span>
+            <div v-if="passenger.checkedBags.length > 0" class="mt-1">
+              <p class="text-[12px] text-[#8a7a79] uppercase tracking-wide">Maletas documentadas</p>
+              <div
+                v-for="bag in passenger.checkedBags"
+                :key="bag.bagNumber"
+                class="flex justify-between text-[13px] pl-3"
+              >
+                <span class="text-[#8a7a79]">Maleta #{{ bag.bagNumber }}</span>
+                <span class="text-[#8a7a79]">{{ formatMoney(bag.price) }}</span>
+              </div>
             </div>
-            <div v-if="passenger.carryOnQuantity > 0" class="flex justify-between text-[13px] pl-3">
+            <div v-if="passenger.carryOnQuantity > 0" class="flex justify-between text-[13px] pl-3 mt-1">
               <span class="text-[#8a7a79]">Equipaje de mano (×{{ passenger.carryOnQuantity }})</span>
               <span class="text-[#8a7a79]">{{ formatMoney(passenger.carryOnTotal) }}</span>
             </div>
