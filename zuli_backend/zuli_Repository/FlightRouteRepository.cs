@@ -17,11 +17,11 @@ namespace zuli_Repository
             const string sql = @"
                   INSERT INTO FlightRoute
                     (adminId, airlineId, arrivalAirport, departureAirport, scheduledArrivalTime, scheduledDepartureTime, frequency, estimatedDuration,
-                    aircraftId, carryOnPrice, checkedPrice, touristPrice, firstClassPrice)
+                    aircraftId, carryOnPrice, checkedPrice, touristPrice, firstClassPrice, checkedBagMultiplier)
                   VALUES
                     (@AdminId, @AirlineId, @ArrivalAirport, @DepartureAirport,
                      @ScheduledArrivalTime, @ScheduledDepartureTime, @Frequency, @EstimatedDuration,
-                     CONVERT(uniqueidentifier, @AircraftId), @CarryOnPrice, @CheckedPrice, @TouristPrice, @FirstClassPrice);
+                     CONVERT(uniqueidentifier, @AircraftId), @CarryOnPrice, @CheckedPrice, @TouristPrice, @FirstClassPrice, @CheckedBagMultiplier);
             ";
 
             var newId = await connection.ExecuteScalarAsync<int>(sql, new
@@ -38,7 +38,8 @@ namespace zuli_Repository
                 CarryOnPrice = flightRoute.carryOnPrice,
                 CheckedPrice = flightRoute.checkedPrice,
                 TouristPrice = flightRoute.touristPrice,
-                FirstClassPrice = flightRoute.firstClassPrice
+                FirstClassPrice = flightRoute.firstClassPrice,
+                CheckedBagMultiplier = flightRoute.multiplier,
             });
             return newId;
         }

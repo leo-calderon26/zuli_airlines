@@ -35,6 +35,7 @@ export function useRouteForm() {
     firstClassPrice: '',
     carryOnPrice: '',
     checkedPrice: '',
+    multiplier: '',
   });
 
   const modalErrors = reactive({});
@@ -184,6 +185,10 @@ export function useRouteForm() {
       errors.fields.checkedPrice = 'Precio invalido';
     }
 
+    if (form.multiplier !== '' && form.multiplier !== null && (isNaN(Number(form.multiplier)) || Number(form.multiplier) < 0)) {
+      errors.fields.multiplier = 'Precio invalido';
+    }
+
     return Object.keys(errors.fields).length === 0 && errors.global === '';
   }
 
@@ -264,6 +269,7 @@ export function useRouteForm() {
         firstClassPrice: Number(form.firstClassPrice),
         carryOnPrice: form.carryOnPrice !== '' ? Number(form.carryOnPrice) : null,
         checkedPrice: form.checkedPrice !== '' ? Number(form.checkedPrice) : null,
+        multiplier: form.multiplier !== '' ? Number(form.multiplier) : null,
       };
 
       await createFlightRoute(routePayload);
