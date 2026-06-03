@@ -243,26 +243,67 @@ namespace zuli_Business
                 var passenger = passengers[i];
                 var passengerId = passengerIds[i];
 
-                foreach (var bag in passenger.BaggageItems)
-                {
-                    var baggageEntity = bag.Adapt<BaggageEntity>();
-                    baggageEntity.PassengerId = passengerId;
-                    baggageEntity.ReservationId = reservationId;
+                await RegisterCheckedBaggage(
+                    passenger,
+                    passengerId,
+                    reservationId
+                );
 
-                    await _baggageRepository.CreateBaggage(baggageEntity);
-                }
+                await RegisterCarryOnBaggage(
+                    passenger,
+                    passengerId,
+                    reservationId
+                );
+            }
+        }
 
-                if (passenger.CarryOn == 1)
+        private async Task RegisterCheckedBaggage(
+            PassengerTicketDTO passenger,
+            int passengerId,
+            int reservationId)
+        {
+            var checkedBaggageCount = Math.Clamp(
+                passenger.CheckedBaggage,
+                0,
+                10
+            );
+
+            for (int i = 0; i < checkedBaggageCount; i++)
+            {
+                var bag = passenger.BaggageItems.ElementAtOrDefault(i);
+
+                await _baggageRepository.CreateBaggage(new BaggageEntity
                 {
-                    await _baggageRepository.CreateBaggage(new BaggageEntity
-                    {
-                        PassengerId = passengerId,
-                        ReservationId = reservationId,
-                        Weight = 7.0m,
-                        Size = "Pequeño",
-                        Type = "Mano"
-                    });
-                }
+                    PassengerId = passengerId,
+                    ReservationId = reservationId,
+                    Weight = bag?.Weight > 0 ? bag.Weight : 23.0m,
+                    Size = string.IsNullOrWhiteSpace(bag?.Size) ? "Mediano" : bag.Size,
+                    Type = "Maleta"
+                });
+            }
+        }
+
+        private async Task RegisterCarryOnBaggage(
+            PassengerTicketDTO passenger,
+            int passengerId,
+            int reservationId)
+        {
+            var carryOnCount = Math.Clamp(
+                passenger.CarryOn,
+                0,
+                2
+            );
+
+            for (int i = 0; i < carryOnCount; i++)
+            {
+                await _baggageRepository.CreateBaggage(new BaggageEntity
+                {
+                    PassengerId = passengerId,
+                    ReservationId = reservationId,
+                    Weight = 7.0m,
+                    Size = "Pequeño",
+                    Type = "Mano"
+                });
             }
         }
 

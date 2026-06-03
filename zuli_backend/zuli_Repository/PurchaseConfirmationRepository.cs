@@ -101,6 +101,8 @@ namespace zuli_Repository
                             CASE
                                 WHEN LOWER(ISNULL(Type, '')) LIKE '%checked%'
                                   OR LOWER(ISNULL(Type, '')) LIKE '%fact%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%maleta%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%document%'
                                 THEN 1
                                 ELSE 0
                             END
