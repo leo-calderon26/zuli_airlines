@@ -138,7 +138,9 @@ function onSuccessClose() {
 
 <template>
     <form class="form-card" @submit.prevent="submit">
-
+        <p v-if="props.isEdit && isAdministrator === false" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Como operario, puedes ver esta aeronave pero no editarla.
+        </p>
 
         <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
