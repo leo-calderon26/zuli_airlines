@@ -94,6 +94,8 @@ namespace zuli_Business
                 AddRow(table, "Total pagado", confirmation.TotalAmount.ToString("C", _cultureInfo));
             });
 
+            BuildBreakdownContent(column, confirmation);
+
             column.Item().Text("Este documento corresponde al comprobante de compra de la reserva indicada.");
         }
 
@@ -150,6 +152,101 @@ namespace zuli_Business
                     AddCell(table, passenger.PassportCountry);
                     AddCell(table, $"Maletas: {passenger.CheckedBaggageQuantity} / Carry on: {passenger.CarryOnQuantity}");
                 }
+            });
+
+            BuildBreakdownContent(column, confirmation);
+        }
+
+        private void BuildBreakdownContent(ColumnDescriptor column, PurchaseConfirmationPageDTO confirmation)
+        {
+            if (confirmation.Breakdown == null || confirmation.Breakdown.Flights.Count == 0)
+                return;
+
+            column.Item().Text("Desglose de costos").FontSize(13).Bold();
+
+            foreach (var flight in confirmation.Breakdown.Flights)
+            {
+                column.Item()
+                    .Border(1)
+                    .BorderColor(Colors.Grey.Lighten2)
+                    .Padding(10)
+                    .Column(flightColumn =>
+                    {
+                        flightColumn.Spacing(6);
+                        flightColumn.Item().Text($"Vuelo {flight.FlightNumber} — {flight.OriginAirportCode} → {flight.DestinationAirportCode}").FontSize(11).Bold();
+
+                        foreach (var passenger in flight.Passengers)
+                        {
+                            flightColumn.Item().Text($"Pasajero: {passenger.FullName}").FontSize(10).Bold();
+
+                            flightColumn.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(4);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(2);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    AddHeaderCell(header, "Concepto");
+                                    AddHeaderCell(header, "Cant.");
+                                    AddHeaderCell(header, "Precio");
+                                });
+
+                                AddCell(table, "Boleto de avión");
+                                AddCell(table, "1");
+                                AddCell(table, passenger.TicketPrice.ToString("C", _cultureInfo));
+
+                                foreach (var bag in passenger.CheckedBags)
+                                {
+                                    AddCell(table, $"  Maleta documentada #{bag.BagNumber}");
+                                    AddCell(table, "1");
+                                    AddCell(table, bag.Price.ToString("C", _cultureInfo));
+                                }
+
+                                if (passenger.CarryOnQuantity > 0)
+                                {
+                                    AddCell(table, "  Equipaje de mano");
+                                    AddCell(table, passenger.CarryOnQuantity.ToString());
+                                    AddCell(table, passenger.CarryOnTotal.ToString("C", _cultureInfo));
+                                }
+
+                                table.Cell().Background(Colors.Grey.Lighten3).Padding(6).Text("Subtotal pasajero").Bold();
+                                table.Cell().Background(Colors.Grey.Lighten3).Padding(6).Text("");
+                                table.Cell().Background(Colors.Grey.Lighten3).Padding(6).Text(passenger.PassengerTotal.ToString("C", _cultureInfo)).Bold();
+                            });
+                        }
+
+                        flightColumn.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(4);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Cell().Background(Colors.Grey.Lighten1).Padding(6).Text($"Total vuelo {flight.FlightNumber}").Bold().FontColor(Colors.White);
+                            table.Cell().Background(Colors.Grey.Lighten1).Padding(6).Text("");
+                            table.Cell().Background(Colors.Grey.Lighten1).Padding(6).Text(flight.FlightTotal.ToString("C", _cultureInfo)).Bold().FontColor(Colors.White);
+                        });
+                    });
+            }
+
+            column.Item().Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(4);
+                    columns.RelativeColumn(1);
+                    columns.RelativeColumn(2);
+                });
+
+                table.Cell().Background(Colors.Grey.Medium).Padding(8).Text("TOTAL GENERAL").Bold().FontSize(11).FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Medium).Padding(8).Text("");
+                table.Cell().Background(Colors.Grey.Medium).Padding(8).Text(confirmation.TotalAmount.ToString("C", _cultureInfo)).Bold().FontSize(11).FontColor(Colors.White);
             });
         }
 

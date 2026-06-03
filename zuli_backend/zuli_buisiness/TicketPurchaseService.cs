@@ -63,7 +63,8 @@ namespace zuli_Business
                 flightIds
             );
 
-            var totalPayment = CalculateTotalPayment(request, flights);
+            var breakdown = CalculatePurchaseBreakdown(request, flights);
+            var totalPayment = breakdown.GrandTotal;
             var reservationCode = ReservationCodeGenerator.Generate();
 
             var buyerId = await CreateBuyer(request.Buyer);
@@ -92,7 +93,8 @@ namespace zuli_Business
                 ConfirmationCode = reservationCode,
                 ReservationId = reservationId,
                 TotalPayment = totalPayment,
-                Message = "Compra realizada exitosamente"
+                Message = "Compra realizada exitosamente",
+                Breakdown = breakdown
             };
         }
 
@@ -135,27 +137,44 @@ namespace zuli_Business
             }
         }
 
-        internal static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
+        public static PurchaseBreakdownDTO CalculatePurchaseBreakdown(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
         {
             var isFirstClass = request.FlightClass.Equals(
                 "Primera Clase",
                 StringComparison.OrdinalIgnoreCase
             );
 
-            decimal total = 0;
+            var breakdown = new PurchaseBreakdownDTO();
+            decimal grandTotal = 0;
 
             foreach (var flight in flights)
             {
-                total += request.Passengers.Sum(passenger =>
-                    CalculateFlightPassengerTotal(flight, passenger, isFirstClass)
-                );
+                var flightBreakdown = new FlightBreakdownDTO
+                {
+                    FlightNumber = flight.Id.ToString(),
+                    OriginAirportCode = "",
+                    DestinationAirportCode = ""
+                };
+
+                decimal flightTotal = 0;
+
+                foreach (var passenger in request.Passengers)
+                {
+                    var passengerBreakdown = CalculatePassengerBreakdown(flight, passenger, isFirstClass);
+                    flightBreakdown.Passengers.Add(passengerBreakdown);
+                    flightTotal += passengerBreakdown.PassengerTotal;
+                }
+
+                flightBreakdown.FlightTotal = flightTotal;
+                breakdown.Flights.Add(flightBreakdown);
+                grandTotal += flightTotal;
             }
 
-            return total;
+            breakdown.GrandTotal = grandTotal;
+            return breakdown;
         }
 
-        internal static decimal CalculateFlightPassengerTotal(FlightEntity flight, PassengerTicketDTO passenger,
-            bool isFirstClass)
+        public static PassengerBreakdownDTO CalculatePassengerBreakdown(FlightEntity flight, PassengerTicketDTO passenger, bool isFirstClass)
         {
             var classPrice = isFirstClass
                 ? flight.FirstClassPrice
@@ -163,16 +182,40 @@ namespace zuli_Business
 
             var checkedPrice = flight.CheckedPrice ?? 0;
             var carryOnPrice = flight.CarryOnPrice ?? 0;
-            var multiplier = flight.CheckedBagMultiplier > 0 ? flight.CheckedBagMultiplier
-                : 1m;
+            var multiplier = flight.CheckedBagMultiplier > 0 ? flight.CheckedBagMultiplier : 1m;
 
+            var checkedBags = new List<BaggageBreakdownItemDTO>();
             decimal checkedBaggageTotal = 0;
+
             for (int i = 1; i <= passenger.CheckedBaggage; i++)
             {
-                checkedBaggageTotal += checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+                var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+                checkedBaggageTotal += bagPrice;
+                checkedBags.Add(new BaggageBreakdownItemDTO
+                {
+                    BagNumber = i,
+                    Type = "Maleta",
+                    Price = bagPrice
+                });
             }
 
-            return classPrice + checkedBaggageTotal + (passenger.CarryOn * carryOnPrice);
+            var carryOnTotal = passenger.CarryOn * carryOnPrice;
+            var passengerTotal = classPrice + checkedBaggageTotal + carryOnTotal;
+
+            return new PassengerBreakdownDTO
+            {
+                FullName = $"{passenger.FirstName} {passenger.FirstLastName} {passenger.SecondLastName}".Trim(),
+                TicketPrice = classPrice,
+                CheckedBags = checkedBags,
+                CarryOnQuantity = passenger.CarryOn,
+                CarryOnTotal = carryOnTotal,
+                PassengerTotal = passengerTotal
+            };
+        }
+
+        public static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
+        {
+            return CalculatePurchaseBreakdown(request, flights).GrandTotal;
         }
 
         private async Task SendPurchaseEmails(string reservationCode)
@@ -186,6 +229,7 @@ namespace zuli_Business
             }
 
             var confirmationDto = _mapper.Map<PurchaseConfirmationPageDTO>(confirmation);
+            confirmationDto.Breakdown = PurchaseConfirmationService.BuildPurchaseBreakdown(confirmationDto);
 
             var invoicePdf = _purchaseConfirmationPdfService.GenerateInvoicePdf(confirmationDto);
             var confirmationPdf = _purchaseConfirmationPdfService.GenerateConfirmationPdf(confirmationDto);

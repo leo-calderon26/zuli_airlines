@@ -146,7 +146,12 @@ namespace zuli_Repository
                     arrivalAirport.Name AS DestinationAirportName,
                     arrivalAirport.AirportCode AS DestinationAirportCode,
                     ISNULL(f.RealDepartureTime, f.FlightDate) AS DepartureDateTime,
-                    ISNULL(f.RealArrivalTime, DATEADD(MINUTE, f.Duration, f.FlightDate)) AS ArrivalDateTime
+                    ISNULL(f.RealArrivalTime, DATEADD(MINUTE, f.Duration, f.FlightDate)) AS ArrivalDateTime,
+                    fr.CheckedPrice,
+                    fr.CarryOnPrice,
+                    fr.CheckedBagMultiplier,
+                    fr.TouristPrice,
+                    fr.FirstClassPrice
                 FROM dbo.Reservation r
                 INNER JOIN dbo.BoardingPass bp
                     ON r.ReservationCode = bp.ReservationCode

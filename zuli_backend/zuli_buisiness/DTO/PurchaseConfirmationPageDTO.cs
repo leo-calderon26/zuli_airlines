@@ -23,5 +23,6 @@ namespace zuli_Business.DTO
 
         public List<PurchaseConfirmationPassengerDTO> Passengers { get; set; } = new();
         public List<PurchaseConfirmationFlightDTO> Flights { get; set; } = new();
+        public PurchaseBreakdownDTO Breakdown { get; set; } = new();
     }
 }

@@ -6,5 +6,6 @@ namespace zuli_Business.DTO
         public int ReservationId { get; set; }
         public decimal TotalPayment { get; set; }
         public string Message { get; set; } = string.Empty;
+        public PurchaseBreakdownDTO Breakdown { get; set; } = new();
     }
 }

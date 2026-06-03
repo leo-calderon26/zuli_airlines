@@ -112,25 +112,23 @@
                 Equipaje (ida)
             </p>
 
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">Maleta documentada</span>
-                <span class="font-semibold">${{ Number(checkedPrice || 0).toFixed(2) }} c/u</span>
+            <div v-if="passengers.length > 0" class="space-y-2">
+                <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
+                    <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
+                    <div v-if="passenger.checkedBaggage > 0" class="space-y-1 pl-2">
+                        <div v-for="bagIdx in passenger.checkedBaggage" :key="bagIdx" class="flex justify-between">
+                            <span class="opacity-70 text-xs">Maleta #{{ bagIdx }}</span>
+                            <span class="font-semibold text-xs">${{ (checkedPrice * Math.pow(checkedBagMultiplier, bagIdx)).toFixed(2) }}</span>
+                        </div>
+                    </div>
+                    <div v-if="passenger.carryOn > 0" class="flex justify-between pl-2">
+                        <span class="opacity-70 text-xs">Equipaje de mano (×{{ passenger.carryOn }})</span>
+                        <span class="font-semibold text-xs">${{ (passenger.carryOn * carryOnPrice).toFixed(2) }}</span>
+                    </div>
+                    <div v-if="!passenger.checkedBaggage && !passenger.carryOn" class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
+                </div>
             </div>
-
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">Equipaje de mano</span>
-                <span class="font-semibold">${{ carryOnPrice }} c/u</span>
-            </div>
-
-            <div v-if="totalCheckedBags > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">Maletas documentadas</span>
-                <span class="font-semibold">{{ totalCheckedBags }} uds.</span>
-            </div>
-
-            <div v-if="totalCarryOns > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">Equipaje de mano</span>
-                <span class="font-semibold">{{ totalCarryOns }} uds.</span>
-            </div>
+            <div v-else class="opacity-70 text-sm">Sin equipaje seleccionado</div>
         </div>
 
         <div v-if="isRoundTrip && returnFlight" class="border-t border-white/20 pt-5 mt-5">
@@ -173,25 +171,23 @@
                     Equipaje (vuelta)
                 </p>
 
-                <div class="flex justify-between text-sm">
-                    <span class="opacity-70">Equipaje de mano</span>
-                    <span class="font-semibold">${{ returnCarryOnPrice }} c/u</span>
+                <div v-if="passengers.length > 0" class="space-y-2">
+                    <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
+                        <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
+                        <div v-if="passenger.checkedBaggage > 0" class="space-y-1 pl-2">
+                            <div v-for="bagIdx in passenger.checkedBaggage" :key="bagIdx" class="flex justify-between">
+                                <span class="opacity-70 text-xs">Maleta #{{ bagIdx }}</span>
+                                <span class="font-semibold text-xs">${{ (returnCheckedPrice * Math.pow(returnCheckedBagMultiplier, bagIdx)).toFixed(2) }}</span>
+                            </div>
+                        </div>
+                        <div v-if="passenger.carryOn > 0" class="flex justify-between pl-2">
+                            <span class="opacity-70 text-xs">Equipaje de mano (×{{ passenger.carryOn }})</span>
+                            <span class="font-semibold text-xs">${{ (passenger.carryOn * returnCarryOnPrice).toFixed(2) }}</span>
+                        </div>
+                        <div v-if="!passenger.checkedBaggage && !passenger.carryOn" class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
+                    </div>
                 </div>
-
-                <div v-if="totalCheckedBags > 0" class="flex justify-between text-sm">
-                    <span class="opacity-70">Maletas documentadas</span>
-                    <span class="font-semibold">
-                        <template v-for="(price, idx) in returnCheckedBagPrices.slice(0, totalCheckedBags)"
-                                  :key="idx">
-                            {{ idx + 1 }}ra: ${{ price }}{{ idx < totalCheckedBags - 1 ? ', ' : '' }}
-                        </template>
-                    </span>
-                </div>
-
-                <div v-if="totalCarryOns > 0" class="flex justify-between text-sm">
-                    <span class="opacity-70">Equipaje de mano</span>
-                    <span class="font-semibold">{{ totalCarryOns }} uds.</span>
-                </div>
+                <div v-else class="opacity-70 text-sm">Sin equipaje seleccionado</div>
             </div>
         </div>
 
