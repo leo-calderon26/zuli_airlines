@@ -71,6 +71,7 @@
               :payment-method="confirmation.paymentMethod"
               :flight-class="confirmation.flightClass"
               :total-amount="confirmation.totalAmount"
+              :breakdown="confirmation.breakdown"
             />
           </div>
 
