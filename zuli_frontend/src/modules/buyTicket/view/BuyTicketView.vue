@@ -1,7 +1,7 @@
 <script setup>
     import { computed, onMounted } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import PublicNavBar from '../../landing/components/PublicNavBar.vue';
+    import PublicNavBar from '../../../shared/PublicNavBar.vue';
     import SuccessModal from '../../../shared/SuccessModal.vue';
     import ErrorModal from '../../../shared/ErrorModal.vue';
     import PassengerForm from '../components/PassengerForm.vue';

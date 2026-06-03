@@ -25,10 +25,6 @@ namespace zuli_Business
                 flightIds.Add(flightId);
             }
 
-            if (request.FlightId.HasValue)
-            {
-                flightIds.Add(request.FlightId.Value);
-            }
             var distinctFlightIds = flightIds
                 .Where(flightId => flightId != Guid.Empty)
                 .Distinct()
