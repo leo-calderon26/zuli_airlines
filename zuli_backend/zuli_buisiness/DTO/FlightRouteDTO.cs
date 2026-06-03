@@ -39,5 +39,8 @@ namespace zuli_Business.DTO
         [Required(ErrorMessage = "Es necesario ingresar el precio de la primera clase")]
         [Range(1, int.MaxValue, ErrorMessage = "El precio de la primera clase debe ser mayor que cero")]
         public decimal firstClassPrice { get; set; }
+        [Required(ErrorMessage = "Es necesario ingresar el multiplicador de precio por equipaje")]
+        [Range(1, int.MaxValue, ErrorMessage = "El multiplicador de precio por equipaje debe ser mayor que cero")]
+        public decimal multiplier { get; set; }
     }
 }
