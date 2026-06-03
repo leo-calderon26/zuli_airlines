@@ -782,5 +782,3 @@ FodyWeavers.xsd
 zuli_frontend/package-lock.json
 zuli_frontend/bun.lock
 .idea
-
-**/appsettings.json

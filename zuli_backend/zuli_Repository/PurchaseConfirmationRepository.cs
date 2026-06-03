@@ -101,6 +101,8 @@ namespace zuli_Repository
                             CASE
                                 WHEN LOWER(ISNULL(Type, '')) LIKE '%checked%'
                                   OR LOWER(ISNULL(Type, '')) LIKE '%fact%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%maleta%'
+                                  OR LOWER(ISNULL(Type, '')) LIKE '%document%'
                                 THEN 1
                                 ELSE 0
                             END
@@ -137,7 +139,7 @@ namespace zuli_Repository
             const string query = @"
                 SELECT DISTINCT
                     f.Id AS FlightId,
-                    CONCAT('ZU-', RIGHT(CONVERT(VARCHAR(36), f.Id), 4)) AS FlightNumber,
+                    CONCAT('ZU-', RIGHT('0000' + CAST(fr.FlightRouteId AS VARCHAR(4)), 4)) AS FlightNumber,
                     airline.AirlineName,
                     departureAirport.Name AS OriginAirportName,
                     departureAirport.AirportCode AS OriginAirportCode,

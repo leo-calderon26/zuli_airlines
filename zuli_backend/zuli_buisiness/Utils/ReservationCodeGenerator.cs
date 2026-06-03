@@ -1,0 +1,18 @@
+namespace zuli_Business
+{
+    public static class ReservationCodeGenerator
+    {
+        public static string Generate()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+
+            return new string(
+                Enumerable
+                    .Range(0, 8)
+                    .Select(_ => chars[random.Next(chars.Length)])
+                    .ToArray()
+            );
+        }
+    }
+}
