@@ -26,37 +26,81 @@
 
     const emit = defineEmits(['purchase']);
 
-    const totalCheckedBags = computed(() =>
-        props.passengers.reduce((sum, passenger) => sum + (passenger.checkedBaggage || 0), 0)
+    function computePassengerBaggage(flightOption, defaultCheckedPrice, defaultCarryOnPrice, defaultMult) {
+        const segments = flightOption?.segments || [];
+        return props.passengers.map(passenger => {
+            let checkedTotal = 0;
+            let carryOnTotal = 0;
+            const checkedBagsCount = passenger.checkedBaggage || 0;
+            const carryOnsCount = passenger.carryOn || 0;
+            
+            const segmentsBreakdown = [];
+
+            if (segments.length === 0) {
+                let segCheckedTotal = 0;
+                const checkedBags = [];
+                for (let i = 1; i <= checkedBagsCount; i++) {
+                    const price = (defaultCheckedPrice || 0) * Math.pow(defaultMult || 1, i);
+                    segCheckedTotal += price;
+                    checkedBags.push({ number: i, price });
+                }
+                const segCarryOnTotal = carryOnsCount * (defaultCarryOnPrice || 0);
+                
+                checkedTotal += segCheckedTotal;
+                carryOnTotal += segCarryOnTotal;
+
+                segmentsBreakdown.push({
+                    label: 'Vuelo directo',
+                    checkedBags,
+                    carryOnTotal: segCarryOnTotal,
+                    segmentTotal: segCheckedTotal + segCarryOnTotal
+                });
+            } else {
+                for (const seg of segments) {
+                    let segCheckedTotal = 0;
+                    const checkedBags = [];
+                    const cp = seg.checkedPrice !== undefined && seg.checkedPrice !== null ? seg.checkedPrice : (defaultCheckedPrice || 0);
+                    const cop = seg.carryOnPrice !== undefined && seg.carryOnPrice !== null ? seg.carryOnPrice : (defaultCarryOnPrice || 0);
+                    const mult = seg.checkedBagMultiplier !== undefined && seg.checkedBagMultiplier !== null ? seg.checkedBagMultiplier : (defaultMult || 1);
+                    
+                    for (let i = 1; i <= checkedBagsCount; i++) {
+                        const price = cp * Math.pow(mult, i);
+                        segCheckedTotal += price;
+                        checkedBags.push({ number: i, price });
+                    }
+                    const segCarryOnTotal = carryOnsCount * cop;
+                    
+                    checkedTotal += segCheckedTotal;
+                    carryOnTotal += segCarryOnTotal;
+
+                    segmentsBreakdown.push({
+                        label: `${seg.origin} ➝ ${seg.destination}`,
+                        checkedBags,
+                        carryOnTotal: segCarryOnTotal,
+                        segmentTotal: segCheckedTotal + segCarryOnTotal
+                    });
+                }
+            }
+
+            return { checkedTotal, carryOnTotal, segmentsBreakdown };
+        });
+    }
+
+    const outboundPassengerBaggage = computed(() =>
+        computePassengerBaggage(props.flight, props.checkedPrice, props.carryOnPrice, props.checkedBagMultiplier)
     );
 
-    const totalCarryOns = computed(() =>
-        props.passengers.reduce((sum, passenger) => sum + (passenger.carryOn || 0), 0)
+    const returnPassengerBaggage = computed(() =>
+        computePassengerBaggage(props.returnFlight, props.returnCheckedPrice, props.returnCarryOnPrice, props.returnCheckedBagMultiplier)
     );
 
-    const checkedBagPrices = computed(() => {
-        if (props.checkedBagMultiplier <= 0 || props.checkedPrice <= 0) return [];
+    const outboundBaggageTotal = computed(() =>
+        outboundPassengerBaggage.value.reduce((sum, p) => sum + p.checkedTotal + p.carryOnTotal, 0)
+    );
 
-        const prices = [];
-
-        for (let i = 1; i <= 10; i++) {
-            prices.push((props.checkedPrice * Math.pow(props.checkedBagMultiplier, i)).toFixed(2));
-        }
-
-        return prices;
-    });
-
-    const returnCheckedBagPrices = computed(() => {
-        if (props.returnCheckedBagMultiplier <= 0 || props.returnCheckedPrice <= 0) return [];
-
-        const prices = [];
-
-        for (let i = 1; i <= 10; i++) {
-            prices.push((props.returnCheckedPrice * Math.pow(props.returnCheckedBagMultiplier, i)).toFixed(2));
-        }
-
-        return prices;
-    });
+    const returnBaggageTotal = computed(() =>
+        returnPassengerBaggage.value.reduce((sum, p) => sum + p.checkedTotal + p.carryOnTotal, 0)
+    );
 
     function handlePurchase() {
         emit('purchase');
@@ -112,25 +156,31 @@
                 Equipaje (ida)
             </p>
 
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">Maleta documentada</span>
-                <span class="font-semibold">${{ Number(checkedPrice || 0).toFixed(2) }} c/u</span>
+            <div v-if="passengers.length > 0" class="space-y-3">
+                <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
+                    <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
+                    
+                    <template v-if="passenger.checkedBaggage > 0 || passenger.carryOn > 0">
+                        <div v-for="(seg, sIdx) in outboundPassengerBaggage[pIdx].segmentsBreakdown" :key="sIdx" class="ml-2 mb-2 border-l border-white/20 pl-3">
+                            <p class="text-[10px] font-bold text-gold uppercase mb-1">{{ seg.label }}</p>
+                            <div v-for="bag in seg.checkedBags" :key="bag.number" class="flex justify-between">
+                                <span class="opacity-70 text-[11px]">↳ Maleta #{{ bag.number }}</span>
+                                <span class="font-semibold text-[11px]">${{ bag.price.toFixed(2) }}</span>
+                            </div>
+                            <div v-if="seg.carryOnTotal > 0" class="flex justify-between">
+                                <span class="opacity-70 text-[11px]">↳ Equipaje de mano (×{{ passenger.carryOn }})</span>
+                                <span class="font-semibold text-[11px]">${{ seg.carryOnTotal.toFixed(2) }}</span>
+                            </div>
+                            <div class="flex justify-between mt-1 border-t border-white/10 pt-1">
+                                <span class="opacity-70 text-[10px]">Subtotal segmento</span>
+                                <span class="font-semibold text-[10px]">${{ seg.segmentTotal.toFixed(2) }}</span>
+                            </div>
+                        </div>
+                    </template>
+                    <div v-else class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
+                </div>
             </div>
-
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">Equipaje de mano</span>
-                <span class="font-semibold">${{ carryOnPrice }} c/u</span>
-            </div>
-
-            <div v-if="totalCheckedBags > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">Maletas documentadas</span>
-                <span class="font-semibold">{{ totalCheckedBags }} uds.</span>
-            </div>
-
-            <div v-if="totalCarryOns > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">Equipaje de mano</span>
-                <span class="font-semibold">{{ totalCarryOns }} uds.</span>
-            </div>
+            <div v-else class="opacity-70 text-sm">Sin equipaje seleccionado</div>
         </div>
 
         <div v-if="isRoundTrip && returnFlight" class="border-t border-white/20 pt-5 mt-5">
@@ -173,25 +223,31 @@
                     Equipaje (vuelta)
                 </p>
 
-                <div class="flex justify-between text-sm">
-                    <span class="opacity-70">Equipaje de mano</span>
-                    <span class="font-semibold">${{ returnCarryOnPrice }} c/u</span>
-                </div>
-
-                <div v-if="totalCheckedBags > 0" class="flex justify-between text-sm">
-                    <span class="opacity-70">Maletas documentadas</span>
-                    <span class="font-semibold">
-                        <template v-for="(price, idx) in returnCheckedBagPrices.slice(0, totalCheckedBags)"
-                                  :key="idx">
-                            {{ idx + 1 }}ra: ${{ price }}{{ idx < totalCheckedBags - 1 ? ', ' : '' }}
+                <div v-if="passengers.length > 0" class="space-y-3">
+                    <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
+                        <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
+                        
+                        <template v-if="passenger.checkedBaggage > 0 || passenger.carryOn > 0">
+                            <div v-for="(seg, sIdx) in returnPassengerBaggage[pIdx].segmentsBreakdown" :key="sIdx" class="ml-2 mb-2 border-l border-white/20 pl-3">
+                                <p class="text-[10px] font-bold text-gold uppercase mb-1">{{ seg.label }}</p>
+                                <div v-for="bag in seg.checkedBags" :key="bag.number" class="flex justify-between">
+                                    <span class="opacity-70 text-[11px]">↳ Maleta #{{ bag.number }}</span>
+                                    <span class="font-semibold text-[11px]">${{ bag.price.toFixed(2) }}</span>
+                                </div>
+                                <div v-if="seg.carryOnTotal > 0" class="flex justify-between">
+                                    <span class="opacity-70 text-[11px]">↳ Equipaje de mano (×{{ passenger.carryOn }})</span>
+                                    <span class="font-semibold text-[11px]">${{ seg.carryOnTotal.toFixed(2) }}</span>
+                                </div>
+                                <div class="flex justify-between mt-1 border-t border-white/10 pt-1">
+                                    <span class="opacity-70 text-[10px]">Subtotal segmento</span>
+                                    <span class="font-semibold text-[10px]">${{ seg.segmentTotal.toFixed(2) }}</span>
+                                </div>
+                            </div>
                         </template>
-                    </span>
+                        <div v-else class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
+                    </div>
                 </div>
-
-                <div v-if="totalCarryOns > 0" class="flex justify-between text-sm">
-                    <span class="opacity-70">Equipaje de mano</span>
-                    <span class="font-semibold">{{ totalCarryOns }} uds.</span>
-                </div>
+                <div v-else class="opacity-70 text-sm">Sin equipaje seleccionado</div>
             </div>
         </div>
 
@@ -200,25 +256,30 @@
                 Resumen de Precios
             </p>
 
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Vuelo ida ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
-                </span>
-                <span class="font-semibold">${{ outboundFlightTotal.toFixed(2) }}</span>
+            <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                    <span class="opacity-70">
+                        Boletos ida (×{{ passengerCount }})
+                    </span>
+                    <span class="font-semibold">${{ outboundFlightTotal.toFixed(2) }}</span>
+                </div>
+                <div v-if="outboundBaggageTotal > 0" class="flex justify-between text-sm pl-2">
+                    <span class="opacity-70 text-xs">↳ Total equipaje</span>
+                    <span class="font-semibold text-xs">${{ outboundBaggageTotal.toFixed(2) }}</span>
+                </div>
             </div>
 
-            <div v-if="isRoundTrip && returnFlightTotal > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Vuelo vuelta ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
-                </span>
-                <span class="font-semibold">${{ returnFlightTotal.toFixed(2) }}</span>
-            </div>
-
-            <div v-if="baggageTotal > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Equipaje {{ isRoundTrip ? '(ida y vuelta)' : '(ida)' }}
-                </span>
-                <span class="font-semibold">${{ baggageTotal.toFixed(2) }}</span>
+            <div v-if="isRoundTrip && returnFlight" class="space-y-1 border-t border-white/10 pt-2">
+                <div class="flex justify-between text-sm">
+                    <span class="opacity-70">
+                        Boletos vuelta (×{{ passengerCount }})
+                    </span>
+                    <span class="font-semibold">${{ returnFlightTotal.toFixed(2) }}</span>
+                </div>
+                <div v-if="returnBaggageTotal > 0" class="flex justify-between text-sm pl-2">
+                    <span class="opacity-70 text-xs">↳ Total equipaje</span>
+                    <span class="font-semibold text-xs">${{ returnBaggageTotal.toFixed(2) }}</span>
+                </div>
             </div>
         </div>
 

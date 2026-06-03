@@ -251,6 +251,33 @@ namespace zuli_backend.Tests
         }
 
         [Test]
+        public async Task GetConfirmationPageAsync_ReturnsBreakdownWithBaggagePrices()
+        {
+            var reservationCode = "ZUTEST001";
+            var confirmationEntity = BuildValidConfirmationEntity();
+            var confirmationDto = BuildValidConfirmationDto();
+
+            _purchaseConfirmationRepositoryMock
+                .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
+                .ReturnsAsync(confirmationEntity);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
+                .Returns(confirmationDto);
+
+            var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode);
+
+            Assert.That(result.Breakdown, Is.Not.Null);
+            Assert.That(result.Breakdown.Flights.Count, Is.EqualTo(1));
+            Assert.That(result.Breakdown.Flights[0].Passengers.Count, Is.EqualTo(1));
+            Assert.That(result.Breakdown.Flights[0].Passengers[0].TicketPrice, Is.EqualTo(200m)); // Económica = TouristPrice
+            Assert.That(result.Breakdown.Flights[0].Passengers[0].CheckedBags.Count, Is.EqualTo(1));
+            Assert.That(result.Breakdown.Flights[0].Passengers[0].CheckedBags[0].Price, Is.EqualTo(75m)); // 50 * 1.5
+            Assert.That(result.Breakdown.Flights[0].Passengers[0].CarryOnTotal, Is.EqualTo(25m));
+            Assert.That(result.Breakdown.Flights[0].Passengers[0].PassengerTotal, Is.EqualTo(300m)); // 200 + 75 + 25
+        }
+
+        [Test]
         public void CompleteConfirmationAsync_ReservationDoesNotExist_ThrowsZuliNotFoundException()
         {
             var reservationCode = "INVALID01";
@@ -450,7 +477,12 @@ namespace zuli_backend.Tests
                         DestinationAirportName = "Tocumen International Airport",
                         DestinationAirportCode = "PTY",
                         DepartureDateTime = new DateTime(2026, 8, 18, 9, 20, 0),
-                        ArrivalDateTime = new DateTime(2026, 8, 18, 10, 45, 0)
+                        ArrivalDateTime = new DateTime(2026, 8, 18, 10, 45, 0),
+                        CheckedPrice = 50m,
+                        CarryOnPrice = 25m,
+                        CheckedBagMultiplier = 1.5m,
+                        TouristPrice = 200m,
+                        FirstClassPrice = 500m
                     }
                 }
             };
@@ -492,7 +524,12 @@ namespace zuli_backend.Tests
                         DestinationAirportName = "Tocumen International Airport",
                         DestinationAirportCode = "PTY",
                         DepartureDateTime = new DateTime(2026, 8, 18, 9, 20, 0),
-                        ArrivalDateTime = new DateTime(2026, 8, 18, 10, 45, 0)
+                        ArrivalDateTime = new DateTime(2026, 8, 18, 10, 45, 0),
+                        CheckedPrice = 50m,
+                        CarryOnPrice = 25m,
+                        CheckedBagMultiplier = 1.5m,
+                        TouristPrice = 200m,
+                        FirstClassPrice = 500m
                     }
                 }
             };

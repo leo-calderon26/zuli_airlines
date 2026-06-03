@@ -38,7 +38,9 @@ namespace zuli_Business
                 throw new ZuliNotFoundException("No se encontró la reserva indicada.");
             }
 
-            return _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
+            var confirmation = _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
+            confirmation.Breakdown = BuildPurchaseBreakdown(confirmation);
+            return confirmation;
         }
 
         public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(string reservationCode)
@@ -51,6 +53,7 @@ namespace zuli_Business
             }
 
             var confirmation = _mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity);
+            confirmation.Breakdown = BuildPurchaseBreakdown(confirmation);
 
             ValidateConfirmationData(confirmation);
 
@@ -104,6 +107,72 @@ namespace zuli_Business
                 firstError.PropertyName,
                 firstError.ErrorMessage
             );
+        }
+
+        public static PurchaseBreakdownDTO BuildPurchaseBreakdown(PurchaseConfirmationPageDTO confirmation)
+        {
+            var breakdown = new PurchaseBreakdownDTO();
+            decimal grandTotal = 0;
+
+            var isFirstClass = confirmation.FlightClass.Equals(
+                "Primera Clase",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            foreach (var flight in confirmation.Flights)
+            {
+                var checkedPrice = flight.CheckedPrice ?? 0;
+                var carryOnPrice = flight.CarryOnPrice ?? 0;
+                var multiplier = flight.CheckedBagMultiplier > 0 ? flight.CheckedBagMultiplier : 1m;
+                var ticketPrice = isFirstClass ? flight.FirstClassPrice : flight.TouristPrice;
+
+                var flightBreakdown = new FlightBreakdownDTO
+                {
+                    FlightNumber = flight.FlightNumber,
+                    OriginAirportCode = flight.OriginAirportCode,
+                    DestinationAirportCode = flight.DestinationAirportCode
+                };
+
+                decimal flightTotal = 0;
+
+                foreach (var passenger in confirmation.Passengers)
+                {
+                    var passengerBreakdown = new PassengerBreakdownDTO
+                    {
+                        FullName = passenger.FullName,
+                        TicketPrice = ticketPrice
+                    };
+
+                    decimal checkedBaggageTotal = 0;
+                    for (int i = 1; i <= passenger.CheckedBaggageQuantity; i++)
+                    {
+                        var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+                        checkedBaggageTotal += bagPrice;
+                        passengerBreakdown.CheckedBags.Add(new BaggageBreakdownItemDTO
+                        {
+                            BagNumber = i,
+                            Type = "Maleta",
+                            Price = bagPrice
+                        });
+                    }
+
+                    var carryOnTotal = passenger.CarryOnQuantity * carryOnPrice;
+                    passengerBreakdown.CarryOnQuantity = passenger.CarryOnQuantity;
+                    passengerBreakdown.CarryOnTotal = carryOnTotal;
+                    passengerBreakdown.PassengerTotal = ticketPrice + checkedBaggageTotal + carryOnTotal;
+
+                    flightBreakdown.Passengers.Add(passengerBreakdown);
+                    flightTotal += passengerBreakdown.PassengerTotal;
+                }
+
+                flightBreakdown.FlightTotal = flightTotal;
+                breakdown.Flights.Add(flightBreakdown);
+                grandTotal += flightTotal;
+            }
+
+            breakdown.GrandTotal = grandTotal;
+
+            return breakdown;
         }
     }
 }

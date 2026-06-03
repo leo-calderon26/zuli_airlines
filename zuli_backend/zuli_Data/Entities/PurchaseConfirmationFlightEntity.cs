@@ -15,5 +15,10 @@ namespace zuli_Data.Entities
 
         public DateTime DepartureDateTime { get; set; }
         public DateTime ArrivalDateTime { get; set; }
+        public decimal? CheckedPrice { get; set; }
+        public decimal? CarryOnPrice { get; set; }
+        public decimal CheckedBagMultiplier { get; set; }
+        public decimal TouristPrice { get; set; }
+        public decimal FirstClassPrice { get; set; }
     }
 }

@@ -89,6 +89,7 @@
         if (!reservationCode) {
             return;
         }
+        store.reset();
         router.push({
             name: 'purchaseConfirmation',
             params: {
