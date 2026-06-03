@@ -28,8 +28,11 @@
 
                 <router-link
                     to="/"
-                    class="inline-block rounded-md bg-white/5 px-4 py-2 font-semibold text-white transition hover:bg-black/15"
+                    class="inline-flex items-center gap-2 rounded-lg bg-white/90 px-5 py-2 font-semibold text-primary shadow-sm ring-1 ring-white/50 backdrop-blur-sm transition hover:bg-white hover:shadow-md"
                 >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                    </svg>
                     Modificar Búsqueda
                 </router-link>
             </div>
