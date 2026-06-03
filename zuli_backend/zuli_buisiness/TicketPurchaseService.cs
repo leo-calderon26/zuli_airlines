@@ -58,6 +58,11 @@ namespace zuli_Business
                 flightIds
             );
 
+            await _baggageRegistrationService.ValidateBaggageCapacity(
+                request.Passengers,
+                flightIds
+            );
+
             var totalPayment = CalculateTotalPayment(request, flights);
             var reservationCode = ReservationCodeGenerator.Generate();
 
@@ -73,11 +78,13 @@ namespace zuli_Business
 
             await LinkPassengersToReservation(passengerIds, reservationId);
             await CreateAllBoardingPasses(reservationCode, passengerIds, flightIds);
+
             await _baggageRegistrationService.RegisterAllBaggage(
                 request.Passengers,
                 passengerIds,
                 reservationId
             );
+
             await SendPurchaseEmails(reservationCode);
 
             return new TicketPurchaseResponseDTO

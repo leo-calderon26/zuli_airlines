@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { purchaseTickets } from "../service/ticketService";
 import { checkFlightAvailability } from "../../landing/service/flightSearchService";
 
+
 export const useTicketStore = defineStore("ticket", () => {
     const selectedFlight = ref(null);
     const passengers = ref([]);
@@ -27,6 +28,8 @@ export const useTicketStore = defineStore("ticket", () => {
     const outboundFlightTotal = ref(0);
     const returnFlightTotal = ref(0);
     const baggageTotal = ref(0);
+
+    const maxCheckedBaggagePerPassenger = 5;
 
     function getClassPrice(flight) {
         if (!flight) return 0;
@@ -224,6 +227,20 @@ export const useTicketStore = defineStore("ticket", () => {
             return false;
         }
     };
+    function getValidationMessages(errors) {
+        if (!errors) {
+            return [];
+        }
+
+        return Object.values(errors)
+            .flatMap((error) => Array.isArray(error) ? error : [error])
+            .filter(Boolean);
+    }
+
+    function getFirstValidationMessage(errors) {
+        const messages = getValidationMessages(errors);
+        return messages[0] || "Errores de validación";
+    }
 
     const purchase = async () => {
         isLoading.value = true;
@@ -244,9 +261,11 @@ export const useTicketStore = defineStore("ticket", () => {
                     flightRouteId: flightRoute.flightRouteId,
                     departureDate: flightRoute.departureDate
                 })),
-                passengers: passengers.value.map((passenger) => {
-                    const baggageItems = [];
-                    const checkedCount = passenger.checkedBaggage || 0;
+                passengers: passengers.value.map((passenger) => {const baggageItems = [];
+                    const checkedCount = Math.min(
+                        Math.max(Number(passenger.checkedBaggage) || 0, 0),
+                        maxCheckedBaggagePerPassenger
+                    );
 
                     for (let i = 0; i < checkedCount; i++) {
                         baggageItems.push({
@@ -264,36 +283,39 @@ export const useTicketStore = defineStore("ticket", () => {
                         gender: passenger.gender,
                         passportCountry: passenger.passportCountry,
                         passportDueDate: passenger.passportDueDate,
-                        checkedBaggage: Math.min(Math.max(checkedCount, 0), 10),
+                        checkedBaggage: checkedCount,
                         baggageItems,
-                        carryOn: passenger.carryOn
+                        carryOn: Math.min(
+                            Math.max(Number(passenger.carryOn) || 0, 0),
+                            1
+                        )
                     };
-                }),
-                buyer: {
-                    firstName: buyerFirstName.value,
-                    firstLastName: buyerFirstLastName.value,
-                    secondLastName: buyerSecondLastName.value,
-                    birthDate: buyerBirthDate.value,
-                    email: contactEmail.value,
-                    phone: contactPhone.value
-                },
-                paymentMethod: paymentMethod.value,
-                reservationOrigin: "Web"
-            };
+                    }),
+                    buyer: {
+                        firstName: buyerFirstName.value,
+                        firstLastName: buyerFirstLastName.value,
+                        secondLastName: buyerSecondLastName.value,
+                        birthDate: buyerBirthDate.value,
+                        email: contactEmail.value,
+                        phone: contactPhone.value
+                    },
+                    paymentMethod: paymentMethod.value,
+                    reservationOrigin: "Web"
+                };
 
             purchaseResult.value = await purchaseTickets(payload);
         } catch (err) {
             const data = err.response?.data;
 
-            if (data?.detail) {
+            if (data?.errors) {
+                error.value = {
+                    message: getFirstValidationMessage(data.errors),
+                    validationErrors: data.errors
+                };
+            } else if (data?.detail) {
                 error.value = {
                     message: data.detail,
                     validationErrors: null
-                };
-            } else if (data?.errors) {
-                error.value = {
-                    message: "Errores de validación",
-                    validationErrors: data.errors
                 };
             } else {
                 error.value = {

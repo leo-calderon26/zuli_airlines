@@ -147,6 +147,7 @@ builder.Services.AddScoped<IFlightResolverService, FlightResolverService>();
 builder.Services.AddScoped<IPassengerValidationService, PassengerValidationService>();
 builder.Services.AddScoped<IPassengerCreationService, PassengerCreationService>();
 builder.Services.AddScoped<IBaggageRegistrationService, BaggageRegistrationService>();
+builder.Services.AddValidatorsFromAssemblyContaining<TicketPurchaseRequestValidator>();
 
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();

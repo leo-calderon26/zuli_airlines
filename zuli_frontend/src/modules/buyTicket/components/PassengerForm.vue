@@ -180,7 +180,8 @@ function updatePassenger(index, field, value) {
                         <span class="w-6 text-center font-semibold">{{ passenger.checkedBaggage || 0 }}</span>
                         <button
                             type="button"
-                            @click="updatePassenger(index, 'checkedBaggage', (passenger.checkedBaggage || 0) + 1)"
+                            :disabled="(passenger.checkedBaggage || 0) >= 5"
+                            @click="updatePassenger(index, 'checkedBaggage', Math.min(5, (passenger.checkedBaggage || 0) + 1))"
                             class="w-8 h-8 flex items-center justify-center border border-border-soft bg-white text-sm font-bold hover:bg-[#F3DADA] transition"
                         >+</button>
                     </div>
@@ -197,7 +198,7 @@ function updatePassenger(index, field, value) {
                             @change="updatePassenger(index, 'carryOn', $event.target.checked ? 1 : 0)"
                             class="w-4 h-4 accent-sumary"
                         />
-                        <span class="text-sm font-semibold">{{ passenger.carryOn ? '1 equipaje' : 'Sin equipaje' }}</span>
+                        <span class="text-sm font-semibold">Incluir equipaje de mano</span>
                     </label>
                 </div>
             </div>
