@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Mapster;
 using System;
 using System.Threading.Tasks;
+using FluentValidation;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Mappings;
@@ -33,8 +34,7 @@ namespace zuli_backend.Tests
             _service = new AirportService(
                 _airportRepositoryMock.Object,
                 _userRepositoryMock.Object,
-                new AirportValidator(),
-                new AirportSearchValidator());
+                new AirportValidator());
         }
 
         [Test]
@@ -53,6 +53,8 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock.Setup(r => r.IsAdmin(airport.businessId)).ReturnsAsync(true);
             _airportRepositoryMock.Setup(r => r.GetByCodeAsync("SJO")).ReturnsAsync(existingAirport);
+
+
             _airportRepositoryMock.Setup(r => r.UpdateAirportAsync(It.IsAny<AirportEntity>())).Returns(Task.CompletedTask);
 
             var result = await _service.UpdateAirportAsync(airportCode, airport);
