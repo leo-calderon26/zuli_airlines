@@ -51,7 +51,9 @@
                 store.setFlightRoutes(flightData.flight);
             }
 
-            store.setPassengers(parseInt(route.query.seats) || 1);
+            const seats = parseInt(route.query.seats) || 1;
+            store.setPassengers(1);
+            store.maxPassengers = seats;
 
             if (route.query.roundTrip === 'true' && route.query.returnFlight) {
                 const returnFlight = JSON.parse(route.query.returnFlight);
@@ -137,6 +139,7 @@
                                    :carry-on-price="store.selectedFlight?.carryOnPrice || 0"
                                    :max-weight-per-bag="store.selectedFlight?.maxWeightPerBag || 23"
                                    :errors="passengerErrors"
+                                   :maxPassengers="store.maxPassengers"
                                    :contactErrors="contactErrors"
                                    @update:passengers="store.passengers = $event"
                                    @update:buyerFirstName="store.buyerFirstName = $event"
