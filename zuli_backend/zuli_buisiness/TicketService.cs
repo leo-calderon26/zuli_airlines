@@ -15,6 +15,9 @@ namespace zuli_Business
         private readonly IBaggageRepository _baggageRepository;
         private readonly IFlightRepository _flightRepository;
         private readonly IBuyerRepository _buyerRepository;
+        private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
+        private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
         public TicketService(
@@ -23,6 +26,9 @@ namespace zuli_Business
             IBaggageRepository baggageRepository,
             IFlightRepository flightRepository,
             IBuyerRepository buyerRepository,
+            IPurchaseConfirmationRepository purchaseConfirmationRepository,
+            IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
+            IEmailService emailService,
             IMapper mapper)
         {
             _personRepository = personRepository;
@@ -30,17 +36,30 @@ namespace zuli_Business
             _baggageRepository = baggageRepository;
             _flightRepository = flightRepository;
             _buyerRepository = buyerRepository;
+            _purchaseConfirmationRepository = purchaseConfirmationRepository;
+            _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
         {
+            ValidateRequestPassengersAreUnique(request.Passengers);
+
             var flightIds = await ResolveFlightIds(request);
             var flights = await GetFlights(flightIds);
 
-            var totalPayment = CalculateTotalPayment(request, flights);
-            var reservationCode = GenerateReservationCode();
+            await ValidatePassengersDoNotExistInFlights(
+                request.Passengers,
+                flightIds
+            );
 
+            var totalPayment = CalculateTotalPayment(
+                request,
+                flights
+            );
+
+            var reservationCode = GenerateReservationCode();
             var buyerId = await CreateBuyer(request.Buyer);
             var passengerIds = await CreateAllPassengers(request.Passengers);
 
@@ -51,9 +70,24 @@ namespace zuli_Business
                 buyerId
             );
 
-            await LinkPassengersToReservation(passengerIds, reservationId);
-            await CreateAllBoardingPasses(reservationCode, passengerIds, flightIds);
-            await RegisterAllBaggage(request.Passengers, passengerIds, reservationId);
+            await LinkPassengersToReservation(
+                passengerIds,
+                reservationId
+            );
+
+            await CreateAllBoardingPasses(
+                reservationCode,
+                passengerIds,
+                flightIds
+            );
+
+            await RegisterAllBaggage(
+                request.Passengers,
+                passengerIds,
+                reservationId
+            );
+
+            await SendPurchaseEmails(reservationCode);
 
             return new TicketPurchaseResponseDTO
             {
@@ -297,13 +331,138 @@ namespace zuli_Business
                 + (passenger.CarryOn * carryOnPrice);
         }
 
+        private static void ValidateRequestPassengersAreUnique(
+            List<PassengerTicketDTO> passengers)
+        {
+            var passengerKeys = new HashSet<string>();
+            var errors = new Dictionary<string, List<string>>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                var passengerKey = BuildPassengerKey(passengers[i]);
+
+                if (passengerKeys.Add(passengerKey))
+                {
+                    continue;
+                }
+
+                errors[$"passengers[{i}]"] = new List<string>
+                {
+                    "Este pasajero está repetido en la compra actual."
+                };
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
+
+        private async Task ValidatePassengersDoNotExistInFlights(
+            List<PassengerTicketDTO> passengers,
+            List<Guid> flightIds)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                var passenger = passengers[i];
+
+                var alreadyExists = await _reservationRepository.PassengerExistsInFlights(
+                    flightIds,
+                    passenger.FirstName,
+                    passenger.FirstLastName,
+                    passenger.SecondLastName,
+                    passenger.BirthDate,
+                    passenger.PassportCountry
+                );
+
+                if (!alreadyExists)
+                {
+                    continue;
+                }
+
+                errors[$"passengers[{i}]"] = new List<string>
+                {
+                    "Este pasajero ya tiene un espacio registrado en uno de los vuelos seleccionados."
+                };
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
+
+        private async Task SendPurchaseEmails(string reservationCode)
+        {
+            var confirmation = await _purchaseConfirmationRepository
+                .GetPurchaseConfirmationAsync(reservationCode);
+
+            if (confirmation == null)
+            {
+                throw new ZuliNotFoundException("No se encontró la confirmación de compra.");
+            }
+
+            var confirmationDto = _mapper.Map<PurchaseConfirmationPageDTO>(confirmation);
+
+            var invoicePdf = _purchaseConfirmationPdfService.GenerateInvoicePdf(confirmationDto);
+            var confirmationPdf = _purchaseConfirmationPdfService.GenerateConfirmationPdf(confirmationDto);
+
+            await _emailService.SendInvoiceEmailAsync(
+                confirmationDto.BuyerEmail,
+                confirmationDto.BuyerName,
+                confirmationDto.ReservationCode,
+                invoicePdf
+            );
+
+            await _emailService.SendPurchaseConfirmationEmailAsync(
+                confirmationDto.BuyerEmail,
+                confirmationDto.BuyerName,
+                confirmationDto.ReservationCode,
+                confirmationPdf
+            );
+        }
+
+        private static string BuildPassengerKey(PassengerTicketDTO passenger)
+        {
+            return string.Join(
+                "|",
+                Normalize(passenger.FirstName),
+                Normalize(passenger.FirstLastName),
+                Normalize(passenger.SecondLastName),
+                NormalizeDate(passenger.BirthDate),
+                Normalize(passenger.PassportCountry)
+            );
+        }
+
+        private static string Normalize(string value)
+        {
+            return value
+                .Trim()
+                .ToLowerInvariant();
+        }
+
+        private static string NormalizeDate(string value)
+        {
+            if (!DateTime.TryParse(value, out var date))
+            {
+                return value.Trim();
+            }
+
+            return date
+                .Date
+                .ToString("yyyy-MM-dd");
+        }
+
         private static string GenerateReservationCode()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             var random = new Random();
 
             return new string(
-                Enumerable.Range(0, 8)
+                Enumerable
+                    .Range(0, 8)
                     .Select(_ => chars[random.Next(chars.Length)])
                     .ToArray()
             );

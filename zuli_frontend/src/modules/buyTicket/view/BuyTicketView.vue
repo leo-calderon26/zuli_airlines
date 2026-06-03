@@ -89,12 +89,9 @@
         }
 
         router.push({
-            name: 'purchase-confirmation',
+            name: 'purchaseConfirmation',
             params: {
                 reservationCode
-            },
-            query: {
-                complete: 'true'
             }
         });
     };
