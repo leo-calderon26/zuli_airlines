@@ -167,7 +167,7 @@ namespace zuli_Repository
                 TargetDate = targetDate, 
                 Seats = seats, 
                 TargetDayMask = targetDayMask, 
-                CurrentTime = DateTime.UtcNow  
+                CurrentTime = DateTime.Now  
             };
 
             return await connection.QueryAsync<RawFlightEntity>(sql, parameters);
