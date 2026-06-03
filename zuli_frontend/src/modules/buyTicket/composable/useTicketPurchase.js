@@ -36,6 +36,23 @@ export function useTicketPurchase() {
         return date > today;
     }
 
+    function isUnderage(dateString) {
+        if (!dateString) return false;
+
+        const today = new Date();
+        const [year, month, day] = dateString.split('-');
+        const birthDate = new Date(year, month - 1, day);
+
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        return age < 18;
+    }
+
     function phoneDigitCount(value) {
         return value.replace(/\D/g, "").length;
     }
@@ -95,6 +112,8 @@ export function useTicketPurchase() {
             newErrors.buyerBirthDate = "Fecha de nacimiento requerida";
         } else if (isFutureDate(store.buyerBirthDate)) {
             newErrors.buyerBirthDate = "La fecha de nacimiento no puede ser futura";
+        } else if (isUnderage(store.buyerBirthDate)) {
+            newErrors.buyerBirthDate = "El comprador debe ser mayor de 18 años";
         }
 
         if (!store.contactEmail) {
