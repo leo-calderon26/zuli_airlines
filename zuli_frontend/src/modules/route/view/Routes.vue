@@ -37,98 +37,101 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col min-h-screen bg-[#F7F3F2]">
     <AdminNavBar />
     <main class="flex-1 pb-8">
       <div class="page-shell">
-        <form class="form-card" @submit.prevent="submit">
-          
-          <div class="form-grid">
-            <AppAutocomplete
-              v-model="form.origin"
-              label="Aeropuerto origen"
-              :error="errors.fields.origin"
-              :suggestions="originSuggestions"
-              maxlength="40"
-              @update:model-value="handleAirportInput('origin')"
-              @select="applySuggestion('origin', $event)"
-            >
-              <template #suggestion="{ suggestion }">
-                <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
-                <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
-              </template>
-            </AppAutocomplete>
+        <form class="space-y-6" @submit.prevent="submit">
 
-            <AppAutocomplete
-              v-model="form.destination"
-              label="Aeropuerto destino"
-              :error="errors.fields.destination"
-              :suggestions="destinationSuggestions"
-              maxlength="40"
-              @update:model-value="handleAirportInput('destination')"
-              @select="applySuggestion('destination', $event)"
-            >
-              <template #suggestion="{ suggestion }">
-                <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
-                <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
-              </template>
-            </AppAutocomplete>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-content">Hora de salida</label>
-              <input
-                v-model="form.departureTime"
-                type="time"
-                step="60"
-                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                :class="{ 'border-error text-error': errors.fields.departureTime }"
-              />
-              <p v-if="errors.fields.departureTime" class="mt-1 text-sm text-error">{{ errors.fields.departureTime }}</p>
-            </div>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-content">Hora de llegada</label>
-              <input
-                v-model="form.arrivalTime"
-                type="time"
-                step="60"
-                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                :class="{ 'border-error text-error': errors.fields.arrivalTime }"
-              />
-              <p v-if="errors.fields.arrivalTime" class="mt-1 text-sm text-error">{{ errors.fields.arrivalTime }}</p>
-            </div>
-
-            <AppInput
-              v-model="form.duration"
-              label="Duracion del vuelo (min)"
-              type="number"
-              min="1"
-              max="1140"
-              step="1"
-              :error="errors.fields.duration"
-            />
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-content">Aeronave</label>
-              <select
-                v-model="form.aircraftId"
-                class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                :class="{ 'border-error text-error': errors.fields.aircraftId }"
-                :disabled="aircraftLoading"
+          <div class="border border-border-soft bg-text-box p-8">
+            <h3 class="text-2xl font-bold text-font mb-6">Detalles de la ruta</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AppAutocomplete
+                v-model="form.origin"
+                label="Aeropuerto origen"
+                :error="errors.fields.origin"
+                :suggestions="originSuggestions"
+                maxlength="40"
+                @update:model-value="handleAirportInput('origin')"
+                @select="applySuggestion('origin', $event)"
               >
-                <option value="" disabled>Seleccione una aeronave</option>
-                <option
-                  v-for="ac in aircraftList"
-                  :key="ac.aircraftId || ac.id"
-                  :value="ac.aircraftId || ac.id"
-                >{{ ac.model }}</option>
-              </select>
-              <p v-if="errors.fields.aircraftId" class="mt-1 text-sm text-error">{{ errors.fields.aircraftId }}</p>
-              <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
+                <template #suggestion="{ suggestion }">
+                  <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
+                  <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
+                </template>
+              </AppAutocomplete>
+
+              <AppAutocomplete
+                v-model="form.destination"
+                label="Aeropuerto destino"
+                :error="errors.fields.destination"
+                :suggestions="destinationSuggestions"
+                maxlength="40"
+                @update:model-value="handleAirportInput('destination')"
+                @select="applySuggestion('destination', $event)"
+              >
+                <template #suggestion="{ suggestion }">
+                  <span class="suggestion-code">{{ getSuggestionCode(suggestion) }}</span>
+                  <span class="suggestion-label">{{ getSuggestionLabel(suggestion) }}</span>
+                </template>
+              </AppAutocomplete>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-content">Hora de salida</label>
+                <input
+                  v-model="form.departureTime"
+                  type="time"
+                  step="60"
+                  class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  :class="{ 'border-error text-error': errors.fields.departureTime }"
+                />
+                <p v-if="errors.fields.departureTime" class="mt-1 text-sm text-error">{{ errors.fields.departureTime }}</p>
+              </div>
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-content">Hora de llegada</label>
+                <input
+                  v-model="form.arrivalTime"
+                  type="time"
+                  step="60"
+                  class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 placeholder:text-font/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  :class="{ 'border-error text-error': errors.fields.arrivalTime }"
+                />
+                <p v-if="errors.fields.arrivalTime" class="mt-1 text-sm text-error">{{ errors.fields.arrivalTime }}</p>
+              </div>
+
+              <AppInput
+                v-model="form.duration"
+                label="Duracion del vuelo (min)"
+                type="number"
+                min="1"
+                max="1140"
+                step="1"
+                :error="errors.fields.duration"
+              />
+
+              <div>
+                <label class="mb-2 block text-sm font-medium text-content">Aeronave</label>
+                <select
+                  v-model="form.aircraftId"
+                  class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  :class="{ 'border-error text-error': errors.fields.aircraftId }"
+                  :disabled="aircraftLoading"
+                >
+                  <option value="" disabled>Seleccione una aeronave</option>
+                  <option
+                    v-for="ac in aircraftList"
+                    :key="ac.aircraftId || ac.id"
+                    :value="ac.aircraftId || ac.id"
+                  >{{ ac.model }}</option>
+                </select>
+                <p v-if="errors.fields.aircraftId" class="mt-1 text-sm text-error">{{ errors.fields.aircraftId }}</p>
+                <p v-if="aircraftLoading" class="mt-1 text-xs text-font/60">Cargando aeronaves...</p>
+              </div>
             </div>
           </div>
 
-          <div class="border border-border-soft bg-text-box p-8 mt-6">
+          <div class="border border-border-soft bg-text-box p-8">
             <h3 class="text-2xl font-bold text-font mb-6">Precios</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <AppInput
@@ -170,12 +173,12 @@ onMounted(() => {
             </div>
           </div>
 
-        <div class="flex justify-end">
-          <AppButton type="submit" variant="primary" size="lg" :loading="isLoading">
-            {{ isLoading ? 'Guardando...' : 'Guardar ruta' }}
-          </AppButton>
-        </div>
-      </form>
+          <div class="flex justify-end">
+            <AppButton type="submit" variant="primary" size="lg" :loading="isLoading">
+              {{ isLoading ? 'Guardando...' : 'Guardar ruta' }}
+            </AppButton>
+          </div>
+        </form>
       </div>
     </main>
 
