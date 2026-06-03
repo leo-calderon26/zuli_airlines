@@ -2,7 +2,6 @@ using Mapster;
 using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
-using zuli_Business.Validation.Strategies;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -16,6 +15,9 @@ namespace zuli_Business
         private readonly IBaggageRepository _baggageRepository;
         private readonly IFlightRepository _flightRepository;
         private readonly IBuyerRepository _buyerRepository;
+        private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
+        private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
         public TicketService(
@@ -24,6 +26,9 @@ namespace zuli_Business
             IBaggageRepository baggageRepository,
             IFlightRepository flightRepository,
             IBuyerRepository buyerRepository,
+            IPurchaseConfirmationRepository purchaseConfirmationRepository,
+            IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
+            IEmailService emailService,
             IMapper mapper)
         {
             _personRepository = personRepository;
@@ -31,42 +36,58 @@ namespace zuli_Business
             _baggageRepository = baggageRepository;
             _flightRepository = flightRepository;
             _buyerRepository = buyerRepository;
+            _purchaseConfirmationRepository = purchaseConfirmationRepository;
+            _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
         {
-            for (int i = 0; i < request.FlightRoutes.Count; i++) {
-                var flightId = await _flightRepository.GetFlightByRoute(request.FlightRoutes[i].FlightRouteId, request.FlightRoutes[i].DepartureDate);
-                if (flightId == Guid.Empty)
-                {
-                    request.FlightIdList.Add(await _flightRepository.CreateFlight(request.FlightRoutes[i].FlightRouteId, request.FlightRoutes[i].DepartureDate));
-                }
-                else {
-                    request.FlightIdList.Add(flightId);
-                }
-            }
+            ValidateRequestPassengersAreUnique(request.Passengers);
 
-            var flight = await _flightRepository.GetFlightById(request.FlightId.Value);
-            if (flight == null)
-                throw new ZuliNotFoundException("Vuelo no encontrado");
+            var flightIds = await ResolveFlightIds(request);
+            var flights = await GetFlights(flightIds);
 
-            FlightEntity? returnFlight = null;
-            if (request.ReturnFlightId != null)
-            {
-                returnFlight = await _flightRepository.GetFlightById(request.ReturnFlightId.Value);
-            }
+            await ValidatePassengersDoNotExistInFlights(
+                request.Passengers,
+                flightIds
+            );
 
-            var totalPayment = CalculateTotalPayment(request, flight, returnFlight);
+            var totalPayment = CalculateTotalPayment(
+                request,
+                flights
+            );
+
             var reservationCode = GenerateReservationCode();
-
             var buyerId = await CreateBuyer(request.Buyer);
             var passengerIds = await CreateAllPassengers(request.Passengers);
 
-            var reservationId = await CreateReservation(reservationCode, request, totalPayment, buyerId);
-            await LinkPassengersToReservation(passengerIds, reservationId);
-            await CreateAllBoardingPasses(reservationCode, passengerIds, request);
-            await RegisterAllBaggage(request.Passengers, passengerIds, reservationId);
+            var reservationId = await CreateReservation(
+                reservationCode,
+                request,
+                totalPayment,
+                buyerId
+            );
+
+            await LinkPassengersToReservation(
+                passengerIds,
+                reservationId
+            );
+
+            await CreateAllBoardingPasses(
+                reservationCode,
+                passengerIds,
+                flightIds
+            );
+
+            await RegisterAllBaggage(
+                request.Passengers,
+                passengerIds,
+                reservationId
+            );
+
+            await SendPurchaseEmails(reservationCode);
 
             return new TicketPurchaseResponseDTO
             {
@@ -77,18 +98,127 @@ namespace zuli_Business
             };
         }
 
+        private async Task<List<Guid>> ResolveFlightIds(TicketPurchaseRequestDTO request)
+        {
+            var flightIds = new List<Guid>();
+
+            foreach (var flightRoute in request.FlightRoutes)
+            {
+                var flightId = await ResolveFlightId(flightRoute);
+                flightIds.Add(flightId);
+            }
+
+            if (request.FlightId.HasValue)
+            {
+                flightIds.Add(request.FlightId.Value);
+            }
+
+            if (request.ReturnFlightId.HasValue)
+            {
+                flightIds.Add(request.ReturnFlightId.Value);
+            }
+
+            var distinctFlightIds = flightIds
+                .Where(flightId => flightId != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            if (distinctFlightIds.Count == 0)
+            {
+                throw new ZuliNotFoundException("Vuelo no encontrado");
+            }
+
+            request.FlightIdList = distinctFlightIds;
+
+            return distinctFlightIds;
+        }
+
+        private async Task<Guid> ResolveFlightId(SummarizedFlightRoute flightRoute)
+        {
+            var existingFlightId = await _flightRepository.GetFlightByRoute(
+                flightRoute.FlightRouteId,
+                flightRoute.DepartureDate
+            );
+
+            if (existingFlightId != Guid.Empty)
+            {
+                return existingFlightId;
+            }
+
+            return await _flightRepository.CreateFlight(
+                flightRoute.FlightRouteId,
+                flightRoute.DepartureDate
+            );
+        }
+
+        private async Task<List<FlightEntity>> GetFlights(List<Guid> flightIds)
+        {
+            var flights = new List<FlightEntity>();
+
+            foreach (var flightId in flightIds)
+            {
+                var flight = await _flightRepository.GetFlightById(flightId);
+
+                if (flight == null)
+                {
+                    throw new ZuliNotFoundException("Vuelo no encontrado");
+                }
+
+                flights.Add(flight);
+            }
+
+            return flights;
+        }
+
         private async Task<int> CreateBuyer(BuyerTicketDTO buyerDto)
         {
             var buyer = _mapper.Map<BuyerEntity>(buyerDto);
             return await _buyerRepository.CreateBuyer(buyer);
         }
 
-        private async Task CreateAllBoardingPasses(string reservationCode, List<int> passengerIds, TicketPurchaseRequestDTO request)
+        private async Task<List<int>> CreateAllPassengers(List<PassengerTicketDTO> passengers)
         {
-            var flightIds = new List<Guid> { request.FlightId!.Value };
-            if (request.ReturnFlightId != null)
-                flightIds.Add(request.ReturnFlightId.Value);
+            var passengerIds = new List<int>();
 
+            foreach (var passenger in passengers)
+            {
+                var person = passenger.Adapt<PersonEntity>();
+                var personId = await _personRepository.CreatePerson(person);
+
+                var passport = new PassportEntity
+                {
+                    PassengerId = personId,
+                    DueDate = DateTime.Parse(passenger.PassportDueDate),
+                    PassportCountry = passenger.PassportCountry
+                };
+
+                await _personRepository.CreatePassport(passport);
+
+                passengerIds.Add(personId);
+            }
+
+            return passengerIds;
+        }
+
+        private async Task LinkPassengersToReservation(
+            List<int> passengerIds,
+            int reservationId)
+        {
+            foreach (var passengerId in passengerIds)
+            {
+                await _reservationRepository.CreatePassengerReservation(new PassengerReservationEntity
+                {
+                    PassengerId = passengerId,
+                    ReservationId = reservationId
+                });
+            }
+        }
+
+        private async Task CreateAllBoardingPasses(
+            string reservationCode,
+            List<int> passengerIds,
+            List<Guid> flightIds)
+        {
             foreach (var passengerId in passengerIds)
             {
                 foreach (var flightId in flightIds)
@@ -103,92 +233,85 @@ namespace zuli_Business
             }
         }
 
-        private static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, FlightEntity flight, FlightEntity? returnFlight = null)
+        private async Task RegisterAllBaggage(
+            List<PassengerTicketDTO> passengers,
+            List<int> passengerIds,
+            int reservationId)
         {
-            var isFirstClass = request.FlightClass.Equals("Primera Clase", StringComparison.OrdinalIgnoreCase);
-
-            static decimal FlightTotal(FlightEntity f, PassengerTicketDTO p, bool firstClass)
+            for (int i = 0; i < passengers.Count; i++)
             {
-                var classPrice = firstClass ? f.FirstClassPrice : f.TouristPrice;
-                var checkedPrice = f.CheckedPrice ?? 0;
-                var carryOnPrice = f.CarryOnPrice ?? 0;
-                var multiplier = f.CheckedBagMultiplier > 0 ? f.CheckedBagMultiplier : 1m;
-                return classPrice + (p.CheckedBaggage * checkedPrice * multiplier) + (p.CarryOn * carryOnPrice);
+                var passenger = passengers[i];
+                var passengerId = passengerIds[i];
+
+                await RegisterCheckedBaggage(
+                    passenger,
+                    passengerId,
+                    reservationId
+                );
+
+                await RegisterCarryOnBaggage(
+                    passenger,
+                    passengerId,
+                    reservationId
+                );
             }
-
-            var outboundTotal = request.Passengers.Sum(p => FlightTotal(flight, p, isFirstClass));
-
-            if (returnFlight != null)
-            {
-                outboundTotal += request.Passengers.Sum(p => FlightTotal(returnFlight, p, isFirstClass));
-            }
-
-            return outboundTotal;
         }
 
-        private async Task<List<int>> CreateAllPassengers(List<PassengerTicketDTO> passengers)
+        private async Task RegisterCheckedBaggage(
+            PassengerTicketDTO passenger,
+            int passengerId,
+            int reservationId)
         {
-            var ids = new List<int>();
-            foreach (var p in passengers)
+            var checkedBaggageCount = Math.Clamp(
+                passenger.CheckedBaggage,
+                0,
+                10
+            );
+
+            for (int i = 0; i < checkedBaggageCount; i++)
             {
-                var person = p.Adapt<PersonEntity>();
-                var personId = await _personRepository.CreatePerson(person);
+                var bag = passenger.BaggageItems.ElementAtOrDefault(i);
 
-                var passport = new PassportEntity
+                await _baggageRepository.CreateBaggage(new BaggageEntity
                 {
-                    PassengerId = personId,
-                    DueDate = DateTime.Parse(p.PassportDueDate),
-                    PassportCountry = p.PassportCountry
-                };
-                await _personRepository.CreatePassport(passport);
-
-                ids.Add(personId);
-            }
-            return ids;
-        }
-
-        private async Task LinkPassengersToReservation(List<int> passengerIds, int reservationId)
-        {
-            foreach (var pid in passengerIds)
-            {
-                await _reservationRepository.CreatePassengerReservation(new PassengerReservationEntity
-                {
-                    PassengerId = pid,
-                    ReservationId = reservationId
+                    PassengerId = passengerId,
+                    ReservationId = reservationId,
+                    Weight = bag?.Weight > 0 ? bag.Weight : 23.0m,
+                    Size = string.IsNullOrWhiteSpace(bag?.Size) ? "Mediano" : bag.Size,
+                    Type = "Maleta"
                 });
             }
         }
 
-        private async Task RegisterAllBaggage(List<PassengerTicketDTO> passengers, List<int> passengerIds, int reservationId)
+        private async Task RegisterCarryOnBaggage(
+            PassengerTicketDTO passenger,
+            int passengerId,
+            int reservationId)
         {
-            for (int i = 0; i < passengers.Count; i++)
+            var carryOnCount = Math.Clamp(
+                passenger.CarryOn,
+                0,
+                2
+            );
+
+            for (int i = 0; i < carryOnCount; i++)
             {
-                var dto = passengers[i];
-                var passengerId = passengerIds[i];
-
-                foreach (var bag in dto.BaggageItems)
+                await _baggageRepository.CreateBaggage(new BaggageEntity
                 {
-                    var baggageEntity = bag.Adapt<BaggageEntity>();
-                    baggageEntity.PassengerId = passengerId;
-                    baggageEntity.ReservationId = reservationId;
-                    await _baggageRepository.CreateBaggage(baggageEntity);
-                }
-
-                if (dto.CarryOn == 1)
-                {
-                    await _baggageRepository.CreateBaggage(new BaggageEntity
-                    {
-                        PassengerId = passengerId,
-                        ReservationId = reservationId,
-                        Weight = 7.0m,
-                        Size = "Pequeño",
-                        Type = "Mano"
-                    });
-                }
+                    PassengerId = passengerId,
+                    ReservationId = reservationId,
+                    Weight = 7.0m,
+                    Size = "Pequeño",
+                    Type = "Mano"
+                });
             }
         }
 
-        private async Task<int> CreateReservation(string code, TicketPurchaseRequestDTO request, decimal total, int buyerId)
+        private async Task<int> CreateReservation(
+            string code,
+            TicketPurchaseRequestDTO request,
+            decimal total,
+            int buyerId)
         {
             var reservation = new ReservationEntity
             {
@@ -200,14 +323,190 @@ namespace zuli_Business
                 FlightClass = request.FlightClass,
                 PaymentMethod = request.PaymentMethod
             };
+
             return await _reservationRepository.CreateReservation(reservation);
+        }
+
+        private static decimal CalculateTotalPayment(
+            TicketPurchaseRequestDTO request,
+            List<FlightEntity> flights)
+        {
+            var isFirstClass = request.FlightClass.Equals(
+                "Primera Clase",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            decimal total = 0;
+
+            foreach (var flight in flights)
+            {
+                total += request.Passengers.Sum(passenger =>
+                    CalculateFlightPassengerTotal(
+                        flight,
+                        passenger,
+                        isFirstClass
+                    )
+                );
+            }
+
+            return total;
+        }
+
+        private static decimal CalculateFlightPassengerTotal(
+            FlightEntity flight,
+            PassengerTicketDTO passenger,
+            bool isFirstClass)
+        {
+            var classPrice = isFirstClass
+                ? flight.FirstClassPrice
+                : flight.TouristPrice;
+
+            var checkedPrice = flight.CheckedPrice ?? 0;
+            var carryOnPrice = flight.CarryOnPrice ?? 0;
+            var multiplier = flight.CheckedBagMultiplier > 0
+                ? flight.CheckedBagMultiplier
+                : 1m;
+
+            return classPrice
+                + (passenger.CheckedBaggage * checkedPrice * multiplier)
+                + (passenger.CarryOn * carryOnPrice);
+        }
+
+        private static void ValidateRequestPassengersAreUnique(
+            List<PassengerTicketDTO> passengers)
+        {
+            var passengerKeys = new HashSet<string>();
+            var errors = new Dictionary<string, List<string>>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                var passengerKey = BuildPassengerKey(passengers[i]);
+
+                if (passengerKeys.Add(passengerKey))
+                {
+                    continue;
+                }
+
+                errors[$"passengers[{i}]"] = new List<string>
+                {
+                    "Este pasajero está repetido en la compra actual."
+                };
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
+
+        private async Task ValidatePassengersDoNotExistInFlights(
+            List<PassengerTicketDTO> passengers,
+            List<Guid> flightIds)
+        {
+            var errors = new Dictionary<string, List<string>>();
+
+            for (int i = 0; i < passengers.Count; i++)
+            {
+                var passenger = passengers[i];
+
+                var alreadyExists = await _reservationRepository.PassengerExistsInFlights(
+                    flightIds,
+                    passenger.FirstName,
+                    passenger.FirstLastName,
+                    passenger.SecondLastName,
+                    passenger.BirthDate,
+                    passenger.PassportCountry
+                );
+
+                if (!alreadyExists)
+                {
+                    continue;
+                }
+
+                errors[$"passengers[{i}]"] = new List<string>
+                {
+                    "Este pasajero ya tiene un espacio registrado en uno de los vuelos seleccionados."
+                };
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ZuliValidationException(errors);
+            }
+        }
+
+        private async Task SendPurchaseEmails(string reservationCode)
+        {
+            var confirmation = await _purchaseConfirmationRepository
+                .GetPurchaseConfirmationAsync(reservationCode);
+
+            if (confirmation == null)
+            {
+                throw new ZuliNotFoundException("No se encontró la confirmación de compra.");
+            }
+
+            var confirmationDto = _mapper.Map<PurchaseConfirmationPageDTO>(confirmation);
+
+            var invoicePdf = _purchaseConfirmationPdfService.GenerateInvoicePdf(confirmationDto);
+            var confirmationPdf = _purchaseConfirmationPdfService.GenerateConfirmationPdf(confirmationDto);
+
+            await _emailService.SendInvoiceEmailAsync(
+                confirmationDto.BuyerEmail,
+                confirmationDto.BuyerName,
+                confirmationDto.ReservationCode,
+                invoicePdf
+            );
+
+            await _emailService.SendPurchaseConfirmationEmailAsync(
+                confirmationDto.BuyerEmail,
+                confirmationDto.BuyerName,
+                confirmationDto.ReservationCode,
+                confirmationPdf
+            );
+        }
+
+        private static string BuildPassengerKey(PassengerTicketDTO passenger)
+        {
+            return string.Join(
+                "|",
+                Normalize(passenger.FirstName),
+                Normalize(passenger.FirstLastName),
+                Normalize(passenger.SecondLastName),
+                NormalizeDate(passenger.BirthDate),
+                Normalize(passenger.PassportCountry)
+            );
+        }
+
+        private static string Normalize(string value)
+        {
+            return value
+                .Trim()
+                .ToLowerInvariant();
+        }
+
+        private static string NormalizeDate(string value)
+        {
+            if (!DateTime.TryParse(value, out var date))
+            {
+                return value.Trim();
+            }
+
+            return date
+                .Date
+                .ToString("yyyy-MM-dd");
         }
 
         private static string GenerateReservationCode()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             var random = new Random();
-            return new string(Enumerable.Range(0, 8).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+
+            return new string(
+                Enumerable
+                    .Range(0, 8)
+                    .Select(_ => chars[random.Next(chars.Length)])
+                    .ToArray()
+            );
         }
     }
 }

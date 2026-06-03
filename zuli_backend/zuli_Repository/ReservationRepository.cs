@@ -59,5 +59,45 @@ namespace zuli_Repository
                 pr.ReservationId
             });
         }
+        public async Task<bool> PassengerExistsInFlights(
+            IEnumerable<Guid> flightIds,
+            string firstName,
+            string firstLastName,
+            string secondLastName,
+            string birthDate,
+            string passportCountry)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT TOP 1 1
+                FROM dbo.BoardingPass bp
+                INNER JOIN dbo.Person p
+                    ON bp.PassengerId = p.PersonId
+                LEFT JOIN dbo.Passport passport
+                    ON p.PersonId = passport.PassengerId
+                WHERE bp.FlightId IN @FlightIds
+                AND LOWER(LTRIM(RTRIM(p.FirstName))) = LOWER(LTRIM(RTRIM(@FirstName)))
+                AND LOWER(LTRIM(RTRIM(p.FirstLastName))) = LOWER(LTRIM(RTRIM(@FirstLastName)))
+                AND LOWER(LTRIM(RTRIM(p.SecondLastName))) = LOWER(LTRIM(RTRIM(@SecondLastName)))
+                AND CAST(p.BirthDate AS DATE) = CAST(@BirthDate AS DATE)
+                AND LOWER(LTRIM(RTRIM(ISNULL(passport.PassportCountry, '')))) = LOWER(LTRIM(RTRIM(@PassportCountry)));
+            ";
+
+            var exists = await connection.QueryFirstOrDefaultAsync<int>(
+                sql,
+                new
+                {
+                    FlightIds = flightIds.ToList(),
+                    FirstName = firstName,
+                    FirstLastName = firstLastName,
+                    SecondLastName = secondLastName,
+                    BirthDate = birthDate,
+                    PassportCountry = passportCountry
+                }
+            );
+
+            return exists == 1;
+        }
     }
 }
