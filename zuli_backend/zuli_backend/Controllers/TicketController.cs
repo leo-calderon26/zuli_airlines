@@ -8,8 +8,8 @@ namespace zuli_backend.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        private readonly ITicketService _service;
-        public TicketController(ITicketService service) => _service = service;
+        private readonly ITicketPurchaseService _service;
+        public TicketController(ITicketPurchaseService service) => _service = service;
 
         [HttpPost("purchase")]
         public async Task<ActionResult<TicketPurchaseResponseDTO>> Purchase([FromBody] TicketPurchaseRequestDTO request)

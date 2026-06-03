@@ -141,8 +141,13 @@ builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<ITicketPurchaseService, TicketPurchaseService>();
+builder.Services.AddScoped<IReservationCreationService, ReservationCreationService>();
+builder.Services.AddScoped<IFlightResolverService, FlightResolverService>();
+builder.Services.AddScoped<IPassengerValidationService, PassengerValidationService>();
+builder.Services.AddScoped<IPassengerCreationService, PassengerCreationService>();
+builder.Services.AddScoped<IBaggageRegistrationService, BaggageRegistrationService>();
 
-builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();

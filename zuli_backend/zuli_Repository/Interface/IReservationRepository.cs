@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using zuli_Data;
 using zuli_Data.Entities;
 
 namespace zuli_Repository.Interface
@@ -17,6 +19,11 @@ namespace zuli_Repository.Interface
             string secondLastName,
             string birthDate,
             string passportCountry
+        );
+
+        Task<Dictionary<int, bool>> PassengersExistInFlights(
+            IEnumerable<Guid> flightIds,
+            List<PassengerCheckInfo> passengers
         );
     }
 }
