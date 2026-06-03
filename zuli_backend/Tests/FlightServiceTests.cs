@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using FluentValidation.Results;
 using MapsterMapper;
 using Moq;
@@ -51,9 +51,204 @@ namespace zuli_backend.Tests
                 _pathFinderMock.Object,
                 _flightValidatorMock.Object,
                 _searchValidatorMock.Object,
-                _mapperMock.Object,
-                _availabilityValidatorMock.Object
+                _availabilityValidatorMock.Object,
+                _mapperMock.Object
             );
+        }
+
+        [Test]
+        public async Task CreateFlight_WithValidData_ReturnsSuccess()
+        {
+            var validFlightRequestWithoutService = new FlightDTO 
+            { 
+                BusinessId = "123456789", 
+                ServiceDescription = string.Empty 
+            };
+            
+            var successfulValidationResult = new ValidationResult(); 
+            var expectedAdminUserId = Guid.NewGuid();
+            var mockedFlightEntity = new FlightEntity();
+
+            _flightValidatorMock
+                .Setup(validator => validator.ValidateAsync(validFlightRequestWithoutService, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(successfulValidationResult);
+
+            _userRepoMock
+                .Setup(repo => repo.GetUserId(validFlightRequestWithoutService.BusinessId))
+                .ReturnsAsync(expectedAdminUserId);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<FlightEntity>(validFlightRequestWithoutService))
+                .Returns(mockedFlightEntity);
+
+
+            var operationResponse = await _flightService.CreateFlight(validFlightRequestWithoutService);
+
+            Assert.That(operationResponse, Is.Not.Null);
+            Assert.That(operationResponse.StatusCode, Is.EqualTo(200));
+            Assert.That(operationResponse.Message, Is.EqualTo("Se realizo la creacion del vuelo correctamente"));
+            
+            _serviceRepoMock.Verify(repo => repo.CreateService(It.IsAny<ServiceEntity>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateFlight_WithValidDataAndService_ReturnsSuccess()
+        {
+            var validFlightRequestWithService = new FlightDTO 
+            { 
+                BusinessId = "123456789", 
+                ServiceDescription = "   Servicio VIP   " 
+            };
+            
+            var successfulValidationResult = new ValidationResult();
+            var expectedAdminUserId = Guid.NewGuid();
+            var mockedFlightEntity = new FlightEntity();
+
+            _flightValidatorMock
+                .Setup(validator => validator.ValidateAsync(validFlightRequestWithService, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(successfulValidationResult);
+
+            _userRepoMock
+                .Setup(repo => repo.GetUserId(validFlightRequestWithService.BusinessId))
+                .ReturnsAsync(expectedAdminUserId);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<FlightEntity>(validFlightRequestWithService))
+                .Returns(mockedFlightEntity);
+
+            var operationResponse = await _flightService.CreateFlight(validFlightRequestWithService);
+
+            Assert.That(operationResponse, Is.Not.Null);
+            Assert.That(operationResponse.StatusCode, Is.EqualTo(200));
+            Assert.That(operationResponse.Message, Is.EqualTo("Se realizo la creacion del vuelo correctamente"));
+            
+            _serviceRepoMock.Verify(repo => repo.CreateService(It.Is<ServiceEntity>(entity => 
+                entity.FlightId == mockedFlightEntity.Id && 
+                entity.Description == "Servicio VIP"
+            )), Times.Once);
+        }
+
+        [Test]
+        public void CreateFlight_WithInvalidData_ThrowsZuliValidationException()
+        {
+            var invalidFlightRequest = new FlightDTO 
+            { 
+                BusinessId = string.Empty 
+            };
+            
+            var validationErrors = new List<ValidationFailure>
+            {
+                new ValidationFailure("BusinessId", "Debe especificar un administrador valido")
+            };
+            var failedValidationResult = new ValidationResult(validationErrors);
+
+            _flightValidatorMock
+                .Setup(validator => validator.ValidateAsync(invalidFlightRequest, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(failedValidationResult);
+
+            var thrownException = Assert.ThrowsAsync<ZuliValidationException>(
+                async () => await _flightService.CreateFlight(invalidFlightRequest)
+            );
+
+            Assert.That(thrownException, Is.Not.Null);
+            Assert.That(thrownException.Errors.ContainsKey("BusinessId"), Is.True);
+            
+            _userRepoMock.Verify(repo => repo.GetUserId(It.IsAny<string>()), Times.Never);
+            _mapperMock.Verify(mapper => mapper.Map<FlightEntity>(It.IsAny<FlightDTO>()), Times.Never);
+            _serviceRepoMock.Verify(repo => repo.CreateService(It.IsAny<ServiceEntity>()), Times.Never);
+        }
+
+        [Test]
+        public async Task GetAllFlights_WhenNoFlightsExist_ReturnsEmptyList()
+        {
+            var emptyFlightEntitiesList = new List<FlightEntity>();
+            var emptyFlightDtosList = new List<FlightDTO>();
+
+            _flightRepoMock
+                .Setup(repo => repo.GetAllFlights())
+                .ReturnsAsync(emptyFlightEntitiesList);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<List<FlightDTO>>(emptyFlightEntitiesList))
+                .Returns(emptyFlightDtosList);
+
+            var operationResponse = await _flightService.GetAllFlights();
+
+            Assert.That(operationResponse, Is.Not.Null);
+            Assert.That(operationResponse, Is.Empty);
+
+            _userRepoMock.Verify(repo => repo.GetBusinessId(It.IsAny<Guid>()), Times.Never);
+            _serviceRepoMock.Verify(repo => repo.GetServiceByFlightId(It.IsAny<Guid>()), Times.Never);
+        }
+
+        [Test]
+        public async Task GetAllFlights_WhenFlightsExist_MapsDataCorrectly()
+        {
+            var firstFlightId = Guid.NewGuid();
+            var secondFlightId = Guid.NewGuid();
+            
+            var firstAdminId = Guid.NewGuid();
+            var secondAdminId = Guid.NewGuid();
+
+            var expectedFirstBusinessId = "BUSINESS-001";
+            var expectedSecondBusinessId = "BUSINESS-002";
+
+            var mockedFlightEntities = new List<FlightEntity>
+            {
+                new FlightEntity { Id = firstFlightId, AdminId = firstAdminId },
+                new FlightEntity { Id = secondFlightId, AdminId = secondAdminId }
+            };
+
+            var mappedFlightDtos = new List<FlightDTO>
+            {
+                new FlightDTO { Id = firstFlightId },
+                new FlightDTO { Id = secondFlightId }
+            };
+
+            var mockedServiceForFirstFlight = new ServiceEntity { Description = "Almuerzo VIP incluido" };
+
+            _flightRepoMock
+                .Setup(repo => repo.GetAllFlights())
+                .ReturnsAsync(mockedFlightEntities);
+
+            _userRepoMock
+                .Setup(repo => repo.GetBusinessId(firstAdminId))
+                .ReturnsAsync(expectedFirstBusinessId);
+
+            _userRepoMock
+                .Setup(repo => repo.GetBusinessId(secondAdminId))
+                .ReturnsAsync(expectedSecondBusinessId);
+
+            _serviceRepoMock
+                .Setup(repo => repo.GetServiceByFlightId(firstFlightId))
+                .ReturnsAsync(mockedServiceForFirstFlight);
+
+            _serviceRepoMock
+                .Setup(repo => repo.GetServiceByFlightId(secondFlightId))
+                .ReturnsAsync((ServiceEntity)null);
+
+            _mapperMock
+                .Setup(mapper => mapper.Map<List<FlightDTO>>(mockedFlightEntities))
+                .Returns(mappedFlightDtos);
+
+            var operationResponse = (List<FlightDTO>)await _flightService.GetAllFlights();
+
+            Assert.That(operationResponse, Is.Not.Null);
+            Assert.That(operationResponse.Count, Is.EqualTo(2));
+
+
+            var firstResultDto = operationResponse[0];
+            Assert.That(firstResultDto.Id, Is.EqualTo(firstFlightId));
+            Assert.That(firstResultDto.BusinessId, Is.EqualTo(expectedFirstBusinessId));
+            Assert.That(firstResultDto.ServiceDescription, Is.EqualTo("Almuerzo VIP incluido"));
+
+            var secondResultDto = operationResponse[1];
+            Assert.That(secondResultDto.Id, Is.EqualTo(secondFlightId));
+            Assert.That(secondResultDto.BusinessId, Is.EqualTo(expectedSecondBusinessId));
+            Assert.That(secondResultDto.ServiceDescription, Is.Null);
+
+            _userRepoMock.Verify(repo => repo.GetBusinessId(It.IsAny<Guid>()), Times.Exactly(2));
+            _serviceRepoMock.Verify(repo => repo.GetServiceByFlightId(It.IsAny<Guid>()), Times.Exactly(2));
         }
 
         [Test]
