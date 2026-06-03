@@ -171,6 +171,7 @@ namespace zuli_Business
             }
 
             breakdown.GrandTotal = grandTotal;
+
             return breakdown;
         }
     }

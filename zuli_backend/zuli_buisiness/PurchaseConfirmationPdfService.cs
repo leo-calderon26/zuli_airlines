@@ -173,7 +173,8 @@ namespace zuli_Business
                     .Column(flightColumn =>
                     {
                         flightColumn.Spacing(6);
-                        flightColumn.Item().Text($"Vuelo {flight.FlightNumber} — {flight.OriginAirportCode} → {flight.DestinationAirportCode}").FontSize(11).Bold();
+                        flightColumn.Item().Text($"Vuelo {flight.FlightNumber}").FontSize(11).Bold();
+                        flightColumn.Item().Text($"{flight.OriginAirportCode} → {flight.DestinationAirportCode}").FontSize(10);
 
                         foreach (var passenger in flight.Passengers)
                         {
@@ -199,16 +200,22 @@ namespace zuli_Business
                                 AddCell(table, "1");
                                 AddCell(table, passenger.TicketPrice.ToString("C", _cultureInfo));
 
-                                foreach (var bag in passenger.CheckedBags)
+                                if (passenger.CheckedBags.Count > 0)
                                 {
-                                    AddCell(table, $"  Maleta documentada #{bag.BagNumber}");
-                                    AddCell(table, "1");
-                                    AddCell(table, bag.Price.ToString("C", _cultureInfo));
+                                    AddCell(table, "Maletas documentadas");
+                                    AddCell(table, "");
+                                    AddCell(table, "");
+                                    foreach (var bag in passenger.CheckedBags)
+                                    {
+                                        AddCell(table, $"  Maleta #{bag.BagNumber}");
+                                        AddCell(table, "1");
+                                        AddCell(table, bag.Price.ToString("C", _cultureInfo));
+                                    }
                                 }
 
                                 if (passenger.CarryOnQuantity > 0)
                                 {
-                                    AddCell(table, "  Equipaje de mano");
+                                    AddCell(table, "Equipaje de mano");
                                     AddCell(table, passenger.CarryOnQuantity.ToString());
                                     AddCell(table, passenger.CarryOnTotal.ToString("C", _cultureInfo));
                                 }

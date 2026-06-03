@@ -65,37 +65,48 @@ export const useTicketStore = defineStore("ticket", () => {
 
         returnFlightTotal.value = retTotal;
 
-        const outCheckedPrice = flight.checkedPrice || flight.CheckedPrice || 0;
-        const outCarryOnPrice = flight.carryOnPrice || flight.CarryOnPrice || 0;
-        const outMultiplier = flight.checkedBagMultiplier || 1.0;
+        function calculateBaggageForFlight(flightOption) {
+            if (!flightOption) return 0;
 
-        let baggage = 0;
-
-        for (const passenger of passengers.value) {
-            const checkedBags = passenger.checkedBaggage || 0;
-
-            for (let i = 1; i <= checkedBags; i++) {
-                baggage += (outCheckedPrice || 0) * Math.pow(outMultiplier, i);
-            }
-
-            baggage += (passenger.carryOn || 0) * outCarryOnPrice;
-        }
-
-        if (isRoundTrip.value && returnFlight.value) {
-            const ret = returnFlight.value;
-            const retCheckedPrice = ret.checkedPrice || ret.CheckedPrice || 0;
-            const retCarryOnPrice = ret.carryOnPrice || ret.CarryOnPrice || 0;
-            const retMultiplier = ret.checkedBagMultiplier || 1.0;
+            const segments = flightOption.segments || [];
+            let flightBaggage = 0;
 
             for (const passenger of passengers.value) {
                 const checkedBags = passenger.checkedBaggage || 0;
+                const carryOns = passenger.carryOn || 0;
 
-                for (let i = 1; i <= checkedBags; i++) {
-                    baggage += retCheckedPrice * Math.pow(retMultiplier, i);
+                if (segments.length === 0) {
+                    const checkedPrice = flightOption.checkedPrice || flightOption.CheckedPrice || 0;
+                    const carryOnPrice = flightOption.carryOnPrice || flightOption.CarryOnPrice || 0;
+                    const multiplier = flightOption.checkedBagMultiplier || 1.0;
+
+                    for (let i = 1; i <= checkedBags; i++) {
+                        flightBaggage += checkedPrice * Math.pow(multiplier, i);
+                    }
+
+                    flightBaggage += carryOns * carryOnPrice;
+                } else {
+                    for (const segment of segments) {
+                        const checkedPrice = segment.checkedPrice || segment.CheckedPrice || 0;
+                        const carryOnPrice = segment.carryOnPrice || segment.CarryOnPrice || 0;
+                        const multiplier = segment.checkedBagMultiplier || 1.0;
+
+                        for (let i = 1; i <= checkedBags; i++) {
+                            flightBaggage += checkedPrice * Math.pow(multiplier, i);
+                        }
+
+                        flightBaggage += carryOns * carryOnPrice;
+                    }
                 }
-
-                baggage += (passenger.carryOn || 0) * retCarryOnPrice;
             }
+
+            return flightBaggage;
+        }
+
+        let baggage = calculateBaggageForFlight(flight);
+
+        if (isRoundTrip.value && returnFlight.value) {
+            baggage += calculateBaggageForFlight(returnFlight.value);
         }
 
         baggageTotal.value = baggage;

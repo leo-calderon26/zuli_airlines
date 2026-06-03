@@ -46,7 +46,10 @@ namespace zuli_Business.Mappings
                         ArrivalTimeText = current.ArrivalTime.ToString("h:mm tt", culture).ToLower(),
                         DurationText = FormatDuration(current.EstimatedDuration),
                         LayoverTimeText = GetLayoverTimeText(index, current, path),
-                        DepartureDateText = current.DepartureTime.ToString("yyyy-MM-dd", culture)
+                        DepartureDateText = current.DepartureTime.ToString("yyyy-MM-dd", culture),
+                        CheckedPrice = current.CheckedPrice,
+                        CarryOnPrice = current.CarryOnPrice,
+                        CheckedBagMultiplier = current.CheckedBagMultiplier
                     }).ToList()
                 });
         }

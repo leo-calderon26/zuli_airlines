@@ -12,6 +12,7 @@ namespace zuli_backend.Test
     {
         private Mock<IReservationRepository> _reservationRepoMock;
         private Mock<IBaggageRepository> _baggageRepoMock;
+        private Mock<IFlightRepository> _flightRepoMock;
 
         private PassengerValidationService _passengerValidationService;
         private BaggageRegistrationService _baggageRegistrationService;
@@ -22,9 +23,10 @@ namespace zuli_backend.Test
         {
             _reservationRepoMock = new Mock<IReservationRepository>();
             _baggageRepoMock = new Mock<IBaggageRepository>();
+            _flightRepoMock = new Mock<IFlightRepository>();
 
             _passengerValidationService = new PassengerValidationService(_reservationRepoMock.Object);
-            _baggageRegistrationService = new BaggageRegistrationService(_baggageRepoMock.Object);
+            _baggageRegistrationService = new BaggageRegistrationService(_baggageRepoMock.Object, _flightRepoMock.Object);
             _reservationCreationService = new ReservationCreationService(_reservationRepoMock.Object);
         }
 
@@ -474,6 +476,176 @@ namespace zuli_backend.Test
                 res.PaymentMethod == "Targeta" &&
                 res.ReservationOrigin == "Agent"
             )), Times.Once);
+        }
+
+        [Test]
+        public void CalculatePurchaseBreakdown_ReturnsCorrectBaggageBreakdown()
+        {
+            var request = new TicketPurchaseRequestDTO
+            {
+                FlightClass = "Turista",
+                Passengers = new List<PassengerTicketDTO>
+                {
+                    new PassengerTicketDTO
+                    {
+                        FirstName = "Juan",
+                        FirstLastName = "Perez",
+                        SecondLastName = "Garcia",
+                        BirthDate = "1990-01-15",
+                        PassportCountry = "Costa Rica",
+                        CheckedBaggage = 2,
+                        CarryOn = 1
+                    },
+                    new PassengerTicketDTO
+                    {
+                        FirstName = "Maria",
+                        FirstLastName = "Lopez",
+                        SecondLastName = "Sanchez",
+                        BirthDate = "1985-06-20",
+                        PassportCountry = "Mexico",
+                        CheckedBaggage = 1,
+                        CarryOn = 0
+                    }
+                }
+            };
+
+            var flights = new List<FlightEntity>
+            {
+                new FlightEntity
+                {
+                    Id = Guid.NewGuid(),
+                    TouristPrice = 200m,
+                    CheckedPrice = 50m,
+                    CarryOnPrice = 25m,
+                    CheckedBagMultiplier = 1.5m
+                }
+            };
+
+            var breakdown = TicketPurchaseService.CalculatePurchaseBreakdown(request, flights);
+
+            Assert.That(breakdown, Is.Not.Null);
+            Assert.That(breakdown.Flights.Count, Is.EqualTo(1));
+            Assert.That(breakdown.GrandTotal, Is.GreaterThan(0));
+
+            var flightBreakdown = breakdown.Flights[0];
+            Assert.That(flightBreakdown.Passengers.Count, Is.EqualTo(2));
+
+            var passenger1 = flightBreakdown.Passengers[0];
+            Assert.That(passenger1.TicketPrice, Is.EqualTo(200m));
+            Assert.That(passenger1.CheckedBags.Count, Is.EqualTo(2));
+            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(75m)); // 50 * 1.5^1 = 75
+            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(112.5m)); // 50 * 1.5^2 = 112.5
+            Assert.That(passenger1.CarryOnQuantity, Is.EqualTo(1));
+            Assert.That(passenger1.CarryOnTotal, Is.EqualTo(25m));
+
+            var passenger2 = flightBreakdown.Passengers[1];
+            Assert.That(passenger2.CheckedBags.Count, Is.EqualTo(1));
+            Assert.That(passenger2.CarryOnQuantity, Is.EqualTo(0));
+            Assert.That(passenger2.CarryOnTotal, Is.EqualTo(0m));
+        }
+
+        [Test]
+        public void CalculatePurchaseBreakdown_WithMultipleFlights_ChargesBaggagePerFlight()
+        {
+            var request = new TicketPurchaseRequestDTO
+            {
+                FlightClass = "Turista",
+                Passengers = new List<PassengerTicketDTO>
+                {
+                    new PassengerTicketDTO
+                    {
+                        FirstName = "Juan",
+                        FirstLastName = "Perez",
+                        SecondLastName = "Garcia",
+                        BirthDate = "1990-01-15",
+                        PassportCountry = "Costa Rica",
+                        CheckedBaggage = 2,
+                        CarryOn = 1
+                    }
+                }
+            };
+
+            var flights = new List<FlightEntity>
+            {
+                new FlightEntity
+                {
+                    Id = Guid.NewGuid(),
+                    TouristPrice = 200m,
+                    CheckedPrice = 50m,
+                    CarryOnPrice = 25m,
+                    CheckedBagMultiplier = 1.5m
+                },
+                new FlightEntity
+                {
+                    Id = Guid.NewGuid(),
+                    TouristPrice = 150m,
+                    CheckedPrice = 40m,
+                    CarryOnPrice = 20m,
+                    CheckedBagMultiplier = 1.2m
+                }
+            };
+
+            var breakdown = TicketPurchaseService.CalculatePurchaseBreakdown(request, flights);
+
+            Assert.That(breakdown.Flights.Count, Is.EqualTo(2));
+
+            var passenger1 = breakdown.Flights[0].Passengers[0];
+            // Ticket 200 + bag1 50*1.5=75 + bag2 50*1.5^2=112.5 + carryOn 25 = 412.5
+            Assert.That(passenger1.TicketPrice, Is.EqualTo(200m));
+            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(75m));
+            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(112.5m));
+            Assert.That(passenger1.CarryOnTotal, Is.EqualTo(25m));
+            Assert.That(passenger1.PassengerTotal, Is.EqualTo(412.5m));
+
+            var passenger2 = breakdown.Flights[1].Passengers[0];
+            // Ticket 150 + bag1 40*1.2=48 + bag2 40*1.2^2=57.6 + carryOn 20 = 275.6
+            Assert.That(passenger2.TicketPrice, Is.EqualTo(150m));
+            Assert.That(passenger2.CheckedBags[0].Price, Is.EqualTo(48m));
+            Assert.That(passenger2.CheckedBags[1].Price, Is.EqualTo(57.6m));
+            Assert.That(passenger2.CarryOnTotal, Is.EqualTo(20m));
+            Assert.That(passenger2.PassengerTotal, Is.EqualTo(275.6m));
+
+            Assert.That(breakdown.GrandTotal, Is.EqualTo(688.1m));
+        }
+
+        [Test]
+        public void CalculatePurchaseBreakdown_WithFirstClass_UsesFirstClassPrice()
+        {
+            var request = new TicketPurchaseRequestDTO
+            {
+                FlightClass = "Primera Clase",
+                Passengers = new List<PassengerTicketDTO>
+                {
+                    new PassengerTicketDTO
+                    {
+                        FirstName = "Ana",
+                        FirstLastName = "Gomez",
+                        SecondLastName = "Ruiz",
+                        BirthDate = "1995-03-10",
+                        PassportCountry = "Costa Rica",
+                        CheckedBaggage = 0,
+                        CarryOn = 0
+                    }
+                }
+            };
+
+            var flights = new List<FlightEntity>
+            {
+                new FlightEntity
+                {
+                    Id = Guid.NewGuid(),
+                    TouristPrice = 200m,
+                    FirstClassPrice = 500m,
+                    CheckedPrice = 50m,
+                    CarryOnPrice = 25m,
+                    CheckedBagMultiplier = 1.0m
+                }
+            };
+
+            var breakdown = TicketPurchaseService.CalculatePurchaseBreakdown(request, flights);
+
+            Assert.That(breakdown.Flights[0].Passengers[0].TicketPrice, Is.EqualTo(500m));
+            Assert.That(breakdown.GrandTotal, Is.EqualTo(500m));
         }
     }
 }

@@ -13,6 +13,9 @@ namespace zuli_Business.DTO
         public string ArrivalTimeText { get; set; }
         public string DurationText { get; set; }
         public string LayoverTimeText { get; set; }
-        public string DepartureDateText { get; set; } = string.Empty; 
+        public string DepartureDateText { get; set; } = string.Empty;
+        public decimal? CheckedPrice { get; set; }
+        public decimal? CarryOnPrice { get; set; }
+        public decimal CheckedBagMultiplier { get; set; }
     }
 }

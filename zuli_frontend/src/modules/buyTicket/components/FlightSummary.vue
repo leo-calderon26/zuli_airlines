@@ -34,29 +34,58 @@
         props.passengers.reduce((sum, passenger) => sum + (passenger.carryOn || 0), 0)
     );
 
-    const checkedBagPrices = computed(() => {
-        if (props.checkedBagMultiplier <= 0 || props.checkedPrice <= 0) return [];
+    function computePassengerBaggage(flightOption, checkedPrice, carryOnPrice, checkedBagMultiplier) {
+        const segments = flightOption?.segments || [];
+        return props.passengers.map(passenger => {
+            let checkedTotal = 0;
+            let carryOnTotal = 0;
+            const checkedBags = passenger.checkedBaggage || 0;
+            const carryOns = passenger.carryOn || 0;
+            const checkedBagPrices = [];
 
-        const prices = [];
+            if (segments.length === 0) {
+                const cp = checkedPrice || 0;
+                const cop = carryOnPrice || 0;
+                const mult = checkedBagMultiplier || 1;
+                for (let i = 1; i <= checkedBags; i++) {
+                    const price = cp * Math.pow(mult, i);
+                    checkedTotal += price;
+                    checkedBagPrices.push({ number: i, price });
+                }
+                carryOnTotal = carryOns * cop;
+            } else {
+                for (const seg of segments) {
+                    const cp = seg.checkedPrice || seg.CheckedPrice || 0;
+                    const cop = seg.carryOnPrice || seg.CarryOnPrice || 0;
+                    const mult = seg.checkedBagMultiplier || 1;
+                    for (let i = 1; i <= checkedBags; i++) {
+                        const price = cp * Math.pow(mult, i);
+                        checkedTotal += price;
+                        checkedBagPrices.push({ number: i, price });
+                    }
+                    carryOnTotal += carryOns * cop;
+                }
+            }
 
-        for (let i = 1; i <= 10; i++) {
-            prices.push((props.checkedPrice * Math.pow(props.checkedBagMultiplier, i)).toFixed(2));
-        }
+            return { checkedTotal, carryOnTotal, checkedBagPrices };
+        });
+    }
 
-        return prices;
-    });
+    const outboundPassengerBaggage = computed(() =>
+        computePassengerBaggage(props.flight, props.checkedPrice, props.carryOnPrice, props.checkedBagMultiplier)
+    );
 
-    const returnCheckedBagPrices = computed(() => {
-        if (props.returnCheckedBagMultiplier <= 0 || props.returnCheckedPrice <= 0) return [];
+    const returnPassengerBaggage = computed(() =>
+        computePassengerBaggage(props.returnFlight, props.returnCheckedPrice, props.returnCarryOnPrice, props.returnCheckedBagMultiplier)
+    );
 
-        const prices = [];
+    const outboundBaggageTotal = computed(() =>
+        outboundPassengerBaggage.value.reduce((sum, p) => sum + p.checkedTotal + p.carryOnTotal, 0)
+    );
 
-        for (let i = 1; i <= 10; i++) {
-            prices.push((props.returnCheckedPrice * Math.pow(props.returnCheckedBagMultiplier, i)).toFixed(2));
-        }
-
-        return prices;
-    });
+    const returnBaggageTotal = computed(() =>
+        returnPassengerBaggage.value.reduce((sum, p) => sum + p.checkedTotal + p.carryOnTotal, 0)
+    );
 
     function handlePurchase() {
         emit('purchase');
@@ -115,15 +144,13 @@
             <div v-if="passengers.length > 0" class="space-y-2">
                 <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
                     <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
-                    <div v-if="passenger.checkedBaggage > 0" class="space-y-1 pl-2">
-                        <div v-for="bagIdx in passenger.checkedBaggage" :key="bagIdx" class="flex justify-between">
-                            <span class="opacity-70 text-xs">Maleta #{{ bagIdx }}</span>
-                            <span class="font-semibold text-xs">${{ (checkedPrice * Math.pow(checkedBagMultiplier, bagIdx)).toFixed(2) }}</span>
-                        </div>
+                    <div v-if="passenger.checkedBaggage > 0" class="flex justify-between pl-2">
+                        <span class="opacity-70 text-xs">Maletas documentadas (×{{ passenger.checkedBaggage }})</span>
+                        <span class="font-semibold text-xs">${{ outboundPassengerBaggage[pIdx].checkedTotal.toFixed(2) }}</span>
                     </div>
                     <div v-if="passenger.carryOn > 0" class="flex justify-between pl-2">
                         <span class="opacity-70 text-xs">Equipaje de mano (×{{ passenger.carryOn }})</span>
-                        <span class="font-semibold text-xs">${{ (passenger.carryOn * carryOnPrice).toFixed(2) }}</span>
+                        <span class="font-semibold text-xs">${{ outboundPassengerBaggage[pIdx].carryOnTotal.toFixed(2) }}</span>
                     </div>
                     <div v-if="!passenger.checkedBaggage && !passenger.carryOn" class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
                 </div>
@@ -174,15 +201,13 @@
                 <div v-if="passengers.length > 0" class="space-y-2">
                     <div v-for="(passenger, pIdx) in passengers" :key="pIdx" class="text-sm">
                         <p class="opacity-90 font-semibold text-xs mb-1">{{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</p>
-                        <div v-if="passenger.checkedBaggage > 0" class="space-y-1 pl-2">
-                            <div v-for="bagIdx in passenger.checkedBaggage" :key="bagIdx" class="flex justify-between">
-                                <span class="opacity-70 text-xs">Maleta #{{ bagIdx }}</span>
-                                <span class="font-semibold text-xs">${{ (returnCheckedPrice * Math.pow(returnCheckedBagMultiplier, bagIdx)).toFixed(2) }}</span>
-                            </div>
+                        <div v-if="passenger.checkedBaggage > 0" class="flex justify-between pl-2">
+                            <span class="opacity-70 text-xs">Maletas documentadas (×{{ passenger.checkedBaggage }})</span>
+                            <span class="font-semibold text-xs">${{ returnPassengerBaggage[pIdx].checkedTotal.toFixed(2) }}</span>
                         </div>
                         <div v-if="passenger.carryOn > 0" class="flex justify-between pl-2">
                             <span class="opacity-70 text-xs">Equipaje de mano (×{{ passenger.carryOn }})</span>
-                            <span class="font-semibold text-xs">${{ (passenger.carryOn * returnCarryOnPrice).toFixed(2) }}</span>
+                            <span class="font-semibold text-xs">${{ returnPassengerBaggage[pIdx].carryOnTotal.toFixed(2) }}</span>
                         </div>
                         <div v-if="!passenger.checkedBaggage && !passenger.carryOn" class="opacity-70 text-xs pl-2">Sin equipaje adicional</div>
                     </div>
@@ -196,25 +221,46 @@
                 Resumen de Precios
             </p>
 
-            <div class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Vuelo ida ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
-                </span>
-                <span class="font-semibold">${{ outboundFlightTotal.toFixed(2) }}</span>
+            <div class="space-y-1">
+                <div class="flex justify-between text-sm">
+                    <span class="opacity-70">
+                        Vuelo ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
+                    </span>
+                    <span class="font-semibold">${{ outboundFlightTotal.toFixed(2) }}</span>
+                </div>
+                <template v-for="(passenger, pIdx) in passengers" :key="pIdx">
+                    <template v-if="outboundPassengerBaggage[pIdx].checkedBagPrices.length > 0">
+                        <div v-for="bag in outboundPassengerBaggage[pIdx].checkedBagPrices" :key="bag.number" class="flex justify-between text-xs pl-3">
+                            <span class="opacity-70">↳ Maleta #{{ bag.number }} - {{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</span>
+                            <span class="font-semibold">${{ bag.price.toFixed(2) }}</span>
+                        </div>
+                    </template>
+                    <div v-if="passenger.carryOn > 0" class="flex justify-between text-xs pl-3">
+                        <span class="opacity-70">↳ Equipaje de mano - {{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</span>
+                        <span class="font-semibold">${{ outboundPassengerBaggage[pIdx].carryOnTotal.toFixed(2) }}</span>
+                    </div>
+                </template>
             </div>
 
-            <div v-if="isRoundTrip && returnFlightTotal > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Vuelo vuelta ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
-                </span>
-                <span class="font-semibold">${{ returnFlightTotal.toFixed(2) }}</span>
-            </div>
-
-            <div v-if="baggageTotal > 0" class="flex justify-between text-sm">
-                <span class="opacity-70">
-                    Equipaje {{ isRoundTrip ? '(ida y vuelta)' : '(ida)' }}
-                </span>
-                <span class="font-semibold">${{ baggageTotal.toFixed(2) }}</span>
+            <div v-if="isRoundTrip && returnFlight" class="space-y-1">
+                <div class="flex justify-between text-sm">
+                    <span class="opacity-70">
+                        Vuelo vuelta ({{ passengerCount }} pasajero{{ passengerCount !== 1 ? 's' : '' }})
+                    </span>
+                    <span class="font-semibold">${{ returnFlightTotal.toFixed(2) }}</span>
+                </div>
+                <template v-for="(passenger, pIdx) in passengers" :key="pIdx">
+                    <template v-if="returnPassengerBaggage[pIdx].checkedBagPrices.length > 0">
+                        <div v-for="bag in returnPassengerBaggage[pIdx].checkedBagPrices" :key="bag.number" class="flex justify-between text-xs pl-3">
+                            <span class="opacity-70">↳ Maleta #{{ bag.number }} - {{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</span>
+                            <span class="font-semibold">${{ bag.price.toFixed(2) }}</span>
+                        </div>
+                    </template>
+                    <div v-if="passenger.carryOn > 0" class="flex justify-between text-xs pl-3">
+                        <span class="opacity-70">↳ Equipaje de mano - {{ passenger.firstName || 'Pasajero' }} {{ passenger.firstLastName || '' }}</span>
+                        <span class="font-semibold">${{ returnPassengerBaggage[pIdx].carryOnTotal.toFixed(2) }}</span>
+                    </div>
+                </template>
             </div>
         </div>
 
