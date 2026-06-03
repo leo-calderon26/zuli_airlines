@@ -189,7 +189,7 @@ namespace zuli_Business
 
             for (int i = 1; i <= passenger.CheckedBaggage; i++)
             {
-                var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i);
+                var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i - 1);
                 checkedBaggageTotal += bagPrice;
                 checkedBags.Add(new BaggageBreakdownItemDTO
                 {
