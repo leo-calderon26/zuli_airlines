@@ -1,6 +1,10 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import AppInput from '../../../shared/AppInput.vue'
 import AppButton from '../../../shared/AppButton.vue'
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue'
+import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/20/solid'
+import { getCountries } from '../../airport/service/locationService'
 
 const paymentMethods = [
     { value: 'card', label: 'Tarjeta' },
@@ -40,6 +44,16 @@ const emit = defineEmits([
     'add-passenger',
     'remove-passenger'
 ]);
+
+const countries = ref([]);
+
+onMounted(async () => {
+    try {
+        countries.value = await getCountries();
+    } catch (error) {
+        console.error("Error al cargar la lista de países", error);
+    }
+});
 
 function updatePassenger(index, field, value) {
     const updated = [...props.passengers];
@@ -148,14 +162,51 @@ function updatePassenger(index, field, value) {
                     </div>
                     <p v-if="errors?.[index]?.gender" class="text-xs text-error mt-1">{{ errors[index].gender }}</p>
                 </div>
-                <AppInput
-                    :model-value="passenger.passportCountry"
-                    @update:model-value="updatePassenger(index, 'passportCountry', $event)"
-                    label="País del Pasaporte"
-                    placeholder="Ej: Costa Rica"
-                    :error="errors?.[index]?.passportCountry"
-                    required
-                />
+                <div class="flex flex-col relative z-20">
+                    <label class="mb-2 block text-sm font-medium text-content" :class="{ 'text-error!': errors?.[index]?.passportCountry }">
+                        País del Pasaporte <span class="text-error">*</span>
+                    </label>
+                    
+                    <Listbox 
+                        :model-value="passenger.passportCountry" 
+                        @update:modelValue="updatePassenger(index, 'passportCountry', $event)"
+                    >
+                        <div class="relative">
+                            <ListboxButton 
+                                class="relative w-full cursor-default rounded-base border bg-body px-3 py-2.5 text-left text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="{ 'border-error text-error': errors?.[index]?.passportCountry }"
+                            >
+                                <span class="block truncate">{{ passenger.passportCountry || 'Seleccione un país' }}</span>
+                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                    <ChevronDownIcon class="size-5 text-gray-400" aria-hidden="true" />
+                                </span>
+                            </ListboxButton>
+
+                            <transition leave-active-class="transition duration-100 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
+                                <ListboxOptions class="absolute z-50 mt-1 max-h-[10.0rem] w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                                    <ListboxOption 
+                                        v-for="country in countries" 
+                                        :key="country.id" 
+                                        :value="country.countryName" 
+                                        v-slot="{ active, selected }" 
+                                        as="template"
+                                    >
+                                        <li :class="[active ? 'bg-primary/10 text-primary' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-10 pr-4']">
+                                            <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
+                                                {{ country.countryName }}
+                                            </span>
+                                            <span v-if="selected" class="absolute inset-y-0 left-0 flex items-center pl-3 text-primary">
+                                                <CheckIcon class="size-5" aria-hidden="true" />
+                                            </span>
+                                        </li>
+                                    </ListboxOption>
+                                </ListboxOptions>
+                            </transition>
+                        </div>
+                    </Listbox>
+                    <p v-if="errors?.[index]?.passportCountry" class="mt-1 text-sm text-error">{{ errors[index].passportCountry }}</p>
+                </div>
+
                 <AppInput
                     :model-value="passenger.passportDueDate"
                     @update:model-value="updatePassenger(index, 'passportDueDate', $event)"
