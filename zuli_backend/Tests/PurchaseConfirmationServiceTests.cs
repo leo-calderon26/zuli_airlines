@@ -256,25 +256,37 @@ namespace zuli_backend.Tests
             var reservationCode = "ZUTEST001";
             var confirmationEntity = BuildValidConfirmationEntity();
             var confirmationDto = BuildValidConfirmationDto();
-
+        
+            confirmationDto.Passengers[0].CheckedBaggageQuantity = 3;
+        
             _purchaseConfirmationRepositoryMock
                 .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
-
+        
             _mapperMock
                 .Setup(mapper => mapper.Map<PurchaseConfirmationPageDTO>(confirmationEntity))
                 .Returns(confirmationDto);
-
+        
             var result = await _purchaseConfirmationService.GetConfirmationPageAsync(reservationCode);
-
+        
+            var passengerBreakdown = result.Breakdown.Flights[0].Passengers[0];
+        
             Assert.That(result.Breakdown, Is.Not.Null);
             Assert.That(result.Breakdown.Flights.Count, Is.EqualTo(1));
             Assert.That(result.Breakdown.Flights[0].Passengers.Count, Is.EqualTo(1));
-            Assert.That(result.Breakdown.Flights[0].Passengers[0].TicketPrice, Is.EqualTo(200m)); // Económica = TouristPrice
-            Assert.That(result.Breakdown.Flights[0].Passengers[0].CheckedBags.Count, Is.EqualTo(1));
-            Assert.That(result.Breakdown.Flights[0].Passengers[0].CheckedBags[0].Price, Is.EqualTo(75m)); // 50 * 1.5
-            Assert.That(result.Breakdown.Flights[0].Passengers[0].CarryOnTotal, Is.EqualTo(25m));
-            Assert.That(result.Breakdown.Flights[0].Passengers[0].PassengerTotal, Is.EqualTo(300m)); // 200 + 75 + 25
+        
+            Assert.That(passengerBreakdown.TicketPrice, Is.EqualTo(200m));
+            Assert.That(passengerBreakdown.CheckedBags.Count, Is.EqualTo(3));
+        
+            Assert.That(passengerBreakdown.CheckedBags[0].Price, Is.EqualTo(50m));
+            Assert.That(passengerBreakdown.CheckedBags[1].Price, Is.EqualTo(75m));
+            Assert.That(passengerBreakdown.CheckedBags[2].Price, Is.EqualTo(112.5m));
+        
+            Assert.That(passengerBreakdown.CarryOnTotal, Is.EqualTo(25m));
+            Assert.That(passengerBreakdown.PassengerTotal, Is.EqualTo(462.5m));
+        
+            Assert.That(result.Breakdown.Flights[0].FlightTotal, Is.EqualTo(462.5m));
+            Assert.That(result.Breakdown.GrandTotal, Is.EqualTo(462.5m));
         }
 
         [Test]
