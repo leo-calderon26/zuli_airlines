@@ -61,7 +61,7 @@ namespace zuli_Repository
                 PassengersQuantity = passengersQuantity,
                 Destination = destination,
                 EarliestDeparture = earliestDeparture,
-                CurrentTime = DateTime.UtcNow
+                CurrentTime = DateTime.Now
             };
 
             return await connection.QueryAsync<RawFlightEntity>(sql, parameters);
