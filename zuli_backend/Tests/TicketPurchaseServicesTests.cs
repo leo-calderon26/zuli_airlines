@@ -213,7 +213,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CarryOn = 2
+                    CarryOn = 1
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -227,7 +227,7 @@ namespace zuli_backend.Test
                 b.Type == "Mano" &&
                 b.Weight == 7m &&
                 b.Size == "Pequeño"
-            )), Times.Exactly(2));
+)), Times.Exactly(1));
         }
 
         [Test]
@@ -266,7 +266,7 @@ namespace zuli_backend.Test
         }
 
         [Test]
-        public async Task RegisterAllBaggage_ClampsCheckedBaggageToMax10()
+        public async Task RegisterAllBaggage_ClampsCheckedBaggageToMax5()
         {
             var passengers = new List<PassengerTicketDTO>
             {
@@ -283,9 +283,8 @@ namespace zuli_backend.Test
             var passengerIds = new List<int> { 1 };
             var reservationId = 100;
 
-            await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
-
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Maleta")), Times.Exactly(10));
+            Assert.That(async () => await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId),
+                Throws.InstanceOf<ZuliValidationException>());
         }
 
         [Test]
@@ -306,9 +305,8 @@ namespace zuli_backend.Test
             var passengerIds = new List<int> { 1 };
             var reservationId = 100;
 
-            await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
-
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Mano")), Times.Exactly(2));
+            Assert.That(async () => await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId),
+                Throws.InstanceOf<ZuliValidationException>());
         }
 
         [Test]
@@ -456,7 +454,7 @@ namespace zuli_backend.Test
             var request = new TicketPurchaseRequestDTO
             {
                 FlightClass = "Turista",
-                PaymentMethod = "crypto",
+                PaymentMethod = "Targeta",
                 ReservationOrigin = "Agent"
             };
             decimal total = 750.50m;
@@ -533,8 +531,8 @@ namespace zuli_backend.Test
             var passenger1 = flightBreakdown.Passengers[0];
             Assert.That(passenger1.TicketPrice, Is.EqualTo(200m));
             Assert.That(passenger1.CheckedBags.Count, Is.EqualTo(2));
-            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(75m)); // 50 * 1.5^1 = 75
-            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(112.5m)); // 50 * 1.5^2 = 112.5
+            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(50m)); // 50 * 1.5^0 = 50
+            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(75m)); // 50 * 1.5^1 = 75
             Assert.That(passenger1.CarryOnQuantity, Is.EqualTo(1));
             Assert.That(passenger1.CarryOnTotal, Is.EqualTo(25m));
 
@@ -590,22 +588,22 @@ namespace zuli_backend.Test
             Assert.That(breakdown.Flights.Count, Is.EqualTo(2));
 
             var passenger1 = breakdown.Flights[0].Passengers[0];
-            // Ticket 200 + bag1 50*1.5=75 + bag2 50*1.5^2=112.5 + carryOn 25 = 412.5
+            // Ticket 200 + bag1 50*1.5^0=50 + bag2 50*1.5^1=75 + carryOn 25 = 350
             Assert.That(passenger1.TicketPrice, Is.EqualTo(200m));
-            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(75m));
-            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(112.5m));
+            Assert.That(passenger1.CheckedBags[0].Price, Is.EqualTo(50m));
+            Assert.That(passenger1.CheckedBags[1].Price, Is.EqualTo(75m));
             Assert.That(passenger1.CarryOnTotal, Is.EqualTo(25m));
-            Assert.That(passenger1.PassengerTotal, Is.EqualTo(412.5m));
+            Assert.That(passenger1.PassengerTotal, Is.EqualTo(350m));
 
             var passenger2 = breakdown.Flights[1].Passengers[0];
-            // Ticket 150 + bag1 40*1.2=48 + bag2 40*1.2^2=57.6 + carryOn 20 = 275.6
+            // Ticket 150 + bag1 40*1.2^0=40 + bag2 40*1.2^1=48 + carryOn 20 = 258
             Assert.That(passenger2.TicketPrice, Is.EqualTo(150m));
-            Assert.That(passenger2.CheckedBags[0].Price, Is.EqualTo(48m));
-            Assert.That(passenger2.CheckedBags[1].Price, Is.EqualTo(57.6m));
+            Assert.That(passenger2.CheckedBags[0].Price, Is.EqualTo(40m));
+            Assert.That(passenger2.CheckedBags[1].Price, Is.EqualTo(48m));
             Assert.That(passenger2.CarryOnTotal, Is.EqualTo(20m));
-            Assert.That(passenger2.PassengerTotal, Is.EqualTo(275.6m));
+            Assert.That(passenger2.PassengerTotal, Is.EqualTo(258m));
 
-            Assert.That(breakdown.GrandTotal, Is.EqualTo(688.1m));
+            Assert.That(breakdown.GrandTotal, Is.EqualTo(608m));
         }
 
         [Test]
