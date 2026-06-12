@@ -213,7 +213,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CarryOn = 2
+                    CarryOn = 1
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -227,7 +227,7 @@ namespace zuli_backend.Test
                 b.Type == "Mano" &&
                 b.Weight == 7m &&
                 b.Size == "Pequeño"
-            )), Times.Exactly(2));
+            )), Times.Exactly(1));
         }
 
         [Test]
@@ -266,7 +266,7 @@ namespace zuli_backend.Test
         }
 
         [Test]
-        public async Task RegisterAllBaggage_ClampsCheckedBaggageToMax10()
+        public async Task RegisterAllBaggage_CreatesMaxCheckedBaggage()
         {
             var passengers = new List<PassengerTicketDTO>
             {
@@ -277,7 +277,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CheckedBaggage = 15
+                    CheckedBaggage = 5
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -285,11 +285,11 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Maleta")), Times.Exactly(10));
+            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Maleta")), Times.Exactly(5));
         }
 
         [Test]
-        public async Task RegisterAllBaggage_ClampsCarryOnToMax2()
+        public async Task RegisterAllBaggage_CreatesMaxCarryOn()
         {
             var passengers = new List<PassengerTicketDTO>
             {
@@ -300,7 +300,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CarryOn = 5
+                    CarryOn = 1
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -308,7 +308,7 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Mano")), Times.Exactly(2));
+            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Mano")), Times.Exactly(1));
         }
 
         [Test]
@@ -473,7 +473,7 @@ namespace zuli_backend.Test
                 res.BuyerId == 99 &&
                 res.TotalPayment == 750.50m &&
                 res.FlightClass == "Turista" &&
-                res.PaymentMethod == "Targeta" &&
+                res.PaymentMethod == "crypto" &&
                 res.ReservationOrigin == "Agent"
             )), Times.Once);
         }

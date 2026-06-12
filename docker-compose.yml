@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: zuli_backend/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - settings__secretKey=${settings__secretKey}
+      - Frontend__BaseUrl=${Frontend__BaseUrl}
+      - EmailSettings__SmtpHost=${EmailSettings__SmtpHost}
+      - EmailSettings__SmtpPort=${EmailSettings__SmtpPort}
+      - EmailSettings__SmtpUser=${EmailSettings__SmtpUser}
+      - EmailSettings__SmtpPassword=${EmailSettings__SmtpPassword}
+      - EmailSettings__FromEmail=${EmailSettings__FromEmail}
+      - EmailSettings__FromName=${EmailSettings__FromName}
+    env_file:
+      - .env
+    networks:
+      - zuli-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: zuli_frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - zuli-network
+
+networks:
+  zuli-network:
+    driver: bridge
