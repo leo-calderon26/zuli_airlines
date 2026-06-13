@@ -1,0 +1,8 @@
+USE ZuliAirlines;
+GO
+
+IF TYPE_ID(N'dbo.GuidList') IS NULL
+BEGIN
+    CREATE TYPE dbo.GuidList AS TABLE (Id UNIQUEIDENTIFIER NOT NULL);
+END
+GO
