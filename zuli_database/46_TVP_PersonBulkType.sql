@@ -1,6 +1,5 @@
 use ZuliAirlines
 GO
-
 CREATE TYPE dbo.PersonBulkType AS TABLE (
     FirstName VARCHAR(50),
     FirstLastName VARCHAR(50),
@@ -9,5 +8,8 @@ CREATE TYPE dbo.PersonBulkType AS TABLE (
     Gender VARCHAR(10),
     Email VARCHAR(254),
     PassportCountry VARCHAR(60),
-    PassportDueDate DATE
+    PassportDueDate DATE,
+    IsBuyer BIT,       
+    Phone VARCHAR(20)  
 );
+GO
