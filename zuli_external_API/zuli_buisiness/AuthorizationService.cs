@@ -18,18 +18,18 @@ namespace zuli_Business
 {
     public class AuthorizationService : IAuthorizationService
     {
-        // Inyeccion de dependencias
         private readonly string secretKey;
+        private readonly string apiKey;
         private readonly AuthorizationValidator _validator;
         public AuthorizationService(IConfiguration config)
         {
             secretKey = config.GetSection("settings").GetSection("secretKey").ToString();
+            apiKey = config.GetSection("settings").GetSection("apiKey").Value.ToString();
             _validator = new AuthorizationValidator();
         }
         public async Task<AuthorizationResponseDTO> ValidateUser(AuthorizationDTO user)
         {
-            // aqui se tiene que llamar el 
-            _validator.ValidateAuthorizationInfo(user);
+            _validator.ValidateAuthorizationInfo(user, apiKey);
 
             var keyBytes = Encoding.ASCII.GetBytes(secretKey);
             var claims = new ClaimsIdentity();
@@ -39,7 +39,7 @@ namespace zuli_Business
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claims,
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddDays(60),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
 

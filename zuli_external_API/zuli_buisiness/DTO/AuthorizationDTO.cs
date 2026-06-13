@@ -9,5 +9,7 @@ namespace zuli_Business.DTO
     {
         [Required(ErrorMessage = "El nombre de la aerolínea es requerido")]
         public string airlineName { get; set; }
+        [Required(ErrorMessage = "La api key es requerida")]
+        public string apikey { get; set; }
     }
 }
