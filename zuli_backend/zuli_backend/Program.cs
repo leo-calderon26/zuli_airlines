@@ -116,6 +116,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Registrar DapperContext para manejo de conexiones SQL
 builder.Services.AddScoped<DapperContext>();
+builder.Services.AddScoped<IUnitOfWork, DapperUnitOfWork>();
 
 // Servicios y repositorios existentes
 builder.Services.AddScoped<IAircraftService, AircraftService>();
@@ -152,7 +153,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<TicketPurchaseRequestValida
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
-builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();

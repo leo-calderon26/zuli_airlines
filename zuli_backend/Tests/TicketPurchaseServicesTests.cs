@@ -1,6 +1,7 @@
 using Moq;
 using zuli_Business;
 using zuli_Business.DTO;
+using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -24,6 +25,10 @@ namespace zuli_backend.Test
             _reservationRepoMock = new Mock<IReservationRepository>();
             _baggageRepoMock = new Mock<IBaggageRepository>();
             _flightRepoMock = new Mock<IFlightRepository>();
+
+            _reservationRepoMock
+                .Setup(r => r.ReservationCodeExists(It.IsAny<string>(), It.IsAny<IUnitOfWork?>()))
+                .ReturnsAsync(false);
 
             _passengerValidationService = new PassengerValidationService(_reservationRepoMock.Object);
             _baggageRegistrationService = new BaggageRegistrationService(_baggageRepoMock.Object, _flightRepoMock.Object);
@@ -161,21 +166,11 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b =>
-                b.PassengerId == 1 &&
-                b.ReservationId == reservationId &&
-                b.Type == "Maleta" &&
-                b.Weight == 25m &&
-                b.Size == "Grande"
-            )), Times.Once);
-
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b =>
-                b.PassengerId == 1 &&
-                b.ReservationId == reservationId &&
-                b.Type == "Maleta" &&
-                b.Weight == 20m &&
-                b.Size == "Mediano"
-            )), Times.Once);
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.Is<List<BaggageEntity>>(list =>
+                list.Count == 2 &&
+                list.Any(b => b.PassengerId == 1 && b.ReservationId == reservationId && b.Type == "Maleta" && b.Weight == 25m && b.Size == "Grande") &&
+                list.Any(b => b.PassengerId == 1 && b.ReservationId == reservationId && b.Type == "Maleta" && b.Weight == 20m && b.Size == "Mediano")
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
@@ -198,7 +193,7 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.Type == "Maleta")), Times.Never);
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.IsAny<List<BaggageEntity>>(), It.IsAny<IUnitOfWork?>()), Times.Never);
         }
 
         [Test]
@@ -221,13 +216,14 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b =>
-                b.PassengerId == 1 &&
-                b.ReservationId == reservationId &&
-                b.Type == "Mano" &&
-                b.Weight == 7m &&
-                b.Size == "Pequeño"
-)), Times.Exactly(1));
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.Is<List<BaggageEntity>>(list =>
+                list.Count == 1 &&
+                list[0].PassengerId == 1 &&
+                list[0].ReservationId == reservationId &&
+                list[0].Type == "Mano" &&
+                list[0].Weight == 7m &&
+                list[0].Size == "Pequeño"
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
@@ -261,8 +257,11 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.PassengerId == 1)), Times.Exactly(2));
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b => b.PassengerId == 2)), Times.Exactly(2));
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.Is<List<BaggageEntity>>(list =>
+                list.Count == 4 &&
+                list.Count(b => b.PassengerId == 1) == 2 &&
+                list.Count(b => b.PassengerId == 2) == 2
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
@@ -333,9 +332,10 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b =>
-                b.Type == "Maleta" && b.Weight == 23m
-            )), Times.Once);
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.Is<List<BaggageEntity>>(list =>
+                list.Count == 1 &&
+                list[0].Type == "Maleta" && list[0].Weight == 23m
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
@@ -362,15 +362,15 @@ namespace zuli_backend.Test
 
             await _baggageRegistrationService.RegisterAllBaggage(passengers, passengerIds, reservationId);
 
-            _baggageRepoMock.Verify(r => r.CreateBaggage(It.Is<BaggageEntity>(b =>
-                b.Type == "Maleta" && b.Size == "Mediano"
-            )), Times.Once);
+            _baggageRepoMock.Verify(r => r.CreateBaggageBulk(It.Is<List<BaggageEntity>>(list =>
+                list.Count == 1 &&
+                list[0].Type == "Maleta" && list[0].Size == "Mediano"
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
         public async Task CreateReservation_WithValidData_CreatesReservationAndReturnsId()
         {
-            var code = "ABC12345";
             var request = new TicketPurchaseRequestDTO
             {
                 FlightClass = "Turista",
@@ -381,27 +381,28 @@ namespace zuli_backend.Test
             int buyerId = 10;
 
             _reservationRepoMock
-                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
+                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>(), It.IsAny<IUnitOfWork?>()))
                 .ReturnsAsync(100);
 
-            var result = await _reservationCreationService.CreateReservation(code, request, total, buyerId);
+            var result = await _reservationCreationService.CreateReservation(request, total, buyerId);
 
-            Assert.That(result, Is.EqualTo(100));
+            Assert.That(result.ReservationId, Is.EqualTo(100));
+            Assert.That(result.ReservationCode, Is.Not.Null.And.Length.EqualTo(8));
 
             _reservationRepoMock.Verify(r => r.CreateReservation(It.Is<ReservationEntity>(res =>
-                res.ReservationCode == code &&
+                !string.IsNullOrEmpty(res.ReservationCode) &&
+                res.ReservationCode.Length == 8 &&
                 res.BuyerId == buyerId &&
                 res.TotalPayment == total &&
                 res.FlightClass == "Turista" &&
                 res.PaymentMethod == "card" &&
                 res.ReservationOrigin == "Web"
-            )), Times.Once);
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
         public async Task CreateReservation_SetsPurchaseDateToToday()
         {
-            var code = "XYZ99999";
             var request = new TicketPurchaseRequestDTO
             {
                 FlightClass = "Primera Clase",
@@ -413,20 +414,20 @@ namespace zuli_backend.Test
 
             ReservationEntity? capturedEntity = null;
             _reservationRepoMock
-                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
-                .Callback<ReservationEntity>(entity => capturedEntity = entity)
+                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>(), It.IsAny<IUnitOfWork?>()))
+                .Callback<ReservationEntity, IUnitOfWork?>((entity, _) => capturedEntity = entity)
                 .ReturnsAsync(200);
 
-            await _reservationCreationService.CreateReservation(code, request, total, buyerId);
+            await _reservationCreationService.CreateReservation(request, total, buyerId);
 
             Assert.That(capturedEntity, Is.Not.Null);
             Assert.That(capturedEntity!.PurchaseDate, Is.EqualTo(DateTime.Now.Date));
+            Assert.That(capturedEntity.ReservationCode, Is.Not.Null.And.Length.EqualTo(8));
         }
 
         [Test]
         public async Task CreateReservation_WithFirstClass_SetsCorrectFlightClass()
         {
-            var code = "FIRST01";
             var request = new TicketPurchaseRequestDTO
             {
                 FlightClass = "Primera Clase",
@@ -437,20 +438,21 @@ namespace zuli_backend.Test
             int buyerId = 3;
 
             _reservationRepoMock
-                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
+                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>(), It.IsAny<IUnitOfWork?>()))
                 .ReturnsAsync(300);
 
-            await _reservationCreationService.CreateReservation(code, request, total, buyerId);
+            var result = await _reservationCreationService.CreateReservation(request, total, buyerId);
 
+            Assert.That(result.ReservationCode, Is.Not.Null.And.Length.EqualTo(8));
             _reservationRepoMock.Verify(r => r.CreateReservation(It.Is<ReservationEntity>(res =>
-                res.FlightClass == "Primera Clase"
-            )), Times.Once);
+                res.FlightClass == "Primera Clase" &&
+                !string.IsNullOrEmpty(res.ReservationCode)
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]
         public async Task CreateReservation_PassesAllParametersCorrectly()
         {
-            var code = "TESTCODE";
             var request = new TicketPurchaseRequestDTO
             {
                 FlightClass = "Turista",
@@ -461,19 +463,23 @@ namespace zuli_backend.Test
             int buyerId = 99;
 
             _reservationRepoMock
-                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>()))
+                .Setup(r => r.CreateReservation(It.IsAny<ReservationEntity>(), It.IsAny<IUnitOfWork?>()))
                 .ReturnsAsync(999);
 
-            var result = await _reservationCreationService.CreateReservation(code, request, total, buyerId);
+            var result = await _reservationCreationService.CreateReservation(request, total, buyerId);
+
+            Assert.That(result.ReservationId, Is.EqualTo(999));
+            Assert.That(result.ReservationCode, Is.Not.Null.And.Length.EqualTo(8));
 
             _reservationRepoMock.Verify(r => r.CreateReservation(It.Is<ReservationEntity>(res =>
-                res.ReservationCode == "TESTCODE" &&
+                !string.IsNullOrEmpty(res.ReservationCode) &&
+                res.ReservationCode.Length == 8 &&
                 res.BuyerId == 99 &&
                 res.TotalPayment == 750.50m &&
                 res.FlightClass == "Turista" &&
                 res.PaymentMethod == "Targeta" &&
                 res.ReservationOrigin == "Agent"
-            )), Times.Once);
+            ), It.IsAny<IUnitOfWork?>()), Times.Once);
         }
 
         [Test]

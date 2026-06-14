@@ -1,9 +1,11 @@
 using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Data;
 using zuli_Data.Entities;
-using zuli_Repository.Interface;
 using zuli_Data.Exceptions;
+using zuli_Repository.Interface;
+
 namespace zuli_Business
 {
     public class TicketPurchaseService : ITicketPurchaseService
@@ -14,10 +16,10 @@ namespace zuli_Business
         private readonly IPassengerCreationService _passengerCreationService;
         private readonly IBaggageRegistrationService _baggageRegistrationService;
         private readonly IReservationRepository _reservationRepository;
-        private readonly IBuyerRepository _buyerRepository;
         private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
         private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
         private readonly IEmailService _emailService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public TicketPurchaseService(
@@ -27,10 +29,10 @@ namespace zuli_Business
             IPassengerCreationService passengerCreationService,
             IBaggageRegistrationService baggageRegistrationService,
             IReservationRepository reservationRepository,
-            IBuyerRepository buyerRepository,
             IPurchaseConfirmationRepository purchaseConfirmationRepository,
             IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
             IEmailService emailService,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _flightResolverService = flightResolverService;
@@ -39,10 +41,10 @@ namespace zuli_Business
             _passengerCreationService = passengerCreationService;
             _baggageRegistrationService = baggageRegistrationService;
             _reservationRepository = reservationRepository;
-            _buyerRepository = buyerRepository;
             _purchaseConfirmationRepository = purchaseConfirmationRepository;
             _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
             _emailService = emailService;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -65,26 +67,59 @@ namespace zuli_Business
 
             var breakdown = CalculatePurchaseBreakdown(request, flights);
             var totalPayment = breakdown.GrandTotal;
-            var reservationCode = ReservationCodeGenerator.Generate();
 
-            var buyerId = await CreateBuyer(request.Buyer);
-            var passengerIds = await _passengerCreationService.CreateAllPassengers(request.Passengers);
+            await _unitOfWork.BeginTransactionAsync();
+            int reservationId = 0;
+            string reservationCode = string.Empty;
+            try
+            {
+                var result = await _passengerCreationService
+                    .CreateAllPassengers(request.Passengers, request.Buyer, _unitOfWork);
+                var passengerIds = result.passengerIds;
+                var buyerId = result.buyerId;
 
-            var reservationId = await _reservationCreationService.CreateReservation(
-                reservationCode,
-                request,
-                totalPayment,
-                buyerId
-            );
+                var reservationResult = await _reservationCreationService.CreateReservation(
+                    request,
+                    totalPayment,
+                    buyerId,
+                    _unitOfWork
+                );
+                reservationId = reservationResult.ReservationId;
+                reservationCode = reservationResult.ReservationCode;
 
-            await LinkPassengersToReservation(passengerIds, reservationId);
-            await CreateAllBoardingPasses(reservationCode, passengerIds, flightIds);
+                var passengerReservations = passengerIds
+                    .Select(pid => new PassengerReservationEntity
+                    {
+                        PassengerId = pid,
+                        ReservationId = reservationId
+                    })
+                    .ToList();
+                await _reservationRepository.CreatePassengerReservationsBulk(passengerReservations, _unitOfWork);
 
-            await _baggageRegistrationService.RegisterAllBaggage(
-                request.Passengers,
-                passengerIds,
-                reservationId
-            );
+                var boardingPasses = passengerIds
+                    .SelectMany(pid => flightIds.Select(fid => new BoardingPassEntity
+                    {
+                        FlightId = fid,
+                        ReservationCode = reservationCode,
+                        PassengerId = pid
+                    }))
+                    .ToList();
+                await _reservationRepository.CreateBoardingPassesBulk(boardingPasses, _unitOfWork);
+
+                await _baggageRegistrationService.RegisterAllBaggage(
+                    request.Passengers,
+                    passengerIds,
+                    reservationId,
+                    _unitOfWork
+                );
+
+                await _unitOfWork.CommitAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
 
             await SendPurchaseEmails(reservationCode);
 
@@ -96,45 +131,6 @@ namespace zuli_Business
                 Message = "Compra realizada exitosamente",
                 Breakdown = breakdown
             };
-        }
-
-        private async Task<int> CreateBuyer(BuyerTicketDTO buyerDto)
-        {
-            var buyer = _mapper.Map<BuyerEntity>(buyerDto);
-            return await _buyerRepository.CreateBuyer(buyer);
-        }
-
-        private async Task LinkPassengersToReservation(List<int> passengerIds, int reservationId)
-        {
-            foreach (var passengerId in passengerIds)
-            {
-                await _reservationRepository.CreatePassengerReservation(
-                    new PassengerReservationEntity
-                    {
-                        PassengerId = passengerId,
-                        ReservationId = reservationId
-                    }
-                );
-            }
-        }
-
-        private async Task CreateAllBoardingPasses(string reservationCode, List<int> passengerIds,
-            List<Guid> flightIds)
-        {
-            foreach (var passengerId in passengerIds)
-            {
-                foreach (var flightId in flightIds)
-                {
-                    await _reservationRepository.CreateBoardingPass(
-                        new BoardingPassEntity
-                        {
-                            FlightId = flightId,
-                            ReservationCode = reservationCode,
-                            PassengerId = passengerId
-                        }
-                    );
-                }
-            }
         }
 
         public static PurchaseBreakdownDTO CalculatePurchaseBreakdown(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
@@ -187,9 +183,9 @@ namespace zuli_Business
             var checkedBags = new List<BaggageBreakdownItemDTO>();
             decimal checkedBaggageTotal = 0;
 
+            var bagPrice = checkedPrice;
             for (int i = 1; i <= passenger.CheckedBaggage; i++)
             {
-                var bagPrice = checkedPrice * (decimal)Math.Pow((double)multiplier, i - 1);
                 checkedBaggageTotal += bagPrice;
                 checkedBags.Add(new BaggageBreakdownItemDTO
                 {
@@ -197,6 +193,7 @@ namespace zuli_Business
                     Type = "Maleta",
                     Price = bagPrice
                 });
+                bagPrice *= multiplier;
             }
 
             var carryOnTotal = passenger.CarryOn * carryOnPrice;
@@ -212,12 +209,7 @@ namespace zuli_Business
                 PassengerTotal = passengerTotal
             };
         }
-
-        public static decimal CalculateTotalPayment(TicketPurchaseRequestDTO request, List<FlightEntity> flights)
-        {
-            return CalculatePurchaseBreakdown(request, flights).GrandTotal;
-        }
-
+        
         private async Task SendPurchaseEmails(string reservationCode)
         {
             var confirmation = await _purchaseConfirmationRepository

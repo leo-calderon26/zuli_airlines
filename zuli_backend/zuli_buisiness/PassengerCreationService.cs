@@ -1,6 +1,7 @@
 using Mapster;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
@@ -14,28 +15,30 @@ namespace zuli_Business
         {
             _personRepository = personRepository;
         }
-
-        public async Task<List<int>> CreateAllPassengers(List<PassengerTicketDTO> passengers)
+        
+        public async Task<(List<int> passengerIds, int buyerId)> CreateAllPassengers(
+            List<PassengerTicketDTO> passengers,
+            BuyerTicketDTO buyer,
+            IUnitOfWork? uow = null)
         {
-            var passengerIds = new List<int>();
+            var persons = new List<PersonEntity>();
+            var passports = new List<PassportEntity>();
 
             foreach (var passenger in passengers)
             {
-                var person = passenger.Adapt<PersonEntity>();
-                var personId = await _personRepository.CreatePerson(person);
-
-                var passport = new PassportEntity
-                {
-                    PassengerId = personId,
-                    DueDate = DateTime.Parse(passenger.PassportDueDate),
-                    PassportCountry = passenger.PassportCountry
-                };
-
-                await _personRepository.CreatePassport(passport);
-                passengerIds.Add(personId);
+                persons.Add(passenger.Adapt<PersonEntity>());
+                passports.Add(passenger.Adapt<PassportEntity>());
             }
+            var buyerEntity = buyer.Adapt<BuyerEntity>();
+            var results = await _personRepository.CreatePersonBulk(persons, passports, buyerEntity, uow);
+            
+            var buyerResult = results.First();
+            var passengerResults = results.Skip(1).ToList();
 
-            return passengerIds;
+            var passengerIds = passengerResults.Select(r => r.PersonId).ToList();
+            var buyerId = buyerResult.BuyerId;
+
+            return (passengerIds, buyerId);
         }
     }
 }

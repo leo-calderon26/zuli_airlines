@@ -8,10 +8,11 @@ namespace zuli_Repository.Interface
 {
     public interface IReservationRepository
     {
-        Task<int> CreateReservation(ReservationEntity reservation);
-        Task CreatePassengerReservation(PassengerReservationEntity pr);
-        Task CreateBoardingPass(BoardingPassEntity boardingPass);
-        
+        Task<int> CreateReservation(ReservationEntity reservation, IUnitOfWork? uow = null);
+        Task<int> CreatePassengerReservationsBulk(List<PassengerReservationEntity> pr, IUnitOfWork? uow = null);
+        Task<int> CreateBoardingPassesBulk(List<BoardingPassEntity> boardingPasses, IUnitOfWork? uow = null);
+        Task<bool> ReservationCodeExists(string reservationCode, IUnitOfWork? uow = null);
+
         Task<bool> PassengerExistsInFlights(
             IEnumerable<Guid> flightIds,
             string firstName,
