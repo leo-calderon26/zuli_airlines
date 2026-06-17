@@ -1,20 +1,3 @@
 <template>
-    <div class="landing-page">
-                <h1 class="message">Reportes en mantenimiento</h1>
-    </div>
+  <router-view />
 </template>
-
-<style scoped>
-    .landing-page {
-        display: flex;
-        flex-direction: column;
-    }
-
-        .landing-page > :last-child {
-            margin-top: auto;
-        }
-
-    .message {
-        color: #000;
-    }
-</style>
