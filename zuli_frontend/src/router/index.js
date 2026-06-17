@@ -213,7 +213,13 @@ const router = createRouter({
             name: "purchaseConfirmation",
             component: PurchaseConfirmationView,
             meta: { requiresAuth: false, adminRequired: false }
-        }
+        },
+        {
+            path: "/admin/reports",
+            name: "reports",
+            component: Reports,
+            meta: {requiresAuth: true, adminRequired: false}
+        },
     ]
 });
 

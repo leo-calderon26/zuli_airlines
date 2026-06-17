@@ -28,14 +28,10 @@
                                 </router-link>
                             </li>
                             <li class="hover:bg-purple">
-                                <AppButton 
-                                    variant="link" 
-                                    @click="showMaintenanceModal = true" 
-                                    class="!block !p-3 !rounded-lg hover:!bg-neutral-secondary-medium !no-underline"
-                                >
-                                    <img :src="reportIcon" alt="Report Icon" class="menuIcons" />
+                                <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="Report Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Reportes</div>
-                                </AppButton>
+                                </router-link>
+
                             </li>
                         </ul>
                     </div>
