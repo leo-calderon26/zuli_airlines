@@ -1,20 +1,11 @@
 <template>
-    <div class="landing-page">
-                <h1 class="message">Reportes en mantenimiento</h1>
+    <div class="p-6">
+
+
+        <flightsReport />
     </div>
 </template>
 
-<style scoped>
-    .landing-page {
-        display: flex;
-        flex-direction: column;
-    }
-
-        .landing-page > :last-child {
-            margin-top: auto;
-        }
-
-    .message {
-        color: #000;
-    }
-</style>
+<script setup>
+import flightsReport from '../components/flightsReport.vue';
+</script>

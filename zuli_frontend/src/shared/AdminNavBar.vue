@@ -42,13 +42,13 @@
             </router-link>
           </li>
           <li class="px-4">
-            <AppButton
-              variant="ghost"
-              @click="showMaintenanceModal = true"
-              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
+            <router-link
+              to="/admin/reports"
+              exact-active-class="nav-active"
+              class="inline-block rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
             >
               Reportes
-            </AppButton>
+            </router-link>
           </li>
         </ul>
       </nav>
