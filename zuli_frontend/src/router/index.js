@@ -19,6 +19,8 @@ import RouteList from '../modules/route/view/RouteList.vue'
 
 import ProfileSettings from '../modules/profile/view/ProfileSettings.vue'
 import Reports from '../modules/reports/view/Reports.vue'
+import IncomeReport from '../modules/reports/view/IncomeReportView.vue'
+import FlightsReport from '../modules/reports/view/FlightsReportView.vue'
 import FlightCreate from "../modules/flight/view/FlightCreate.vue"
 import ReserveView from '../modules/landing/view/ReserveView.vue'
 import CheckInView from '../modules/landing/view/CheckInView.vue'
@@ -168,7 +170,19 @@ const router = createRouter({
             path: "/admin/reports",
             name: "reports",
             component: Reports,
-            meta: {requiresAuth: true, adminRequired: false}
+            meta: {requiresAuth: true, adminRequired: false},
+            children: [
+                {
+                    path: "income",
+                    name: "incomeReport",
+                    component: IncomeReport
+                },
+                {
+                    path: "flights",
+                    name: "flightsReport",
+                    component: FlightsReport
+                }
+            ]
         },
         {
             path: "/admin/profile-settings",
