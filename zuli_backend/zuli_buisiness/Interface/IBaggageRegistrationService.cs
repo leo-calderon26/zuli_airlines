@@ -1,5 +1,4 @@
 using zuli_Business.DTO;
-using zuli_Data;
 
 namespace zuli_Business.Interface
 {
@@ -8,8 +7,7 @@ namespace zuli_Business.Interface
         Task RegisterAllBaggage(
             List<PassengerTicketDTO> passengers,
             List<int> passengerIds,
-            int reservationId,
-            IUnitOfWork? uow = null);
+            int reservationId);
 
         Task ValidateBaggageCapacity(
             List<PassengerTicketDTO> passengers,

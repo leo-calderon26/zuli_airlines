@@ -14,7 +14,7 @@ namespace zuli_Repository
 
         public async Task<PersonEntity?> GetPersonByEmail(string email)
         {
-            return await WithConnectionAsync(async (connection, _) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var sql = @"
                     SELECT p.PersonId, p.FirstName, p.FirstLastName, p.SecondLastName, p.BirthDate, p.Gender
@@ -28,10 +28,9 @@ namespace zuli_Repository
         public async Task<List<PersonBulkResult>> CreatePersonBulk(
             List<PersonEntity> persons,
             List<PassportEntity> passports,
-            BuyerEntity buyer,
-            IUnitOfWork? uow = null)
+            BuyerEntity buyer)
         {
-            return await WithConnectionAsync(async (connection, transaction) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var table = new DataTable();
                 table.Columns.Add("FirstName", typeof(string));
@@ -83,11 +82,10 @@ namespace zuli_Repository
             var result = await connection.QueryAsync<PersonBulkResult>(
                 "dbo.sp_UpsertPersonBulk",
                 parameters,
-                transaction,
                 commandType: CommandType.StoredProcedure
             );
             return result.ToList();
-            }, uow);
+            });
         }
     }
 }

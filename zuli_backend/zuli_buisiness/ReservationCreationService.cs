@@ -1,6 +1,5 @@
 using zuli_Business.DTO;
 using zuli_Business.Interface;
-using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -20,23 +19,23 @@ namespace zuli_Business
         public async Task<(int ReservationId, string ReservationCode)> CreateReservation(
             TicketPurchaseRequestDTO request,
             decimal total,
-            int buyerId,
-            IUnitOfWork? uow = null)
+            int buyerId)
         {
             var reservationCode = await GenerateUniqueReservationCodeAsync();
             var reservation = BuildReservationEntity(reservationCode, request, total, buyerId);
-            var reservationId = await _reservationRepository.CreateReservation(reservation, uow);
+            var reservationId = await _reservationRepository.CreateReservation(reservation);
             return (reservationId, reservationCode);
         }
 
         private async Task<string> GenerateUniqueReservationCodeAsync()
         {
+            var existingCodes = await _reservationRepository.GetAllReservationCodes();
+
             for (int attempt = 0; attempt < MAX_RESERVATION_CODE_GENERATION_ATTEMPTS; attempt++)
             {
                 var code = ReservationCodeGenerator.Generate();
-                var exists = await _reservationRepository.ReservationCodeExists(code);
 
-                if (!exists)
+                if (!existingCodes.Contains(code))
                 {
                     return code;
                 }

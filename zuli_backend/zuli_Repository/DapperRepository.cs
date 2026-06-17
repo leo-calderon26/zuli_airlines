@@ -13,30 +13,17 @@ namespace zuli_Repository
         }
 
         protected async Task WithConnectionAsync(
-            Func<IDbConnection, IDbTransaction?, Task> action,
-            IUnitOfWork? uow = null)
+            Func<IDbConnection, Task> action)
         {
-            if (uow != null)
-            {
-                await action(uow.Connection, uow.Transaction);
-                return;
-            }
-
             using var connection = _context.CreateConnection();
-            await action(connection, null);
+            await action(connection);
         }
 
         protected async Task<T> WithConnectionAsync<T>(
-            Func<IDbConnection, IDbTransaction?, Task<T>> action,
-            IUnitOfWork? uow = null)
+            Func<IDbConnection, Task<T>> action)
         {
-            if (uow != null)
-            {
-                return await action(uow.Connection, uow.Transaction);
-            }
-
             using var connection = _context.CreateConnection();
-            return await action(connection, null);
+            return await action(connection);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Transactions;
 using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
@@ -160,97 +161,78 @@ namespace zuli_Repository
 
         public async Task CreatePendingUserAsync(AppUser user)
         {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             using var connection = _dapperContext.CreateConnection();
 
-            connection.Open();
-
-            using var transaction = connection.BeginTransaction();
-
-            try
-            {
-                // (logging removed)
-                var personSql = @"
-                    INSERT INTO Person (
-                        FirstName,
-                        FirstLastName,
-                        SecondLastName,
-                        BirthDate,
-                        Gender
-                    )
-                    VALUES (
-                        @FirstName,
-                        @FirstLastName,
-                        @SecondLastName,
-                        '',
-                        ''
-                    );
-
-                    SELECT CAST(SCOPE_IDENTITY() AS INT);
-                ";
-
-                int personId = await connection.QuerySingleAsync<int>(
-                    personSql,
-                    user,
-                    transaction
+            var personSql = @"
+                INSERT INTO Person (
+                    FirstName,
+                    FirstLastName,
+                    SecondLastName,
+                    BirthDate,
+                    Gender
+                )
+                VALUES (
+                    @FirstName,
+                    @FirstLastName,
+                    @SecondLastName,
+                    '',
+                    ''
                 );
 
-                // (logging removed)
+                SELECT CAST(SCOPE_IDENTITY() AS INT);
+            ";
 
-                if (!string.IsNullOrWhiteSpace(user.Email))
-                {
-                    var emailSql = @"
-                        INSERT INTO PersonEmail (PersonId, Email)
-                        VALUES (@PersonId, @Email);";
+            int personId = await connection.QuerySingleAsync<int>(
+                personSql,
+                user
+            );
 
-                    await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email }, transaction);
-
-                    // (logging removed)
-                }
-
-                user.PersonId = personId;
-
-                var userSql = @"
-                    INSERT INTO AirlineUser (
-                        UserId,
-                        PersonId,
-                        NationalId,
-                        BusinessEmail,
-                        BusinessId,
-                        UserRole,
-                        PasswordHash,
-                        IsActive,
-                        FailedLoginAttempts,
-                        LockoutEnd,
-                        ManagedByAdminId,
-                        ActivationTokenHash
-                    )
-                    VALUES (
-                        @UserId,
-                        @PersonId,
-                        @NationalId,
-                        @BusinessEmail,
-                        @BusinessId,
-                        @UserRole,
-                        @PasswordHash,
-                        @IsActive,
-                        @FailedLoginAttempts,
-                        @LockoutEnd,
-                        @ManagedByAdminId,
-                        @ActivationTokenHash
-                    );
-                ";
-
-                await connection.ExecuteAsync(userSql, user, transaction);
-
-                // (logging removed)
-
-                transaction.Commit();
-            }
-            catch (Exception)
+            if (!string.IsNullOrWhiteSpace(user.Email))
             {
-                transaction.Rollback();
-                throw;
+                var emailSql = @"
+                    INSERT INTO PersonEmail (PersonId, Email)
+                    VALUES (@PersonId, @Email);";
+
+                await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email });
             }
+
+            user.PersonId = personId;
+
+            var userSql = @"
+                INSERT INTO AirlineUser (
+                    UserId,
+                    PersonId,
+                    NationalId,
+                    BusinessEmail,
+                    BusinessId,
+                    UserRole,
+                    PasswordHash,
+                    IsActive,
+                    FailedLoginAttempts,
+                    LockoutEnd,
+                    ManagedByAdminId,
+                    ActivationTokenHash
+                )
+                VALUES (
+                    @UserId,
+                    @PersonId,
+                    @NationalId,
+                    @BusinessEmail,
+                    @BusinessId,
+                    @UserRole,
+                    @PasswordHash,
+                    @IsActive,
+                    @FailedLoginAttempts,
+                    @LockoutEnd,
+                    @ManagedByAdminId,
+                    @ActivationTokenHash
+                );
+            ";
+
+            await connection.ExecuteAsync(userSql, user);
+
+            scope.Complete();
         }
 
         public async Task UpdateLoginStateAsync(AppUser user)

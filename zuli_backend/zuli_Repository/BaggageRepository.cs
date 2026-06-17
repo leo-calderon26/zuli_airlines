@@ -11,9 +11,9 @@ namespace zuli_Repository
         public BaggageRepository(DapperContext context) : base(context)
         {
         }
-        public async Task CreateBaggageBulk(List<BaggageEntity> baggages, IUnitOfWork? uow = null)
+        public async Task CreateBaggageBulk(List<BaggageEntity> baggages)
         {
-            await WithConnectionAsync(async (connection, transaction) =>
+            await WithConnectionAsync(async (connection) =>
             {
                 var table = new DataTable();
                 table.Columns.Add("PassengerId", typeof(int));
@@ -32,10 +32,9 @@ namespace zuli_Repository
                 await connection.ExecuteAsync(
                     "dbo.sp_BulkBaggage",
                     parameters,
-                    transaction,
                     commandType: CommandType.StoredProcedure
                 );
-            }, uow);
+            });
         }
     }
 }
