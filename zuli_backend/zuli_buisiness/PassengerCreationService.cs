@@ -1,7 +1,6 @@
 using Mapster;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
-using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
@@ -18,8 +17,7 @@ namespace zuli_Business
         
         public async Task<(List<int> passengerIds, int buyerId)> CreateAllPassengers(
             List<PassengerTicketDTO> passengers,
-            BuyerTicketDTO buyer,
-            IUnitOfWork? uow = null)
+            BuyerTicketDTO buyer)
         {
             var persons = new List<PersonEntity>();
             var passports = new List<PassportEntity>();
@@ -30,7 +28,7 @@ namespace zuli_Business
                 passports.Add(passenger.Adapt<PassportEntity>());
             }
             var buyerEntity = buyer.Adapt<BuyerEntity>();
-            var results = await _personRepository.CreatePersonBulk(persons, passports, buyerEntity, uow);
+            var results = await _personRepository.CreatePersonBulk(persons, passports, buyerEntity);
             
             var buyerResult = results.First();
             var passengerResults = results.Skip(1).ToList();

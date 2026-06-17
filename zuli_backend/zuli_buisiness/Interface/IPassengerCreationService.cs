@@ -6,7 +6,6 @@ namespace zuli_Business.Interface
     {
         Task<(List<int> passengerIds, int buyerId)> CreateAllPassengers(
             List<PassengerTicketDTO> passengers,
-            BuyerTicketDTO buyer,
-            zuli_Data.IUnitOfWork? uow = null);
+            BuyerTicketDTO buyer);
     }
 }

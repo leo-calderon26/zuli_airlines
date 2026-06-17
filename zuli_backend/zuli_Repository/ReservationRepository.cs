@@ -12,9 +12,9 @@ namespace zuli_Repository
         {
         }
 
-        public async Task<int> CreateReservation(ReservationEntity reservation, IUnitOfWork? uow = null)
+        public async Task<int> CreateReservation(ReservationEntity reservation)
         {
-            return await WithConnectionAsync(async (connection, transaction) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var sql = @"
                     INSERT INTO Reservation (ReservationCode, ReservationOrigin, TotalPayment, PurchaseDate, BuyerId, FlightClass, PaymentMethod)
@@ -30,13 +30,13 @@ namespace zuli_Repository
                     reservation.BuyerId,
                     reservation.FlightClass,
                     reservation.PaymentMethod
-                }, transaction);
-            }, uow);
+                });
+            });
         }
 
-        public async Task<int> CreateBoardingPassesBulk(List<BoardingPassEntity> boardingPasses, IUnitOfWork? uow = null)
+        public async Task<int> CreateBoardingPassesBulk(List<BoardingPassEntity> boardingPasses)
         {
-            return await WithConnectionAsync(async (connection, transaction) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var table = new DataTable();
                 table.Columns.Add("FlightId", typeof(Guid));
@@ -54,30 +54,25 @@ namespace zuli_Repository
                 var result = await connection.ExecuteAsync(
                     "dbo.sp_BulkBoardingPass",
                     parameters,
-                    transaction,
                     commandType: CommandType.StoredProcedure
                 );
                 return result;
-            }, uow);
+            });
         }
 
-        public async Task<bool> ReservationCodeExists(string reservationCode, IUnitOfWork? uow = null)
+        public async Task<HashSet<string>> GetAllReservationCodes()
         {
-            return await WithConnectionAsync(async (connection, transaction) =>
+            return await WithConnectionAsync(async (connection) =>
             {
-                var sql = "SELECT TOP 1 1 FROM dbo.Reservation WHERE ReservationCode = @ReservationCode;";
-                var exists = await connection.QueryFirstOrDefaultAsync<int>(
-                    sql,
-                    new { ReservationCode = reservationCode },
-                    transaction);
-
-                return exists == 1;
-            }, uow);
+                var sql = "SELECT ReservationCode FROM dbo.Reservation;";
+                var codes = await connection.QueryAsync<string>(sql);
+                return codes.ToHashSet();
+            });
         }
 
-        public async Task<int> CreatePassengerReservationsBulk(List<PassengerReservationEntity> prs, IUnitOfWork? uow = null)
+        public async Task<int> CreatePassengerReservationsBulk(List<PassengerReservationEntity> prs)
         {
-            return await WithConnectionAsync(async (connection, transaction) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var table = new DataTable();
                 table.Columns.Add("PassengerId", typeof(int));
@@ -93,11 +88,10 @@ namespace zuli_Repository
                 var result = await connection.QueryAsync<int>(
                     "dbo.sp_BulkPassengerReservation",
                     parameters,
-                    transaction,
                     commandType: CommandType.StoredProcedure
                 );
                 return result.Count();
-            }, uow);
+            });
         }
 
         public async Task<bool> PassengerExistsInFlights(
@@ -108,7 +102,7 @@ namespace zuli_Repository
             string birthDate,
             string passportCountry)
         {
-            return await WithConnectionAsync(async (connection, _) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var sql = @"
                     SELECT TOP 1 1
@@ -146,7 +140,7 @@ namespace zuli_Repository
             IEnumerable<Guid> flightIds,
             List<PassengerCheckInfo> passengers)
         {
-            return await WithConnectionAsync(async (connection, _) =>
+            return await WithConnectionAsync(async (connection) =>
             {
                 var flightIdList = flightIds.ToList();
 

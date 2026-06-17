@@ -1,6 +1,5 @@
 using zuli_Business.DTO;
 using zuli_Business.Interface;
-using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -63,13 +62,12 @@ namespace zuli_Business
         public async Task RegisterAllBaggage(
             List<PassengerTicketDTO> passengers,
             List<int> passengerIds,
-            int reservationId,
-            IUnitOfWork? uow = null)
+            int reservationId)
         {
             var baggages = BuildBaggageList(passengers, passengerIds, reservationId);
             if (baggages.Count > 0)
             {
-                await _baggageRepository.CreateBaggageBulk(baggages, uow);
+                await _baggageRepository.CreateBaggageBulk(baggages);
             }
         }
 
