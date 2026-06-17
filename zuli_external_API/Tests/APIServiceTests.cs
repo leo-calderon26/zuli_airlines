@@ -121,7 +121,7 @@ namespace zuli_backend.Tests
         public async Task ValidateUser_ValidAirline_ReturnsToken()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "zuli" };
+            var request = new AuthorizationDTO { airlineName = "zuli", apikey = "test-api-key-123" };
 
             var result = await service.ValidateUser(request);
 
@@ -134,7 +134,18 @@ namespace zuli_backend.Tests
         public void ValidateUser_InvalidAirline_ThrowsUnauthorized()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "invalidairline" };
+            var request = new AuthorizationDTO { airlineName = "invalidairline", apikey = "test-api-key-123" };
+
+            Assert.That(
+                async () => await service.ValidateUser(request),
+                Throws.TypeOf<ZuliUnauthorizedException>());
+        }
+
+        [Test]
+        public void ValidateUser_InvalidAPIKey_ThrowsUnauthorized()
+        {
+            var service = BuildAuthorizationService();
+            var request = new AuthorizationDTO { airlineName = "zuli", apikey = "invalidkey" };
 
             Assert.That(
                 async () => await service.ValidateUser(request),
@@ -145,7 +156,7 @@ namespace zuli_backend.Tests
         public void ValidateUser_InvalidFormat_ThrowsValidationException()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "zuli123" };
+            var request = new AuthorizationDTO { airlineName = "zuli123", apikey = "test-api-key-123" };
 
             Assert.That(
                 async () => await service.ValidateUser(request),
@@ -213,7 +224,8 @@ namespace zuli_backend.Tests
         {
             var settings = new Dictionary<string, string>
             {
-                {"settings:secretKey", "test-secret-key-123"}
+                {"settings:secretKey", "test-secret-key-123"},
+                {"settings:apiKey", "test-api-key-123" }
             };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(settings)
