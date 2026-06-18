@@ -8,5 +8,6 @@ namespace zuli_Business.Interface
         Task<IEnumerable<AircraftDTO>> GetAll();
         Task<AircraftPaginatedResponseDTO<AircraftDTO>> GetAircraftsPaginated(int pageNumber, int pageSize);
         Task<BasicResponseDTO> UpdateAircraftAsync(Guid aircraftId, AircraftDTO aircraft);
+        Task<BasicResponseDTO> DeleteAircraft(Guid aircraftId);
     }
 }
