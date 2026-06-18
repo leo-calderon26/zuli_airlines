@@ -4,6 +4,8 @@ namespace zuli_Business.Interface
 {
     public interface IPassengerCreationService
     {
-        Task<List<int>> CreateAllPassengers(List<PassengerTicketDTO> passengers);
+        Task<(List<int> passengerIds, int buyerId)> CreateAllPassengers(
+            List<PassengerTicketDTO> passengers,
+            BuyerTicketDTO buyer);
     }
 }

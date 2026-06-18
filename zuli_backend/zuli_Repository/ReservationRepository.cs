@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
@@ -5,60 +6,94 @@ using zuli_Repository.Interface;
 
 namespace zuli_Repository
 {
-    public class ReservationRepository : IReservationRepository
+    public class ReservationRepository : DapperRepository, IReservationRepository
     {
-        private readonly DapperContext _context;
-
-        public ReservationRepository(DapperContext context) => _context = context;
+        public ReservationRepository(DapperContext context) : base(context)
+        {
+        }
 
         public async Task<int> CreateReservation(ReservationEntity reservation)
         {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-                INSERT INTO Reservation (ReservationCode, ReservationOrigin, TotalPayment, PurchaseDate, BuyerId, FlightClass, PaymentMethod)
-                VALUES (@ReservationCode, @ReservationOrigin, @TotalPayment, @PurchaseDate, @BuyerId, @FlightClass, @PaymentMethod);
-                SELECT CAST(SCOPE_IDENTITY() AS INT);";
-
-            return await connection.ExecuteScalarAsync<int>(sql, new
+            return await WithConnectionAsync(async (connection) =>
             {
-                reservation.ReservationCode,
-                reservation.ReservationOrigin,
-                reservation.TotalPayment,
-                reservation.PurchaseDate,
-                reservation.BuyerId,
-                reservation.FlightClass,
-                reservation.PaymentMethod
+                var sql = @"
+                    INSERT INTO Reservation (ReservationCode, ReservationOrigin, TotalPayment, PurchaseDate, BuyerId, FlightClass, PaymentMethod)
+                    VALUES (@ReservationCode, @ReservationOrigin, @TotalPayment, @PurchaseDate, @BuyerId, @FlightClass, @PaymentMethod);
+                    SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+                return await connection.ExecuteScalarAsync<int>(sql, new
+                {
+                    reservation.ReservationCode,
+                    reservation.ReservationOrigin,
+                    reservation.TotalPayment,
+                    reservation.PurchaseDate,
+                    reservation.BuyerId,
+                    reservation.FlightClass,
+                    reservation.PaymentMethod
+                });
             });
         }
 
-        public async Task CreateBoardingPass(BoardingPassEntity boardingPass)
+        public async Task<int> CreateBoardingPassesBulk(List<BoardingPassEntity> boardingPasses)
         {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-                INSERT INTO BoardingPass (FlightId, ReservationCode, PassengerId)
-                VALUES (@FlightId, @ReservationCode, @PassengerId);";
-
-            await connection.ExecuteAsync(sql, new
+            return await WithConnectionAsync(async (connection) =>
             {
-                boardingPass.FlightId,
-                boardingPass.ReservationCode,
-                boardingPass.PassengerId
+                var table = new DataTable();
+                table.Columns.Add("FlightId", typeof(Guid));
+                table.Columns.Add("ReservationCode", typeof(string));
+                table.Columns.Add("PassengerId", typeof(int));
+
+                foreach (var pass in boardingPasses)
+                {
+                    table.Rows.Add(pass.FlightId, pass.ReservationCode, pass.PassengerId);
+                }
+
+                var parameters = new DynamicParameters();
+                parameters.Add("BoardingPasses", table.AsTableValuedParameter("dbo.BoardingPassBulkType"));
+
+                var result = await connection.ExecuteAsync(
+                    "dbo.sp_BulkBoardingPass",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result;
             });
         }
 
-        public async Task CreatePassengerReservation(PassengerReservationEntity pr)
+        public async Task<HashSet<string>> GetAllReservationCodes()
         {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-                INSERT INTO PassengerReservation (PassengerId, ReservationId)
-                VALUES (@PassengerId, @ReservationId);";
-
-            await connection.ExecuteAsync(sql, new
+            return await WithConnectionAsync(async (connection) =>
             {
-                pr.PassengerId,
-                pr.ReservationId
+                var sql = "SELECT ReservationCode FROM dbo.Reservation;";
+                var codes = await connection.QueryAsync<string>(sql);
+                return codes.ToHashSet();
             });
         }
+
+        public async Task<int> CreatePassengerReservationsBulk(List<PassengerReservationEntity> prs)
+        {
+            return await WithConnectionAsync(async (connection) =>
+            {
+                var table = new DataTable();
+                table.Columns.Add("PassengerId", typeof(int));
+                table.Columns.Add("ReservationId", typeof(int));
+                foreach (var pr in prs)
+                {
+                    table.Rows.Add(pr.PassengerId, pr.ReservationId);
+                }
+
+                var parameters = new DynamicParameters();
+                parameters.Add("PassengerReservations", table.AsTableValuedParameter("dbo.PassengerReservationBulkType"));
+
+                var result = await connection.QueryAsync<int>(
+                    "dbo.sp_BulkPassengerReservation",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result.Count();
+            });
+        }
+
         public async Task<bool> PassengerExistsInFlights(
             IEnumerable<Guid> flightIds,
             string firstName,
@@ -67,104 +102,100 @@ namespace zuli_Repository
             string birthDate,
             string passportCountry)
         {
-            using var connection = _context.CreateConnection();
+            return await WithConnectionAsync(async (connection) =>
+            {
+                var sql = @"
+                    SELECT TOP 1 1
+                    FROM dbo.BoardingPass bp
+                    INNER JOIN dbo.Person p
+                        ON bp.PassengerId = p.PersonId
+                    LEFT JOIN dbo.Passport passport
+                        ON p.PersonId = passport.PassengerId
+                    WHERE bp.FlightId IN @FlightIds
+                    AND LOWER(LTRIM(RTRIM(p.FirstName))) = LOWER(LTRIM(RTRIM(@FirstName)))
+                    AND LOWER(LTRIM(RTRIM(p.FirstLastName))) = LOWER(LTRIM(RTRIM(@FirstLastName)))
+                    AND LOWER(LTRIM(RTRIM(p.SecondLastName))) = LOWER(LTRIM(RTRIM(@SecondLastName)))
+                    AND CAST(p.BirthDate AS DATE) = CAST(@BirthDate AS DATE)
+                    AND LOWER(LTRIM(RTRIM(ISNULL(passport.PassportCountry, '')))) = LOWER(LTRIM(RTRIM(@PassportCountry)));
+                ";
 
-            var sql = @"
-                SELECT TOP 1 1
-                FROM dbo.BoardingPass bp
-                INNER JOIN dbo.Person p
-                    ON bp.PassengerId = p.PersonId
-                LEFT JOIN dbo.Passport passport
-                    ON p.PersonId = passport.PassengerId
-                WHERE bp.FlightId IN @FlightIds
-                AND LOWER(LTRIM(RTRIM(p.FirstName))) = LOWER(LTRIM(RTRIM(@FirstName)))
-                AND LOWER(LTRIM(RTRIM(p.FirstLastName))) = LOWER(LTRIM(RTRIM(@FirstLastName)))
-                AND LOWER(LTRIM(RTRIM(p.SecondLastName))) = LOWER(LTRIM(RTRIM(@SecondLastName)))
-                AND CAST(p.BirthDate AS DATE) = CAST(@BirthDate AS DATE)
-                AND LOWER(LTRIM(RTRIM(ISNULL(passport.PassportCountry, '')))) = LOWER(LTRIM(RTRIM(@PassportCountry)));
-            ";
+                var exists = await connection.QueryFirstOrDefaultAsync<int>(
+                    sql,
+                    new
+                    {
+                        FlightIds = flightIds.ToList(),
+                        FirstName = firstName,
+                        FirstLastName = firstLastName,
+                        SecondLastName = secondLastName,
+                        BirthDate = birthDate,
+                        PassportCountry = passportCountry
+                    }
+                );
 
-            var exists = await connection.QueryFirstOrDefaultAsync<int>(
-                sql,
-                new
-                {
-                    FlightIds = flightIds.ToList(),
-                    FirstName = firstName,
-                    FirstLastName = firstLastName,
-                    SecondLastName = secondLastName,
-                    BirthDate = birthDate,
-                    PassportCountry = passportCountry
-                }
-            );
-
-            return exists == 1;
+                return exists == 1;
+            });
         }
 
         public async Task<Dictionary<int, bool>> PassengersExistInFlights(
             IEnumerable<Guid> flightIds,
             List<PassengerCheckInfo> passengers)
         {
-            using var connection = _context.CreateConnection();
-            var flightIdList = flightIds.ToList();
-
-            if (passengers.Count == 0)
+            return await WithConnectionAsync(async (connection) =>
             {
-                return new Dictionary<int, bool>();
-            }
+                var flightIdList = flightIds.ToList();
 
-            var (sql, parameters) = BuildPassengerExistsSql(flightIdList, passengers);
+                if (passengers.Count == 0)
+                {
+                    return new Dictionary<int, bool>();
+                }
 
-            var results = await connection.QueryAsync<int>(sql, parameters);
+                var passengersTable = new DataTable();
+                passengersTable.Columns.Add("PassengerIndex", typeof(int));
+                passengersTable.Columns.Add("FirstName", typeof(string));
+                passengersTable.Columns.Add("FirstLastName", typeof(string));
+                passengersTable.Columns.Add("SecondLastName", typeof(string));
+                passengersTable.Columns.Add("BirthDate", typeof(string));
+                passengersTable.Columns.Add("PassportCountry", typeof(string));
 
-            var matchedIndices = results.ToHashSet();
-            var result = new Dictionary<int, bool>();
+                foreach (var p in passengers)
+                {
+                    passengersTable.Rows.Add(
+                        p.Index,
+                        p.FirstName,
+                        p.FirstLastName,
+                        p.SecondLastName,
+                        p.BirthDate,
+                        p.PassportCountry
+                    );
+                }
 
-            for (int i = 0; i < passengers.Count; i++)
-            {
-                result[passengers[i].Index] = matchedIndices.Contains(i);
-            }
+                var flightIdsTable = new DataTable();
+                flightIdsTable.Columns.Add("Id", typeof(Guid));
+                foreach (var id in flightIdList)
+                {
+                    flightIdsTable.Rows.Add(id);
+                }
 
-            return result;
-        }
+                var parameters = new DynamicParameters();
+                parameters.Add("Passengers", passengersTable.AsTableValuedParameter("dbo.PassengerCheckBulkType"));
+                parameters.Add("FlightIds", flightIdsTable.AsTableValuedParameter("dbo.GuidList"));
 
-        private static (string sql, DynamicParameters parameters) BuildPassengerExistsSql(
-            List<Guid> flightIds,
-            List<PassengerCheckInfo> passengers)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("FlightIds", flightIds);
+                var matchedIndices = await connection.QueryAsync<int>(
+                    "dbo.sp_CheckPassengersExistInFlights",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
 
-            var unions = new List<string>();
+                var matched = matchedIndices.ToHashSet();
+                var result = new Dictionary<int, bool>();
 
-            for (int i = 0; i < passengers.Count; i++)
-            {
-                var p = passengers[i];
-                var prefix = $"{i}";
+                for (int i = 0; i < passengers.Count; i++)
+                {
+                    result[passengers[i].Index] = matched.Contains(passengers[i].Index);
+                }
 
-                parameters.Add($"FirstName{prefix}", p.FirstName);
-                parameters.Add($"FirstLastName{prefix}", p.FirstLastName);
-                parameters.Add($"SecondLastName{prefix}", p.SecondLastName);
-                parameters.Add($"BirthDate{prefix}", p.BirthDate);
-                parameters.Add($"PassportCountry{prefix}", p.PassportCountry);
-
-                var union = $@"
-                SELECT {i} AS PassengerIndex
-                FROM dbo.BoardingPass bp
-                INNER JOIN dbo.Person p ON bp.PassengerId = p.PersonId
-                LEFT JOIN dbo.Passport passport ON p.PersonId = passport.PassengerId
-                WHERE bp.FlightId IN @FlightIds
-                AND LOWER(LTRIM(RTRIM(p.FirstName))) = LOWER(LTRIM(RTRIM(@FirstName{prefix})))
-                AND LOWER(LTRIM(RTRIM(p.FirstLastName))) = LOWER(LTRIM(RTRIM(@FirstLastName{prefix})))
-                AND LOWER(LTRIM(RTRIM(p.SecondLastName))) = LOWER(LTRIM(RTRIM(@SecondLastName{prefix})))
-                AND CAST(p.BirthDate AS DATE) = CAST(@BirthDate{prefix} AS DATE)
-                AND LOWER(LTRIM(RTRIM(ISNULL(passport.PassportCountry, '')))) = LOWER(LTRIM(RTRIM(@PassportCountry{prefix})))";
-
-                unions.Add(union);
-            }
-
-            var sql = string.Join(" UNION ALL ", unions);
-
-            return (sql, parameters);
+                return result;
+            });
         }
     }
 }
