@@ -12,6 +12,7 @@ namespace zuli_Repository.Interface
         Task<(IEnumerable<AircraftEntity> aircrafts, int totalCount)> GetAircraftsPaginated(int pageNumber, int pageSize);
         Task<AircraftEntity?> GetById(Guid aircraftId);
         Task UpdateAircraftAsync(AircraftEntity aircraft);
+        Task DeleteAircraft(Guid aircraftId);
         Task<bool> IsAdmin(Guid userId);
     }
 }
