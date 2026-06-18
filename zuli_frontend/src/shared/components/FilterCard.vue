@@ -13,6 +13,20 @@
             {{ opt.label }}
           </option>
         </select>
+        <input 
+          v-else-if="filter.type === 'date'"
+          type="date"
+          v-model="model[filter.key]"
+          class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+
+        <input 
+          v-else-if="filter.type === 'text'"
+          type="text"
+          v-model="model[filter.key]"
+          :placeholder="filter.placeholder || ''"
+          class="block w-full appearance-none rounded-base border bg-body px-3 py-2.5 text-sm text-content shadow-xs transition-all duration-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
       </div>
     </div>
     <div class="mt-4 flex justify-end">
