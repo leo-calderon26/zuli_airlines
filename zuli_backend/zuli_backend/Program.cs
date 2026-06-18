@@ -152,7 +152,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<TicketPurchaseRequestValida
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
-builder.Services.AddScoped<IBuyerRepository, BuyerRepository>();
 
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();

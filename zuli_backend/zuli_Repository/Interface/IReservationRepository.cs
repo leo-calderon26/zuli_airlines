@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using zuli_Data;
 using zuli_Data.Entities;
 
@@ -9,9 +6,10 @@ namespace zuli_Repository.Interface
     public interface IReservationRepository
     {
         Task<int> CreateReservation(ReservationEntity reservation);
-        Task CreatePassengerReservation(PassengerReservationEntity pr);
-        Task CreateBoardingPass(BoardingPassEntity boardingPass);
-        
+        Task<int> CreatePassengerReservationsBulk(List<PassengerReservationEntity> pr);
+        Task<int> CreateBoardingPassesBulk(List<BoardingPassEntity> boardingPasses);
+        Task<HashSet<string>> GetAllReservationCodes();
+
         Task<bool> PassengerExistsInFlights(
             IEnumerable<Guid> flightIds,
             string firstName,

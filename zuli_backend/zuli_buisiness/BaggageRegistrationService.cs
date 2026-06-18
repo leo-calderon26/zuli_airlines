@@ -8,10 +8,10 @@ namespace zuli_Business
 {
     public class BaggageRegistrationService : IBaggageRegistrationService
     {
-        private const decimal DefaultCheckedBaggageWeight = 23.0m;
-        private const decimal DefaultCarryOnWeight = 7.0m;
-        private const int MaxCheckedBaggagePerPassenger = 5;
-        private const int MaxCarryOnPerPassenger = 1;
+        private const decimal DEFAULT_CHECKED_BAGGAGE_WEIGHT = 23.0m;
+        private const decimal DEFAULT_CARRY_ON_WEIGHT = 7.0m;
+        private const int MAX_CHECKED_BAGGAGER_PASSENGER = 5;
+        private const int MAX_CARRY_ON_PER_PASSENGER = 1;
 
         private readonly IBaggageRepository _baggageRepository;
         private readonly IFlightRepository _flightRepository;
@@ -36,7 +36,7 @@ namespace zuli_Business
             }
 
             var requestedBaggageCount = Math.Ceiling(
-                requestedBaggageWeight / DefaultCheckedBaggageWeight
+                requestedBaggageWeight / DEFAULT_CHECKED_BAGGAGE_WEIGHT
             );
 
             foreach (var flightId in flightIds)
@@ -49,7 +49,7 @@ namespace zuli_Business
                 }
 
                 var maxAvailableBags = Math.Floor(
-                    remainingCapacity / DefaultCheckedBaggageWeight
+                    remainingCapacity / DEFAULT_CHECKED_BAGGAGE_WEIGHT
                 );
 
                 throw new ZuliValidationException(
@@ -64,22 +64,45 @@ namespace zuli_Business
             List<int> passengerIds,
             int reservationId)
         {
-            ValidatePassengerBaggageLimits(passengers);
-
-            for (int i = 0; i < passengers.Count; i++)
+            var baggages = BuildBaggageList(passengers, passengerIds, reservationId);
+            if (baggages.Count > 0)
             {
-                await RegisterCheckedBaggage(
-                    passengers[i],
-                    passengerIds[i],
-                    reservationId
-                );
-
-                await RegisterCarryOnBaggage(
-                    passengers[i],
-                    passengerIds[i],
-                    reservationId
-                );
+                await _baggageRepository.CreateBaggageBulk(baggages);
             }
+        }
+
+        private List<BaggageEntity> BuildBaggageList(List<PassengerTicketDTO> passengers, List<int> passengerIds, int reservationId)
+        {
+            ValidatePassengerBaggageLimits(passengers);
+            var baggages = new List<BaggageEntity>();
+
+            for (int i = 0; i < passengers.Count ; i++)
+            {
+                for (int b = 0; b < passengers[i].CheckedBaggage; b++)
+                {
+                    var bag = passengers[i].BaggageItems.ElementAtOrDefault(b);
+                    baggages.Add(new BaggageEntity
+                    {
+                        PassengerId = passengerIds[i],
+                        ReservationId = reservationId,
+                        Weight = bag?.Weight > 0 ? bag.Weight : DEFAULT_CHECKED_BAGGAGE_WEIGHT,
+                        Size = string.IsNullOrWhiteSpace(bag?.Size) ? "Mediano" : bag.Size,
+                        Type = "Maleta"
+                    });
+                }
+                for (int c = 0; c < passengers[i].CarryOn; c++)
+                {
+                    baggages.Add(new BaggageEntity
+                    {
+                        PassengerId = passengerIds[i],
+                        ReservationId = reservationId,
+                        Weight = DEFAULT_CARRY_ON_WEIGHT,
+                        Size = "Pequeño",
+                        Type = "Mano"
+                    });
+                }
+            }
+            return baggages;
         }
 
         private static void ValidatePassengerBaggageLimits(
@@ -91,15 +114,15 @@ namespace zuli_Business
             {
                 var passenger = passengers[i];
 
-                if (passenger.CheckedBaggage < 0 || passenger.CheckedBaggage > MaxCheckedBaggagePerPassenger)
+                if (passenger.CheckedBaggage < 0 || passenger.CheckedBaggage > MAX_CHECKED_BAGGAGER_PASSENGER)
                 {
                     errors[$"passengers[{i}].checkedBaggage"] = new List<string>
                     {
-                        $"Cada pasajero puede llevar máximo {MaxCheckedBaggagePerPassenger} maletas documentadas."
+                        $"Cada pasajero puede llevar máximo {MAX_CHECKED_BAGGAGER_PASSENGER} maletas documentadas."
                     };
                 }
 
-                if (passenger.CarryOn < 0 || passenger.CarryOn > MaxCarryOnPerPassenger)
+                if (passenger.CarryOn < 0 || passenger.CarryOn > MAX_CARRY_ON_PER_PASSENGER)
                 {
                     errors[$"passengers[{i}].carryOn"] = new List<string>
                     {
@@ -118,50 +141,8 @@ namespace zuli_Business
             List<PassengerTicketDTO> passengers)
         {
             return passengers.Sum(passenger =>
-                passenger.CheckedBaggage * DefaultCheckedBaggageWeight
+                passenger.CheckedBaggage * DEFAULT_CHECKED_BAGGAGE_WEIGHT
             );
-        }
-
-        private async Task RegisterCheckedBaggage(
-            PassengerTicketDTO passenger,
-            int passengerId,
-            int reservationId)
-        {
-            for (int i = 0; i < passenger.CheckedBaggage; i++)
-            {
-                var bag = passenger.BaggageItems.ElementAtOrDefault(i);
-
-                await _baggageRepository.CreateBaggage(
-                    new BaggageEntity
-                    {
-                        PassengerId = passengerId,
-                        ReservationId = reservationId,
-                        Weight = bag?.Weight > 0 ? bag.Weight : DefaultCheckedBaggageWeight,
-                        Size = string.IsNullOrWhiteSpace(bag?.Size) ? "Mediano" : bag.Size,
-                        Type = "Maleta"
-                    }
-                );
-            }
-        }
-
-        private async Task RegisterCarryOnBaggage(
-            PassengerTicketDTO passenger,
-            int passengerId,
-            int reservationId)
-        {
-            for (int i = 0; i < passenger.CarryOn; i++)
-            {
-                await _baggageRepository.CreateBaggage(
-                    new BaggageEntity
-                    {
-                        PassengerId = passengerId,
-                        ReservationId = reservationId,
-                        Weight = DefaultCarryOnWeight,
-                        Size = "Pequeño",
-                        Type = "Mano"
-                    }
-                );
-            }
         }
     }
 }

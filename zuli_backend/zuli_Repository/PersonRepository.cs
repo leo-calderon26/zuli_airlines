@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
@@ -5,64 +6,86 @@ using zuli_Repository.Interface;
 
 namespace zuli_Repository
 {
-    public class PersonRepository : IPersonRepository
+    public class PersonRepository : DapperRepository, IPersonRepository
     {
-        private readonly DapperContext _context;
-
-        public PersonRepository(DapperContext context) => _context = context;
-
-        public async Task<int> CreatePerson(PersonEntity person)
+        public PersonRepository(DapperContext context) : base(context)
         {
-            using var connection = _context.CreateConnection();
-            var sql = "dbo.sp_UpsertPerson";
-
-            return await connection.ExecuteScalarAsync<int>(sql, new
-            {
-                person.FirstName,
-                person.FirstLastName,
-                person.SecondLastName,
-                person.BirthDate,
-                person.Gender,
-                person.Email
-            }, commandType: System.Data.CommandType.StoredProcedure);
-        }
-
-        public async Task CreatePassport(PassportEntity passport)
-        {
-            using var connection = _context.CreateConnection();
-            var checkSql = @"
-                SELECT COUNT(1) FROM Passport
-                WHERE PassengerId = @PassengerId AND PassportCountry = @PassportCountry;";
-
-            var exists = await connection.ExecuteScalarAsync<int>(checkSql, new
-            {
-                passport.PassengerId,
-                passport.PassportCountry
-            });
-
-            if (exists > 0) return;
-
-            var sql = @"
-                INSERT INTO Passport (PassengerId, DueDate, PassportCountry)
-                VALUES (@PassengerId, @DueDate, @PassportCountry);";
-
-            await connection.ExecuteAsync(sql, new
-            {
-                passport.PassengerId,
-                passport.DueDate,
-                passport.PassportCountry
-            });
         }
 
         public async Task<PersonEntity?> GetPersonByEmail(string email)
         {
-            using var connection = _context.CreateConnection();
-            var sql = @"
-                SELECT p.PersonId, p.FirstName, p.FirstLastName, p.SecondLastName, p.BirthDate, p.Gender
-                FROM Person p
-                INNER JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE pe.Email = @email";
-            return await connection.QuerySingleOrDefaultAsync<PersonEntity>(sql, new { email });
+            return await WithConnectionAsync(async (connection) =>
+            {
+                var sql = @"
+                    SELECT p.PersonId, p.FirstName, p.FirstLastName, p.SecondLastName, p.BirthDate, p.Gender
+                    FROM Person p
+                    INNER JOIN PersonEmail pe ON p.PersonId = pe.PersonId
+                    WHERE pe.Email = @email";
+                return await connection.QuerySingleOrDefaultAsync<PersonEntity>(sql, new { email });
+            });
+        }
+
+        public async Task<List<PersonBulkResult>> CreatePersonBulk(
+            List<PersonEntity> persons,
+            List<PassportEntity> passports,
+            BuyerEntity buyer)
+        {
+            return await WithConnectionAsync(async (connection) =>
+            {
+                var table = new DataTable();
+                table.Columns.Add("FirstName", typeof(string));
+                table.Columns.Add("FirstLastName", typeof(string));
+                table.Columns.Add("SecondLastName", typeof(string));
+                table.Columns.Add("BirthDate", typeof(string));
+                table.Columns.Add("Gender", typeof(string));
+                table.Columns.Add("Email", typeof(string));
+                table.Columns.Add("PassportCountry", typeof(string));
+                table.Columns.Add("PassportDueDate", typeof(DateTime));
+                table.Columns.Add("IsBuyer", typeof(bool));
+                table.Columns.Add("Phone", typeof(string));
+
+                for (var i = 0; i < persons.Count; i++)
+                {
+                    var passport = passports[i];
+                    table.Rows.Add(
+                        persons[i].FirstName,
+                        persons[i].FirstLastName,
+                        persons[i].SecondLastName,
+                        persons[i].BirthDate,
+                        persons[i].Gender,
+                        persons[i].Email ?? (object)DBNull.Value,
+                        passport.PassportCountry,
+                        passport.DueDate,
+                        false,
+                        DBNull.Value
+                    );
+
+                }
+                if (buyer != null)
+                {
+                    table.Rows.Add(
+                        buyer.FirstName,
+                        buyer.FirstLastName,
+                        buyer.SecondLastName,
+                        buyer.BirthDate,
+                        "",
+                        buyer.Email ?? (object)DBNull.Value,
+                        "",
+                        DateTime.MinValue,
+                        true,
+                        buyer.Phone ?? (object)DBNull.Value
+                    );
+                }
+                var parameters = new DynamicParameters();
+                parameters.Add("Persons", table.AsTableValuedParameter("dbo.PersonBulkType"));
+
+            var result = await connection.QueryAsync<PersonBulkResult>(
+                "dbo.sp_UpsertPersonBulk",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+            return result.ToList();
+            });
         }
     }
 }
