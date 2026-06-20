@@ -15,19 +15,15 @@ namespace zuli_Repository
         {
             using var connection = _context.CreateConnection();
             const string sql = @"
-                -- se trae solo los años de los vuelos
                 SELECT DISTINCT YEAR(FlightDate) AS Year FROM Flight ORDER BY Year DESC;
-                -- se trae solo los codigos de los aeropuertos de origen
                 SELECT DISTINCT a.AirportCode
                 FROM FlightRoute fr 
                 JOIN Airport a ON fr.DepartureAirport = a.AirportCode
                 ORDER BY a.AirportCode;
-                -- se trae solo los codigos de los aeropuertos de destino
                 SELECT DISTINCT a.AirportCode
                 FROM FlightRoute fr
                 JOIN Airport a ON fr.ArrivalAirport = a.AirportCode
                 ORDER BY a.AirportCode;
-                -- se trae solo los codigos de las aerolineas
                 SELECT DISTINCT AirlineId AS AirlineCode, AirlineName 
                 FROM Airline ORDER BY AirlineName;
             ";
