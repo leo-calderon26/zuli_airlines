@@ -4,7 +4,7 @@ import AppButton from '../../../shared/AppButton.vue';
 import AppTable from '../../../shared/AppTable.vue';
 import FilterCard from '../../../shared/components/FilterCard.vue'; 
 import TransactionsTable from '../../../shared/components/TransactionsTable.vue';
-
+import { getFlightsReport } from '../service/flightsReportService';
 
 const configuracionFiltros = [
   { key: 'fechaDesde', label: 'Fecha Desde', type: 'date'},
@@ -32,7 +32,7 @@ const columnasReporte = [
   { key: 'pasajerosEconomica', label: 'Pasajeros Económica', format: 'number', align: 'center' },
   { key: 'aerolinea', label: 'Aerolínea' },
   { key: 'ventaPasajeros', label: 'Venta Pasajeros', format: 'money', align: 'right' },
-  { key: 'ventaEquipajes', label: 'Venta Equipaje', format: 'money', align: 'right' },
+  { key: 'ventaEquipaje', label: 'Venta Equipaje', format: 'money', align: 'right' },
   { key: 'totalVenta', label: 'Total Venta', format: 'money', align: 'right', font: 'bold' }
 ];
 
@@ -50,9 +50,22 @@ const reportData = ref([]);
 
 
 async function handleSearch(filtrosFinales) {
-    isLoading.value = false;
+    isLoading.value = true; 
     hasSearched.value = true;
-    //logica para obtener datos del reporte de vuelos desde la API usando los filtrosFinales
+    
+    try {
+        
+        const data = await getFlightsReport();
+        
+        
+        reportData.value = data;
+    } catch (error) {
+        console.error("Error al cargar los datos en la vista:", error);
+        
+        reportData.value = [];
+    } finally {
+        isLoading.value = false; 
+    }
 }
 </script>
 
