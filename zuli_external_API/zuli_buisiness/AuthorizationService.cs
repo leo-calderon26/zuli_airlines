@@ -18,6 +18,7 @@ namespace zuli_Business
 {
     public class AuthorizationService : IAuthorizationService
     {
+        public const int TOKENVALIDPERIOD = 60;
         private readonly string secretKey;
         private readonly string apiKey;
         private readonly AuthorizationValidator _validator;
@@ -39,7 +40,7 @@ namespace zuli_Business
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claims,
-                Expires = DateTime.UtcNow.AddDays(60),
+                Expires = DateTime.UtcNow.AddDays(TOKENVALIDPERIOD),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
 

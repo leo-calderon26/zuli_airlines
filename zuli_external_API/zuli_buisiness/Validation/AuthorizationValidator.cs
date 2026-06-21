@@ -37,9 +37,9 @@ namespace zuli_Business.Validation
             }
             else
             {
-                if (user.apikey != apiKey)
+                if (user.apiKey != apiKey)
                 {
-                    throw new ZuliUnauthorizedException($"El api key ingresado no es permitido {user.apikey}, debe ser {apiKey}");
+                    throw new ZuliUnauthorizedException($"El api key ingresado no es permitido {user.apiKey}");
                 }
                 if (!((user.airlineName == "zuli") || (user.airlineName == "snoopy") ||
                     (user.airlineName == "air") || (user.airlineName == "mushu")))
