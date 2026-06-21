@@ -3,43 +3,49 @@ CREATE OR ALTER PROCEDURE dbo.sp_UpsertPersonBulk
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    -- 1. Insertar/actualizar personas
-    MERGE INTO dbo.Person AS Target
-    USING (
-        SELECT DISTINCT FirstName, FirstLastName, SecondLastName, BirthDate, Gender
+    -- Insertar/actualizar personas
+    ;WITH NumberedPersons AS (
+        SELECT *,
+               ROW_NUMBER() OVER (
+                   PARTITION BY FirstName, FirstLastName, SecondLastName, BirthDate
+                   ORDER BY RowIndex
+               ) AS rn
         FROM @Persons
-    ) AS Source
+    ),
+    UniquePersons AS (
+        SELECT FirstName, FirstLastName, SecondLastName, BirthDate, Gender
+        FROM NumberedPersons
+        WHERE rn = 1
+    )
+    MERGE INTO dbo.Person AS Target
+    USING UniquePersons AS Source
     ON Target.FirstName = Source.FirstName
         AND Target.FirstLastName = Source.FirstLastName
         AND Target.SecondLastName = Source.SecondLastName
         AND Target.BirthDate = Source.BirthDate
-        AND Target.Gender = Source.Gender
     WHEN NOT MATCHED THEN
         INSERT (FirstName, FirstLastName, SecondLastName, BirthDate, Gender)
         VALUES (Source.FirstName, Source.FirstLastName, Source.SecondLastName, Source.BirthDate, Source.Gender);
 
-    -- 2. Insertar/actualizar correos electrónicos
+    --Insertar/actualizar correos electronicos
     MERGE INTO dbo.PersonEmail AS Target
     USING (
-        SELECT p.PersonId, Source.Email
+        SELECT DISTINCT p.PersonId, Source.Email
         FROM @Persons Source
         INNER JOIN dbo.Person p
             ON p.FirstName = Source.FirstName
             AND p.FirstLastName = Source.FirstLastName
             AND p.SecondLastName = Source.SecondLastName
             AND p.BirthDate = Source.BirthDate
-            AND p.Gender = Source.Gender
         WHERE Source.Email IS NOT NULL
     ) AS Source
     ON Target.PersonId = Source.PersonId
     WHEN NOT MATCHED THEN
-        INSERT (PersonId, Email)
-        VALUES (Source.PersonId, Source.Email)
+        INSERT (PersonId, Email) VALUES (Source.PersonId, Source.Email)
     WHEN MATCHED THEN
         UPDATE SET Email = Source.Email;
 
-    -- 3. Insertar pasaportes (solo para pasajeros, no buyers)
+    --Insertar pasaportes (solo para pasajeros, no buyers)
     INSERT INTO dbo.Passport (PassengerId, PassportCountry, DueDate)
     SELECT p.PersonId, Source.PassportCountry, Source.PassportDueDate
     FROM @Persons Source
@@ -57,10 +63,10 @@ BEGIN
           AND pas.PassportCountry = Source.PassportCountry
       );
 
-    -- 4. Insertar/actualizar Buyers (IsBuyer = 1)
+    --Insertar/actualizar Buyers (IsBuyer = 1)
     MERGE INTO dbo.Buyer AS Target
     USING (
-        SELECT p.PersonId, Source.Phone
+        SELECT DISTINCT p.PersonId, Source.Phone
         FROM @Persons Source
         INNER JOIN dbo.Person p
             ON p.FirstName = Source.FirstName
@@ -71,15 +77,16 @@ BEGIN
     ) AS Source
     ON Target.PersonId = Source.PersonId
     WHEN NOT MATCHED THEN
-        INSERT (PersonId, Phone)
-        VALUES (Source.PersonId, Source.Phone)
+        INSERT (PersonId, Phone) VALUES (Source.PersonId, Source.Phone)
     WHEN MATCHED THEN
         UPDATE SET Phone = Source.Phone;
 
-    -- 5. Retornar PersonId y BuyerId (si aplica)
+    --Retornar el personId y buyerId para cada fila de entrada
     SELECT 
+        Source.RowIndex,
         p.PersonId,
-        ISNULL(b.BuyerId, 0) AS BuyerId
+        ISNULL(b.BuyerId, 0) AS BuyerId,
+        Source.IsBuyer
     FROM @Persons Source
     INNER JOIN dbo.Person p
         ON p.FirstName = Source.FirstName
@@ -88,6 +95,6 @@ BEGIN
         AND p.BirthDate = Source.BirthDate
     LEFT JOIN dbo.Buyer b
         ON b.PersonId = p.PersonId
-    ORDER BY Source.IsBuyer DESC;  -- El buyer va primero
+    ORDER BY Source.RowIndex;
 END;
 GO
