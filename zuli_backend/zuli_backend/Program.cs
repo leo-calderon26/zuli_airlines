@@ -209,6 +209,9 @@ builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
 builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
 builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
 
+builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
+builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
+
 QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
