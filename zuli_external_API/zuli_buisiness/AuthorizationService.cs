@@ -24,7 +24,7 @@ namespace zuli_Business
         private readonly AuthorizationValidator _validator;
         public AuthorizationService(IConfiguration config)
         {
-            secretKey = config.GetSection("settings").GetSection("secretKey").ToString();
+            secretKey = config.GetSection("settings").GetSection("secretKey").Value.ToString();
             apiKey = config.GetSection("settings").GetSection("apiKey").Value.ToString();
             _validator = new AuthorizationValidator();
         }
