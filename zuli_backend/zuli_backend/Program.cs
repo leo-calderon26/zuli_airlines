@@ -156,7 +156,7 @@ builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
 builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
-builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>,PurchaseConfirmationValidator>();
+builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>, PurchaseConfirmationValidator>();
 
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
@@ -171,11 +171,14 @@ builder.Services.AddScoped<zuli_Business.Validation.IValidator<FlightRouteDTO>, 
 builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 
 var config = TypeAdapterConfig.GlobalSettings;
-config.Scan(typeof(FlightService).Assembly); 
+config.Scan(typeof(FlightService).Assembly);
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
+
+builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
+builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
 
 QuestPDF.Settings.License = LicenseType.Community;
 
