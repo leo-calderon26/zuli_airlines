@@ -121,7 +121,7 @@ namespace zuli_backend.Tests
         public async Task ValidateUser_ValidAirline_ReturnsToken()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "zuli", apiKey = "test-api-key-123" };
+            var request = new AuthorizationDTO { airlineName = "zuli", apiKey = "test-api-secret-key-123" };
 
             var result = await service.ValidateUser(request);
 
@@ -134,7 +134,7 @@ namespace zuli_backend.Tests
         public void ValidateUser_InvalidAirline_ThrowsUnauthorized()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "invalidairline", apiKey = "test-api-key-123" };
+            var request = new AuthorizationDTO { airlineName = "invalidairline", apiKey = "test-api-secret-key-123" };
 
             Assert.That(
                 async () => await service.ValidateUser(request),
@@ -156,7 +156,7 @@ namespace zuli_backend.Tests
         public void ValidateUser_InvalidFormat_ThrowsValidationException()
         {
             var service = BuildAuthorizationService();
-            var request = new AuthorizationDTO { airlineName = "zuli123", apiKey = "test-api-key-123" };
+            var request = new AuthorizationDTO { airlineName = "zuli123", apiKey = "test-api-secret-key-123" };
 
             Assert.That(
                 async () => await service.ValidateUser(request),
@@ -224,8 +224,8 @@ namespace zuli_backend.Tests
         {
             var settings = new Dictionary<string, string>
             {
-                {"settings:secretKey", "test-secret-key-123"},
-                {"settings:apiKey", "test-api-key-123" }
+                {"settings:secretKey", "THIS_IS_A_SUPER_LONG_TEST_SECRET_KEY_1234567890_ABCDEF"},
+                {"settings:apiKey", "test-api-secret-key-123" }
             };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(settings)
