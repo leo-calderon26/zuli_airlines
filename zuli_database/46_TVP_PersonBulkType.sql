@@ -9,7 +9,7 @@ CREATE TYPE dbo.PersonBulkType AS TABLE (
     Gender VARCHAR(10),
     Email VARCHAR(254),
     PassportCountry VARCHAR(100),
-    PassportDueDate DATETIME,
+    PassportDueDate DATETIME2,
     IsBuyer BIT,
     Phone VARCHAR(20)
 );

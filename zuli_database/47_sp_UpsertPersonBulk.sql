@@ -1,9 +1,10 @@
+
 CREATE OR ALTER PROCEDURE dbo.sp_UpsertPersonBulk
     @Persons dbo.PersonBulkType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    -- Insertar/actualizar personas
+    --Insertar/actualizar personas (una por combinacion unica de datos personales)
     ;WITH NumberedPersons AS (
         SELECT *,
                ROW_NUMBER() OVER (
@@ -27,7 +28,7 @@ BEGIN
         INSERT (FirstName, FirstLastName, SecondLastName, BirthDate, Gender)
         VALUES (Source.FirstName, Source.FirstLastName, Source.SecondLastName, Source.BirthDate, Source.Gender);
 
-    --Insertar/actualizar correos electronicos
+    -- Insertar/actualizar correos electronicos
     MERGE INTO dbo.PersonEmail AS Target
     USING (
         SELECT DISTINCT p.PersonId, Source.Email
@@ -57,6 +58,7 @@ BEGIN
     WHERE Source.IsBuyer = 0
       AND Source.PassportCountry IS NOT NULL
       AND Source.PassportCountry <> ''
+      AND Source.PassportDueDate IS NOT NULL
       AND NOT EXISTS (
           SELECT 1 FROM dbo.Passport pas
           WHERE pas.PassengerId = p.PersonId
@@ -81,7 +83,7 @@ BEGIN
     WHEN MATCHED THEN
         UPDATE SET Phone = Source.Phone;
 
-    --Retornar el personId y buyerId para cada fila de entrada
+    -- Retornar un resultado por cada fila de entrada
     SELECT 
         Source.RowIndex,
         p.PersonId,
