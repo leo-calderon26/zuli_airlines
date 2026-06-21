@@ -83,7 +83,9 @@ namespace zuli_Business
                 reservationId = reservationResult.ReservationId;
                 reservationCode = reservationResult.ReservationCode;
 
-                var passengerReservations = passengerIds
+                var distinctPassengerIds = passengerIds.Distinct().ToList();
+
+                var passengerReservations = distinctPassengerIds
                     .Select(pid => new PassengerReservationEntity
                     {
                         PassengerId = pid,
@@ -92,7 +94,7 @@ namespace zuli_Business
                     .ToList();
                 await _reservationRepository.CreatePassengerReservationsBulk(passengerReservations);
 
-                var boardingPasses = passengerIds
+                var boardingPasses = distinctPassengerIds
                     .SelectMany(pid => flightIds.Select(fid => new BoardingPassEntity
                     {
                         FlightId = fid,

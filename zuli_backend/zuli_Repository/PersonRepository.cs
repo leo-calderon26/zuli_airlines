@@ -33,6 +33,7 @@ namespace zuli_Repository
             return await WithConnectionAsync(async (connection) =>
             {
                 var table = new DataTable();
+                table.Columns.Add("RowIndex", typeof(int));
                 table.Columns.Add("FirstName", typeof(string));
                 table.Columns.Add("FirstLastName", typeof(string));
                 table.Columns.Add("SecondLastName", typeof(string));
@@ -48,6 +49,7 @@ namespace zuli_Repository
                 {
                     var passport = passports[i];
                     table.Rows.Add(
+                        i,
                         persons[i].FirstName,
                         persons[i].FirstLastName,
                         persons[i].SecondLastName,
@@ -64,6 +66,7 @@ namespace zuli_Repository
                 if (buyer != null)
                 {
                     table.Rows.Add(
+                        persons.Count,
                         buyer.FirstName,
                         buyer.FirstLastName,
                         buyer.SecondLastName,
@@ -71,7 +74,7 @@ namespace zuli_Repository
                         "",
                         buyer.Email ?? (object)DBNull.Value,
                         "",
-                        DateTime.MinValue,
+                        DBNull.Value,
                         true,
                         buyer.Phone ?? (object)DBNull.Value
                     );
