@@ -11,8 +11,7 @@ namespace zuli_Business
                 Normalize(passenger.FirstName),
                 Normalize(passenger.FirstLastName),
                 Normalize(passenger.SecondLastName),
-                NormalizeDate(passenger.BirthDate),
-                Normalize(passenger.PassportCountry)
+                NormalizeDate(passenger.BirthDate)
             );
         }
 

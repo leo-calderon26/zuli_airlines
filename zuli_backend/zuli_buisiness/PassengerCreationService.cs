@@ -29,9 +29,12 @@ namespace zuli_Business
             }
             var buyerEntity = buyer.Adapt<BuyerEntity>();
             var results = await _personRepository.CreatePersonBulk(persons, passports, buyerEntity);
-            
-            var buyerResult = results.First();
-            var passengerResults = results.Skip(1).ToList();
+
+            var buyerResult = results.First(r => r.IsBuyer);
+            var passengerResults = results
+                .Where(r => !r.IsBuyer)
+                .OrderBy(r => r.RowIndex)
+                .ToList();
 
             var passengerIds = passengerResults.Select(r => r.PersonId).ToList();
             var buyerId = buyerResult.BuyerId;
