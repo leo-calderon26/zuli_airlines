@@ -33,5 +33,13 @@ namespace zuli_Business
                 .Date
                 .ToString("yyyy-MM-dd");
         }
+
+        public static string NormalizeNameOrLastName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+            return string.Join(" ", value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                         .ToLowerInvariant();
+        }
     }
 }

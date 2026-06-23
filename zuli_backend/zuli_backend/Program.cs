@@ -162,6 +162,9 @@ builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
 builder.Services.AddSingleton<ActivateAccountValidator>();
 
+builder.Services.AddScoped<IReservationSearchRepository, ReservationSearchRepository>();
+builder.Services.AddScoped<IReservationSearchService, ReservationSearchService>();
+
 // FlightRoute strategies
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
@@ -179,6 +182,7 @@ config.Scan(typeof(FlightService).Assembly);
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
