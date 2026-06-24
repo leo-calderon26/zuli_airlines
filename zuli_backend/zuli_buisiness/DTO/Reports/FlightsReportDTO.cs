@@ -1,6 +1,6 @@
 using System;
 
-namespace zuli_Business.DTO
+namespace zuli_Business.DTO.Reports
 {
     public class FlightsReportDTO
     {

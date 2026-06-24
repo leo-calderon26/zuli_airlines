@@ -1,6 +1,6 @@
 using System;
 
-namespace zuli_Data.Entities
+namespace zuli_Data.Entities.Reports
 {
     public class FlightsReportEntity
     {
