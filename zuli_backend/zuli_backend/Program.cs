@@ -5,20 +5,22 @@ using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
 using zuli_backend.Middleware;
-
-
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
+using zuli_Business.Interface.Reports;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
+using zuli_Repository.Interface.Reports;
 using Mapster;
 using MapsterMapper;
 using FluentValidation;
+using zuli_Business.Reports;
+using zuli_Repository.Reports;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -172,6 +174,8 @@ builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 
 builder.Services.AddScoped<IFilterOptionsService, FilterOptionsService>();
 builder.Services.AddScoped<IFilterOptionsRepository, FilterOptionsRepository>();
+builder.Services.AddScoped<IIncomeReportService, IncomeReportService>();
+builder.Services.AddScoped<IIncomeReportRepository, IncomeReportRepository>();
 
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(typeof(FlightService).Assembly);
