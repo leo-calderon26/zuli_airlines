@@ -1,5 +1,4 @@
 using System.Transactions;
-using System.Transactions;
 using Dapper;
 using zuli_Data;
 using zuli_Data.Entities;
@@ -163,7 +162,6 @@ namespace zuli_Repository
         public async Task CreatePendingUserAsync(AppUser user)
         {
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             using var connection = _dapperContext.CreateConnection();
 
             var personSql = @"
@@ -181,24 +179,7 @@ namespace zuli_Repository
                     '',
                     ''
                 );
-            var personSql = @"
-                INSERT INTO Person (
-                    FirstName,
-                    FirstLastName,
-                    SecondLastName,
-                    BirthDate,
-                    Gender
-                )
-                VALUES (
-                    @FirstName,
-                    @FirstLastName,
-                    @SecondLastName,
-                    '',
-                    ''
-                );
 
-                SELECT CAST(SCOPE_IDENTITY() AS INT);
-            ";
                 SELECT CAST(SCOPE_IDENTITY() AS INT);
             ";
 
@@ -215,21 +196,7 @@ namespace zuli_Repository
 
                 await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email });
             }
-            int personId = await connection.QuerySingleAsync<int>(
-                personSql,
-                user
-            );
 
-            if (!string.IsNullOrWhiteSpace(user.Email))
-            {
-                var emailSql = @"
-                    INSERT INTO PersonEmail (PersonId, Email)
-                    VALUES (@PersonId, @Email);";
-
-                await connection.ExecuteAsync(emailSql, new { PersonId = personId, user.Email });
-            }
-
-            user.PersonId = personId;
             user.PersonId = personId;
 
             var userSql = @"
@@ -262,40 +229,7 @@ namespace zuli_Repository
                     @ActivationTokenHash
                 );
             ";
-            var userSql = @"
-                INSERT INTO AirlineUser (
-                    UserId,
-                    PersonId,
-                    NationalId,
-                    BusinessEmail,
-                    BusinessId,
-                    UserRole,
-                    PasswordHash,
-                    IsActive,
-                    FailedLoginAttempts,
-                    LockoutEnd,
-                    ManagedByAdminId,
-                    ActivationTokenHash
-                )
-                VALUES (
-                    @UserId,
-                    @PersonId,
-                    @NationalId,
-                    @BusinessEmail,
-                    @BusinessId,
-                    @UserRole,
-                    @PasswordHash,
-                    @IsActive,
-                    @FailedLoginAttempts,
-                    @LockoutEnd,
-                    @ManagedByAdminId,
-                    @ActivationTokenHash
-                );
-            ";
 
-            await connection.ExecuteAsync(userSql, user);
-
-            scope.Complete();
             await connection.ExecuteAsync(userSql, user);
 
             scope.Complete();
@@ -354,6 +288,7 @@ namespace zuli_Repository
                 commandType: System.Data.CommandType.StoredProcedure
             );
         }
+
         public async Task<bool> IsAdmin(string businesId)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -365,6 +300,7 @@ namespace zuli_Repository
             ) THEN 1 ELSE 0 END";
             return await connection.ExecuteScalarAsync<bool>(sql, new { BusinessId = businesId });
         }
+
         public async Task<Guid> GetUserId(string businesId)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -386,13 +322,12 @@ namespace zuli_Repository
             var businessId = await connection.ExecuteScalarAsync<string?>(sql, new { UserId = userId });
             return businessId ?? string.Empty;
         }
+
         public async Task<(List<AppUser> Users, int TotalItems)> GetUsersAsync(
             string searchType,
             string search,
             int page,
             int pageSize)
-
-
         {
             using var connection = _dapperContext.CreateConnection();
 
@@ -401,7 +336,6 @@ namespace zuli_Repository
 
             string whereClause = searchType switch
             {
-                "email" => "(au.BusinessEmail LIKE @Search OR pe.Email LIKE @Search)",
                 "email" => "(au.BusinessEmail LIKE @Search OR pe.Email LIKE @Search)",
 
                 "nationalId" => "au.NationalId LIKE @Search",
@@ -424,7 +358,6 @@ namespace zuli_Repository
                         OR p.SecondLastName LIKE @Search
                         OR CONCAT(p.FirstName, ' ', p.FirstLastName) LIKE @Search
                         OR CONCAT(p.FirstName, ' ', p.FirstLastName, ' ', p.SecondLastName) LIKE @Search
-                        OR pe.Email LIKE @Search
                         OR pe.Email LIKE @Search
                     )"
             };

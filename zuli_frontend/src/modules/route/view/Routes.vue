@@ -5,7 +5,6 @@ import SuccessModal from '../../../shared/SuccessModal.vue';
 import AppButton from '../../../shared/AppButton.vue';
 import AppInput from '../../../shared/AppInput.vue';
 import AppAutocomplete from '../../../shared/AppAutocomplete.vue';
-import { onMounted } from 'vue';
 import { useRouteForm } from '../composable/useRouteForm.js';
 
 const {
@@ -22,8 +21,6 @@ const {
   destinationSuggestions,
   aircraftList,
   aircraftLoading,
-  aircraftList,
-  aircraftLoading,
   getSuggestionCode,
   getSuggestionLabel,
   handleAirportInput,
@@ -31,12 +28,7 @@ const {
   submit,
   onSuccessClose,
   fetchAircraftList,
-  fetchAircraftList,
 } = useRouteForm();
-
-onMounted(() => {
-  fetchAircraftList();
-});
 
 onMounted(() => {
   fetchAircraftList();

@@ -28,12 +28,6 @@ export function useAircraft() {
     };
 
     const updateAircraft = async (aircraftId, aircraftData) => {
-        const response = await updateAircraftRequest(aircraftId, aircraftData);
-        await fetchAircraftsPaginated(store.pageNumber, store.pageSize);
-        return response;
-    };
-
-    const updateAircraft = async (aircraftId, aircraftData) => {
         await updateAircraftRequest(aircraftId, aircraftData);
         store.updateAircraft(aircraftId, aircraftData);
         return aircraftData;

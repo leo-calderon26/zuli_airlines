@@ -6,13 +6,9 @@
 
                 <div class="relative z-10 w-full max-w-180">
                     <h2 class="mb-10 text-[15px] font-medium text-content">
-                <div class="relative z-10 w-full max-w-180">
-                    <h2 class="mb-10 text-[15px] font-medium text-content">
                         Crear Nuevo Usuario
                     </h2>
 
-                    <UserForm />
-                </div>
                     <UserForm />
                 </div>
             </section>

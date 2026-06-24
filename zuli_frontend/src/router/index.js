@@ -29,7 +29,6 @@ import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 import BuyTicketView from '../modules/buyTicket/view/BuyTicketView.vue'
 
-import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 import UserList from "../modules/user/view/UserList.vue";
 import UserCreate from "../modules/user/view/UserCreate.vue";
 import UserEdit from "../modules/user/view/UserEdit.vue";
@@ -194,12 +193,6 @@ const router = createRouter({
             path: "/administrativo",
             name: "administrativo",
             component: Login,
-            meta: {requiresAuth: false, adminRequired: false}
-        },
-        {
-            path: "/admin/unauthorizedAccess",
-            name: "unauthorizedAccess",
-            component: UnauthorizedAccess,
             meta: {requiresAuth: false, adminRequired: false}
         },
         {

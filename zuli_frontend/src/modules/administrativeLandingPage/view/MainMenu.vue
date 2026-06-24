@@ -29,7 +29,6 @@
                             </li>
                             <li class="hover:bg-purple">
                                 <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="Report Icon" class="menuIcons" />
-                                <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="Report Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Reportes</div>
                                 </router-link>
 
@@ -69,7 +68,6 @@ import flightIcon from '../../../assets/Flight.png';
 import userIcon from '../../../assets/User.png';
 import reportIcon from '../../../assets/Report.png';
 
-const showMaintenanceModal = ref(false);
 const showMaintenanceModal = ref(false);
 </script>
 
