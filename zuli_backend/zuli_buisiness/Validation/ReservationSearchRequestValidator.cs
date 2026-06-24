@@ -9,8 +9,8 @@ namespace zuli_Business.Validation
         {
             RuleFor(x => x.ReservationCode)
                 .NotEmpty().WithMessage("El código de reserva es requerido.")
-                .Length(ReservationSearchRequestDTO.ReservationCodeLength)
-                .WithMessage($"El código debe tener exactamente {ReservationSearchRequestDTO.ReservationCodeLength} caracteres.");
+                .Length(ReservationSearchRequestDTO.RESERVATION_CODE_LENGTH)
+                .WithMessage($"El código debe tener exactamente {ReservationSearchRequestDTO.RESERVATION_CODE_LENGTH} caracteres.");
 
             RuleFor(x => x.LastName)
                 .NotEmpty().WithMessage("El apellido es requerido.");
