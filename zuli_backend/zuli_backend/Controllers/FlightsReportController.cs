@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using zuli_Business.DTO;
+using zuli_Business.DTO.Reports;
+using zuli_Business.DTO.Filters;
 using zuli_Business.Interface;
 
 namespace zuli_backend.Controllers
@@ -17,7 +18,7 @@ namespace zuli_backend.Controllers
         public FlightsReportController(IFlightsReportService service) => _service = service;
 
         [HttpGet("GetFlightsReport")]
-        public async Task<IEnumerable<FlightsReportDTO>> GetFlightsReport()
-            => await _service.GetFlightsReportAsync();
+        public async Task<IEnumerable<FlightsReportDTO>> GetFlightsReport([FromQuery] FlightsReportFilterDTO filters)
+            => await _service.GetFlightsReportAsync(filters);
     }
 }
