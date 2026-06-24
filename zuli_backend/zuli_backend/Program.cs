@@ -175,6 +175,7 @@ builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 builder.Services.AddScoped<IFilterOptionsService, FilterOptionsService>();
 builder.Services.AddScoped<IFilterOptionsRepository, FilterOptionsRepository>();
 builder.Services.AddScoped<IIncomeReportService, IncomeReportService>();
+builder.Services.AddScoped<IIncomeReportExportService, IncomeReportExportService>();
 builder.Services.AddScoped<IIncomeReportRepository, IncomeReportRepository>();
 
 var config = TypeAdapterConfig.GlobalSettings;
