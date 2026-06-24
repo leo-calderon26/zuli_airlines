@@ -13,18 +13,19 @@ namespace zuli_Business.Validation
     public static class AuthorizationAtributes
     {
         public const string AIRLINENAME = "AirlineName";
+        public const string APIKEY = "ApiKey";
     }
     public class AuthorizationValidator
     {
-        public void ValidateAuthorizationInfo(AuthorizationDTO user)
+        public void ValidateAuthorizationInfo(AuthorizationDTO user, string apiKey)
         {
             var errorInfo = new Dictionary<string, List<string>>()
             {
-                {AuthorizationAtributes.AIRLINENAME, new List<string>() }
+                {AuthorizationAtributes.AIRLINENAME, new List<string>() },
+                {AuthorizationAtributes.APIKEY, new List<string>() }
             };
 
             var IsEmptyInfo = false;
-
             if (!MiscValidator.ContainsChars(user.airlineName))
             {
                 errorInfo[AuthorizationAtributes.AIRLINENAME].Add("El nombre de la aerolínea no puede tener números ni caractes especiales");
@@ -36,6 +37,10 @@ namespace zuli_Business.Validation
             }
             else
             {
+                if (user.apiKey != apiKey)
+                {
+                    throw new ZuliUnauthorizedException($"El api key ingresado no es permitido {user.apiKey}");
+                }
                 if (!((user.airlineName == "zuli") || (user.airlineName == "snoopy") ||
                     (user.airlineName == "air") || (user.airlineName == "mushu")))
                 {
