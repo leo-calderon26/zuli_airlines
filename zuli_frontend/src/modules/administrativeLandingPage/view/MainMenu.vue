@@ -29,8 +29,10 @@
                             </li>
                             <li class="hover:bg-purple">
                                 <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="Report Icon" class="menuIcons" />
+                                <router-link to="/admin/reports" class="block p-3 rounded-lg hover:bg-neutral-secondary-medium"><img :src="reportIcon" alt="Report Icon" class="menuIcons" />
                                     <div class="font-semibold text-gold text-center">Reportes</div>
                                 </router-link>
+
 
                             </li>
                         </ul>
@@ -39,6 +41,13 @@
                 <div class="size-14 grow-2"></div>
                 </div>
             </nav>
+
+        <ErrorModal 
+            v-model="showMaintenanceModal" 
+            title="En Mantenimiento" 
+            message="El módulo de Reportes se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
+            buttonText="Entendido"
+        />
 
         <ErrorModal 
             v-model="showMaintenanceModal" 
@@ -61,12 +70,14 @@ import userIcon from '../../../assets/User.png';
 import reportIcon from '../../../assets/Report.png';
 
 const showMaintenanceModal = ref(false);
+const showMaintenanceModal = ref(false);
 </script>
 
 <style scoped>
     .menuIcons {
         width: 120px;
         height: clamp(48px, 8vw, 100px);
+        margin: 0 auto;
         margin: 0 auto;
     }
 

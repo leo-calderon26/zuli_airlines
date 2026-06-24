@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Mapster;
 using FluentValidation;
+using Mapster;
+using FluentValidation;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
@@ -19,6 +21,7 @@ namespace zuli_Business
         private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
         private readonly FluentValidation.IValidator<RegisterUserRequestDTO> _registerUserValidator;
+        private readonly FluentValidation.IValidator<RegisterUserRequestDTO> _registerUserValidator;
         private readonly ActivateAccountValidator _activateAccountValidator;
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
@@ -26,6 +29,7 @@ namespace zuli_Business
         public UserRegistrationService(
             IUserRepository userRepository,
             IEmailService emailService,
+            FluentValidation.IValidator<RegisterUserRequestDTO> registerUserValidator,
             FluentValidation.IValidator<RegisterUserRequestDTO> registerUserValidator,
             ActivateAccountValidator activateAccountValidator,
             IConfiguration configuration)
@@ -43,6 +47,8 @@ namespace zuli_Business
             RegisterUserRequestDTO request,
             Guid adminUserId)
         {
+            var validationResult = await _registerUserValidator.ValidateAsync(request);
+            validationResult.ThrowIfInvalid();
             var validationResult = await _registerUserValidator.ValidateAsync(request);
             validationResult.ThrowIfInvalid();
 

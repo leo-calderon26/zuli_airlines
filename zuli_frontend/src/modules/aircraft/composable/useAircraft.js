@@ -33,6 +33,12 @@ export function useAircraft() {
         return response;
     };
 
+    const updateAircraft = async (aircraftId, aircraftData) => {
+        await updateAircraftRequest(aircraftId, aircraftData);
+        store.updateAircraft(aircraftId, aircraftData);
+        return aircraftData;
+    };
+
     const changePage = async (pageNumber) => {
         await fetchAircraftsPaginated(pageNumber, store.pageSize);
     };

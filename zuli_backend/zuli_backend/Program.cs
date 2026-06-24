@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Infrastructure;
+using QuestPDF.Infrastructure;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -129,6 +130,9 @@ builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
@@ -142,7 +146,24 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<ITicketPurchaseService, TicketPurchaseService>();
+builder.Services.AddScoped<IReservationCreationService, ReservationCreationService>();
+builder.Services.AddScoped<IFlightResolverService, FlightResolverService>();
+builder.Services.AddScoped<IPassengerValidationService, PassengerValidationService>();
+builder.Services.AddScoped<IPassengerCreationService, PassengerCreationService>();
+builder.Services.AddScoped<IBaggageRegistrationService, BaggageRegistrationService>();
+builder.Services.AddValidatorsFromAssemblyContaining<TicketPurchaseRequestValidator>();
+
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
+
+builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
+builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
+builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
+builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>,PurchaseConfirmationValidator>();
 builder.Services.AddScoped<ITicketPurchaseService, TicketPurchaseService>();
 builder.Services.AddScoped<IReservationCreationService, ReservationCreationService>();
 builder.Services.AddScoped<IFlightResolverService, FlightResolverService>();
