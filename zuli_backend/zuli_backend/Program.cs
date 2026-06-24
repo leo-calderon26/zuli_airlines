@@ -21,14 +21,15 @@ using MapsterMapper;
 using FluentValidation;
 using zuli_Business.Reports;
 using zuli_Repository.Reports;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Configuration.AddJsonFile("appsettings.json");
-
-var secretKey = builder.Configuration["settings:secretkey"];
+var secretKey = builder.Configuration["settings:secretKey"];
 if (string.IsNullOrWhiteSpace(secretKey))
 {
     throw new InvalidOperationException("Secret key not found in configuration");
@@ -83,11 +84,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // CORS para permitir comunicación con Vue/Vite
+var frontendBaseUrl = builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins(frontendBaseUrl)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

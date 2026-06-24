@@ -1,0 +1,39 @@
+# Root .dockerignore
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+*.log
+*.md
+.github
+.idea
+.vscode
+
+# Backend
+zuli_backend/**/bin
+zuli_backend/**/obj
+zuli_backend/**/.vs
+zuli_backend/**/*.user
+zuli_backend/**/*.userosscache
+zuli_backend/**/*.suo
+zuli_backend/**/*.rsuser
+zuli_backend/**/TestResults
+zuli_backend/**/coverage
+
+# Frontend
+zuli_frontend/node_modules
+zuli_frontend/dist
+
+# Database
+zuli_database/
+
+# External API
+zuli_external_API/
+
+# Others
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.rsuser
