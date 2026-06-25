@@ -1,58 +1,106 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import AppButton from '../../../shared/AppButton.vue';
 import AppTable from '../../../shared/AppTable.vue';
 import FilterCard from '../../../shared/components/FilterCard.vue'; 
 import TransactionsTable from '../../../shared/components/TransactionsTable.vue';
+import { getFlightsReport, getFilterOptions } from '../service/flightsReportService';
 
+const filterConfig = ref([
+  { key: 'fromDate', label: 'Fecha Desde', type: 'date' },
+  { key: 'toDate', label: 'Fecha Hasta', type: 'date' },
+  { key: 'origin', label: 'Origen', type: 'select', options: [] },
+  { key: 'destination', label: 'Destino', type: 'select', options: [] },
+  {
+    key: 'flightClass',
+    label: 'Clase',
+    type: 'select',
+    options: [
+      { label: 'Todas', value: '' },
+      { label: 'Turista', value: 'Turista' },
+      { label: 'Primera Clase', value: 'Primera Clase' }
+    ]
+  }
+]);
 
-const configuracionFiltros = [
-  { key: 'fechaDesde', label: 'Fecha Desde', type: 'date'},
-    { key: 'fechaHasta', label: 'Fecha Hasta', type: 'date' },
-    { key: 'origen', label: 'Origen', type: 'text', placeholder: 'Ej: SJO' },
-    { key: 'destino', label: 'Destino', type: 'text', placeholder: 'Ej: MAD' },
-    {
-        key: 'clase',
-        label: 'Clase',
-        type: 'select',
-        options: [
-            { label: 'Todas', value: '' },
-            { label: 'Turista', value: 'Turista' },
-            { label: 'Primera Clase', value: 'Primera' }
-        ]
-    }
+const reportColumns = [
+  { key: 'date', label: 'Fecha' },
+  { key: 'origin', label: 'Origen' },
+  { key: 'destination', label: 'Destino' },
+  { key: 'flightNumber', label: '# Vuelo' },
+  { key: 'firstClassPassengers', label: 'Pasajeros Primera', format: 'number', align: 'center' },
+  { key: 'economyClassPassengers', label: 'Pasajeros Económica', format: 'number', align: 'center' },
+  { key: 'airline', label: 'Aerolínea' },
+  { key: 'passengerSales', label: 'Venta Pasajeros', format: 'money', align: 'right' },
+  { key: 'baggageSales', label: 'Venta Equipaje', format: 'money', align: 'right' },
+  { key: 'totalSales', label: 'Total Venta', format: 'money', align: 'right', font: 'bold' }
 ];
 
-const columnasReporte = [
-  { key: 'fecha', label: 'Fecha' },
-  { key: 'origen', label: 'Origen' },
-  { key: 'destino', label: 'Destino' },
-  { key: 'numeroVuelo', label: '# Vuelo' },
-  { key: 'pasajerosPrimera', label: 'Pasajeros Primera', format: 'number', align: 'center' },
-  { key: 'pasajerosEconomica', label: 'Pasajeros Económica', format: 'number', align: 'center' },
-  { key: 'aerolinea', label: 'Aerolínea' },
-  { key: 'ventaPasajeros', label: 'Venta Pasajeros', format: 'money', align: 'right' },
-  { key: 'ventaEquipajes', label: 'Venta Equipaje', format: 'money', align: 'right' },
-  { key: 'totalVenta', label: 'Total Venta', format: 'money', align: 'right', font: 'bold' }
-];
-
-const filtrosSeleccionados = ref({
-    fechaDesde: '',
-    fechaHasta: '',
-    origen: '',
-    destino: '',
-    clase: ''
+const selectedFilters = ref({
+    fromDate: '',
+    toDate: '',
+    origin: '',
+    destination: '',
+    flightClass: ''
 });
 
 const isLoading = ref(false);
 const hasSearched = ref(false);
 const reportData = ref([]);
 
+const mapAirportToOption = (airport) => ({
+    label: airport.airportCode, 
+    value: airport.airportCode
+});
 
-async function handleSearch(filtrosFinales) {
-    isLoading.value = false;
+onMounted(async () => {
+    try {
+        const dataOptions = await getFilterOptions();
+
+        filterConfig.value = filterConfig.value.map(filter => {
+            
+            if (filter.key === 'origin') {
+                return {
+                    ...filter,
+                    options: [
+                        { label: 'Todos', value: '' },
+                        ...dataOptions.origins.map(mapAirportToOption)
+                    ]
+                };
+            }
+
+            if (filter.key === 'destination') {
+                return {
+                    ...filter,
+                    options: [
+                        { label: 'Todos', value: '' },
+                        ...dataOptions.destinations.map(mapAirportToOption)
+                    ]
+                };
+            }
+            return filter;
+        });
+
+    } catch (error) {
+        console.error("Error al cargar las opciones de filtros:", error);
+    }
+});
+
+async function handleSearch(finalFilters) {
+    isLoading.value = true; 
     hasSearched.value = true;
-    //logica para obtener datos del reporte de vuelos desde la API usando los filtrosFinales
+    
+    try {
+        
+        const data = await getFlightsReport(finalFilters);
+        
+        reportData.value = data;
+    } catch (error) {
+        console.error("Error al cargar los datos en la vista:", error);
+        reportData.value = [];
+    } finally {
+        isLoading.value = false; 
+    }
 }
 </script>
 
@@ -60,8 +108,8 @@ async function handleSearch(filtrosFinales) {
 <div class="space-y-6">
     <FilterCard 
       title="Filtros del Reporte de Vuelos"
-      :filters="configuracionFiltros"
-      v-model="filtrosSeleccionados"
+      :filters="filterConfig"
+      v-model="selectedFilters"
       @apply="handleSearch"
     />
 
@@ -69,7 +117,7 @@ async function handleSearch(filtrosFinales) {
       
       <TransactionsTable
         title="Vista Previa de la Información"
-        :columns="columnasReporte"
+        :columns="reportColumns"
         :rows="reportData"
         :loading="isLoading"
         emptyMessage="No se encontraron registros de vuelos para este reporte."
