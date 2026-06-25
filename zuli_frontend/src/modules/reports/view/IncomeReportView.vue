@@ -77,7 +77,7 @@ import FilterCard from '../../../shared/components/FilterCard.vue'
 import ErrorModal from '../../../shared/ErrorModal.vue'
 import { useForm } from '../../../shared/useForm.js'
 import { useFilterOptionsStore } from '../store/filterOptionStore'
-import { getIncomeReport } from '../service/incomeReportService'
+import { getIncomeReport, exportIncomeReport } from '../service/incomeReportService'
 import { formatMonthLabel } from '../helpers/monthNames'
 
 const { showErrorModal, errorMessage, onError, resetModals } = useForm()
@@ -191,7 +191,27 @@ const applyFilters = async () => {
   }
 }
 
-const downloadReport = () => {
-  alert('Descargando reporte de ingresos...')
+const downloadReport = async () => {
+  if (!filters.value.year) {
+    onError(new Error('Debe seleccionar un año para generar el reporte'))
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const { blob, filename } = await exportIncomeReport(filters.value)
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename || `reporte_ingresos_${filters.value.year}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    onError(e, 'Error al descargar el reporte de ingresos')
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
