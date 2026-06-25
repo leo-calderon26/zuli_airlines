@@ -83,13 +83,15 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// CORS para permitir comunicación con Vue/Vite
-var frontendBaseUrl = builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+// CORS para permitir comunicación con Vue/Vite y el proxy nginx en producción
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.WithOrigins(frontendBaseUrl)
+        // Permitir cualquier origen con credenciales.
+        // En producción el backend está protegido por el proxy nginx (mismo origen),
+        // por lo que CORS solo aplica para desarrollo local o acceso directo.
+        policy.SetIsOriginAllowed(_ => true)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -198,8 +200,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
-app.UseHttpsRedirection();
 
 app.UseCors("FrontendPolicy");
 
