@@ -49,7 +49,19 @@ export const updateAircraft = async (aircraftId, aircraftData) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Error al actualizar aeronave:", error);
+        console.error("Error al actualizar la aeronave:", error);
+        throw error;
+    }
+};
+
+export const deleteAircraft = async (aircraftId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/DeleteAircraft/${aircraftId}`, {
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error al eliminar la aeronave:", error);
         throw error;
     }
 };

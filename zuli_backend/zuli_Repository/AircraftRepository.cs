@@ -108,6 +108,18 @@ namespace zuli_Repository
             });
         }
 
+        public async Task DeleteAircraft(Guid aircraftId)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = "dbo.sp_HandleAircraftDeletion";
+
+            await connection.ExecuteScalarAsync(sql, new
+            {
+                selectedAircraftToDelete = aircraftId
+            }, commandType: System.Data.CommandType.StoredProcedure);
+        }
+
         public async Task<bool> IsAdmin(Guid userId)
         {
             using var connection = _context.CreateConnection();
