@@ -10,7 +10,8 @@ namespace zuli_Business.Mappings
     {
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<ReservationSearchFlightEntity, ReservationSearchSegmentDTO>();
+            config.NewConfig<ReservationSearchFlightEntity, ReservationSearchSegmentDTO>()
+                .Map(dest => dest.DurationMinutes, src => (int)(src.ArrivalDateTime - src.DepartureDateTime).TotalMinutes);
 
             config.NewConfig<List<ReservationSearchFlightEntity>, ReservationSearchJourneyDTO>()
                 .Map(dest => dest.DepartureDateTime, src => src.First().DepartureDateTime)
@@ -31,7 +32,10 @@ namespace zuli_Business.Mappings
                 .Map(dest => dest.Journey, src => src)
                 .Ignore(dest => dest.ReservationCode)
                 .Ignore(dest => dest.DaysRemaining)
-                .Ignore(dest => dest.PassengerCount);
+                .Ignore(dest => dest.PassengerCount)
+                .Ignore(dest => dest.Passengers);
+
+            config.NewConfig<ReservationSearchPassengerEntity, ReservationSearchPassengerDTO>();
         }
     }
 }

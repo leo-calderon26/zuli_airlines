@@ -15,9 +15,7 @@ namespace zuli_Business
     public class ReservationSearchService : IReservationSearchService
     {
         private readonly IReservationSearchRepository _repository;
-        
         private readonly FluentValidation.IValidator<ReservationSearchRequestDTO> _validator;
-        
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
 
@@ -41,7 +39,7 @@ namespace zuli_Business
             string normalizedLastName = StringHelper.Normalize(request.LastName);
             string searchParam = $"{normalizedLastName}%";
 
-            var (flights, passengerCount) = await _repository.GetReservationDataAsync(request.ReservationCode, searchParam);
+            var (flights, passengers) = await _repository.GetReservationDataAsync(request.ReservationCode, searchParam);
 
             if (!flights.Any())
             {
@@ -54,7 +52,8 @@ namespace zuli_Business
 
             response.ReservationCode = request.ReservationCode;
             response.DaysRemaining = daysRemaining;
-            response.PassengerCount = passengerCount;
+            response.PassengerCount = passengers.Count;
+            response.Passengers = _mapper.Map<List<ReservationSearchPassengerDTO>>(passengers);
             response.Journey.Layovers = CalculateLayovers(flights);
 
             return response;
