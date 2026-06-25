@@ -82,7 +82,7 @@ onMounted(async () => {
         });
 
     } catch (error) {
-        console.error("Error loading dropdown options:", error);
+        console.error("Error al cargar las opciones de filtros:", error);
     }
 });
 
