@@ -4,7 +4,7 @@ import AppButton from '../../../shared/AppButton.vue';
 import AppTable from '../../../shared/AppTable.vue';
 import FilterCard from '../../../shared/components/FilterCard.vue'; 
 import TransactionsTable from '../../../shared/components/TransactionsTable.vue';
-import { getFlightsReport, getFilterOptions } from '../service/flightsReportService';
+import { getFlightsReport, getFilterOptions, exportFlightsReport } from '../service/flightsReportService';
 
 const filterConfig = ref([
   { key: 'fromDate', label: 'Fecha Desde', type: 'date' },
@@ -44,8 +44,10 @@ const selectedFilters = ref({
     flightClass: ''
 });
 
+const lastAppliedFilters = ref({});
 const isLoading = ref(false);
 const hasSearched = ref(false);
+const isDownloading = ref(false);
 const reportData = ref([]);
 
 const mapAirportToOption = (airport) => ({
@@ -89,17 +91,41 @@ onMounted(async () => {
 async function handleSearch(finalFilters) {
     isLoading.value = true; 
     hasSearched.value = true;
+    lastAppliedFilters.value = { ...finalFilters };
     
     try {
         
-        const data = await getFlightsReport(finalFilters);
-        
-        reportData.value = data;
+      const data = await getFlightsReport(finalFilters);
+      reportData.value = data;
     } catch (error) {
         console.error("Error al cargar los datos en la vista:", error);
         reportData.value = [];
     } finally {
         isLoading.value = false; 
+    }
+}
+
+async function handleDownload() {
+    isLoading.value = true; 
+
+    try {
+      const { blob, filename } = await exportFlightsReport(lastAppliedFilters.value);
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a'); 
+        a.href = url;
+        
+        a.download = filename || 'reporte_vuelos.xlsx';
+        
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("Error en la descarga del reporte:", e);
+    } finally {
+        isLoading.value = false;
     }
 }
 </script>
