@@ -164,6 +164,9 @@ builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
 builder.Services.AddSingleton<ActivateAccountValidator>();
 
+builder.Services.AddScoped<IReservationSearchRepository, ReservationSearchRepository>();
+builder.Services.AddScoped<IReservationSearchService, ReservationSearchService>();
+
 // FlightRoute strategies
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
@@ -175,6 +178,7 @@ builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 builder.Services.AddScoped<IFilterOptionsService, FilterOptionsService>();
 builder.Services.AddScoped<IFilterOptionsRepository, FilterOptionsRepository>();
 builder.Services.AddScoped<IIncomeReportService, IncomeReportService>();
+builder.Services.AddScoped<IIncomeReportExportService, IncomeReportExportService>();
 builder.Services.AddScoped<IIncomeReportRepository, IncomeReportRepository>();
 
 var config = TypeAdapterConfig.GlobalSettings;
@@ -183,6 +187,7 @@ config.Scan(typeof(FlightService).Assembly);
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 
 builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
 builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();

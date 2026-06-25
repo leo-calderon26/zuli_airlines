@@ -1,15 +1,37 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAircraft } from '../composable/useAircraft';
 import { useAircraftStore } from '../store/aircraftStore';
 import AppTable from '../../../shared/AppTable.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import AlertModal from '../../../shared/AlertModal.vue';
+import { useForm } from '../../../shared/useForm.js';
 
 const aircraftStore = useAircraftStore();
-const { fetchAircraftsPaginated, changePage } = useAircraft();
+const { fetchAircraftsPaginated, changePage, deleteAircraft } = useAircraft();
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, isLoading, errors, clearErrors, onSuccess, handleSubmit } = useForm();
+const showDeletionModal = ref(false);
+const aircraftToDelete = ref(null);
 
 const cacheAircraftForEdit = (aircraft) => {
     sessionStorage.setItem('aircraftEditData', JSON.stringify(aircraft));
 };
+
+function chooseAircraftToDelete(aircraftId) {
+    aircraftToDelete.value = aircraftId;
+    showDeletionModal.value = true;
+};
+
+async function processAircraftDeletion(aircraftId){
+    await handleSubmit(async () => {
+        await deleteAircraft(aircraftId);
+        onSuccess('La aeronave se ha eliminado correctamente');
+    }, 'Error al eliminar la aeronave')
+    if (showErrorModal.value) {
+        showErrorModal.value = false;
+    }
+}
 
 onMounted(async () => {
     await fetchAircraftsPaginated(1, 10);
@@ -47,6 +69,7 @@ onMounted(async () => {
         <th scope="col" class="px-8 py-4 font-medium">Filas Primera</th>
         <th scope="col" class="px-8 py-4 font-medium">Asientos Primera</th>
         <th scope="col" class="px-8 py-4 font-medium">Detalles</th>
+        <th scope="col" class="px-4 py-4 font-medium"></th>
     </template>
 
     <tr v-for="(aircraft, index) in aircraftStore.aircrafts" :key="aircraft.id ?? `${aircraft.model}-${index}`" class="border-b border-gray-200 bg-white hover:bg-gray-50">
@@ -78,9 +101,28 @@ onMounted(async () => {
                 @click="cacheAircraftForEdit(aircraft)"
                 class="font-medium text-gold hover:underline"
             >
-                Edit
+                Editar
             </router-link>
+        </td>
+        <td class="px-4 py-5">
+            <button
+                type="button"
+                class="rounded-md bg-primary px-2 py-2 text-sm font-semibold text-white hover:bg-select"
+                @click="chooseAircraftToDelete(aircraft.aircraftId)"
+            >
+                <img src="../../../assets/TrashCan.png" alt="Trash Can Icon" class="h-6 w-6 shrink-0" />
+            </button>
         </td>
     </tr>
 </AppTable>
+
+<SuccessModal v-model="showSuccessModal" :message="successMessage" />
+<ErrorModal v-model="showErrorModal" :message="errorMessage" />
+<AlertModal
+    v-model="showDeletionModal" 
+    title="Eliminar Aeronave" 
+    :message="'¿Está seguro de querer eliminar la aeronave seleccionada?\nEsta acción no se puede deshacer.'"
+    buttonText="Eliminar"
+    @confirm="processAircraftDeletion(aircraftToDelete)"
+/>
 </template>

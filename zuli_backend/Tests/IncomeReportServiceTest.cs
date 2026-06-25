@@ -2,6 +2,7 @@ using Bogus;
 using MapsterMapper;
 using Moq;
 using zuli_Business.DTO.Reports;
+using zuli_Business.Interface.Reports;
 using zuli_Business.Reports;
 using zuli_Data.Entities.Reports;
 using zuli_Repository.Interface.Reports;
@@ -188,6 +189,39 @@ namespace zuli_backend.Tests
                     TotalIncome = rows.Sum(r => r.TotalIncome)
                 }
             };
+        }
+        [Test]
+        public async Task GenerateIncomeReportExcelAsync_ReturnsValidXlsxStream()
+        {
+            var serviceMock = new Mock<IIncomeReportService>();
+            serviceMock
+                .Setup(s => s.GetIncomeReportAsync(It.IsAny<IncomeReportRequestDTO>()))
+                .ReturnsAsync(new IncomeReportResultDTO
+                {
+                    Rows = new List<IncomeReportRowDTO>
+                    {
+                        new() { Year = 2026, Month = 1, Flights = 10, FirstClass = 5, TouristClass = 95,
+                            TotalPassengers = 100, TicketIncome = 1000, BaggageIncome = 200, TotalIncome = 1200 }
+                    },
+                    Summary = new IncomeReportSummaryDTO
+                    {
+                        TotalFlights = 10, TotalFirstClass = 5, TotalTouristClass = 95,
+                        TotalPassengers = 100, TotalTicketIncome = 1000, TotalBaggageIncome = 200, TotalIncome = 1200
+                    }
+                });
+
+            var exportService = new IncomeReportExportService(serviceMock.Object);
+
+            var stream = await exportService.GenerateIncomeReportExcelAsync(new IncomeReportRequestDTO { Year = 2026 });
+
+            Assert.That(stream, Is.Not.Null);
+            Assert.That(stream.CanRead, Is.True);
+
+            stream.Position = 0;
+            var buffer = new byte[4];
+            await stream.ReadExactlyAsync(buffer, 0, 4);
+            Assert.That(buffer, Is.EqualTo(new byte[] { 0x50, 0x4B, 0x03, 0x04 }));
+            await stream.DisposeAsync();
         }
     }
 }

@@ -18,8 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Configuration.AddJsonFile("appsettings.json");
-var secretKey = builder.Configuration.GetSection("settings").GetSection("secretkey").ToString();
+var secretKey = builder.Configuration["settings:secretKey"];
 var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 
 builder.Services.AddAuthorization().AddAuthentication(config =>
@@ -31,6 +30,16 @@ builder.Services.AddAuthorization().AddAuthentication(config =>
     {
         config.RequireHttpsMetadata = false;
         config.SaveToken = true;
+
+        config.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Query["ApiToken"].ToString();
+                return Task.CompletedTask;
+            }
+        };
+
         config.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,

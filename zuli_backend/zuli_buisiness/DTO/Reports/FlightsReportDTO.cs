@@ -4,15 +4,15 @@ namespace zuli_Business.DTO.Reports
 {
     public class FlightsReportDTO
     {
-        public DateTime Fecha { get; set; }
-        public string? Origen { get; set; }
-        public string? Destino { get; set; }
-        public int? NumeroVuelo { get; set; }
-        public int PasajerosPrimera { get; set; }
-        public int PasajerosEconomica { get; set; }
-        public string? Aerolinea { get; set; }
-        public decimal VentaPasajeros { get; set; }
-        public decimal VentaEquipaje { get; set; }
-        public decimal TotalVenta { get; set; }
+        public DateTime Date { get; set; }
+        public string? Origin { get; set; }
+        public string? Destination { get; set; }
+        public int? FlightNumber { get; set; }
+        public int FirstClassPassengers { get; set; }
+        public int EconomyClassPassengers { get; set; }
+        public string? Airline { get; set; }
+        public decimal PassengerSales { get; set; }
+        public decimal BaggageSales { get; set; }
+        public decimal TotalSales { get; set; }
     }
 }

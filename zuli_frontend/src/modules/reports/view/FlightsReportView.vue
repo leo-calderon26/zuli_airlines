@@ -24,16 +24,16 @@ const filterConfig = ref([
 ]);
 
 const reportColumns = [
-  { key: 'fecha', label: 'Fecha' },
-  { key: 'origen', label: 'Origen' },
-  { key: 'destino', label: 'Destino' },
-  { key: 'numeroVuelo', label: '# Vuelo' },
-  { key: 'pasajerosPrimera', label: 'Pasajeros Primera', format: 'number', align: 'center' },
-  { key: 'pasajerosEconomica', label: 'Pasajeros Económica', format: 'number', align: 'center' },
-  { key: 'aerolinea', label: 'Aerolínea' },
-  { key: 'ventaPasajeros', label: 'Venta Pasajeros', format: 'money', align: 'right' },
-  { key: 'ventaEquipaje', label: 'Venta Equipaje', format: 'money', align: 'right' },
-  { key: 'totalVenta', label: 'Total Venta', format: 'money', align: 'right', font: 'bold' }
+  { key: 'date', label: 'Fecha' },
+  { key: 'origin', label: 'Origen' },
+  { key: 'destination', label: 'Destino' },
+  { key: 'flightNumber', label: '# Vuelo' },
+  { key: 'firstClassPassengers', label: 'Pasajeros Primera', format: 'number', align: 'center' },
+  { key: 'economyClassPassengers', label: 'Pasajeros Económica', format: 'number', align: 'center' },
+  { key: 'airline', label: 'Aerolínea' },
+  { key: 'passengerSales', label: 'Venta Pasajeros', format: 'money', align: 'right' },
+  { key: 'baggageSales', label: 'Venta Equipaje', format: 'money', align: 'right' },
+  { key: 'totalSales', label: 'Total Venta', format: 'money', align: 'right', font: 'bold' }
 ];
 
 const selectedFilters = ref({
@@ -84,7 +84,7 @@ onMounted(async () => {
         });
 
     } catch (error) {
-        console.error("Error loading dropdown options:", error);
+        console.error("Error al cargar las opciones de filtros:", error);
     }
 });
 

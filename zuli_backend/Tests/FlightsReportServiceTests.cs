@@ -66,8 +66,8 @@ namespace zuli_backend.Tests
 
             var firstResultDto = result.First();
             var firstExpectedEntity = expectedEntities.First();
-            Assert.That(firstResultDto.NumeroVuelo, Is.EqualTo(firstExpectedEntity.NumeroVuelo));
-            Assert.That(firstResultDto.Aerolinea, Is.EqualTo(firstExpectedEntity.Aerolinea));
+            Assert.That(firstResultDto.FlightNumber, Is.EqualTo(firstExpectedEntity.FlightNumber));
+            Assert.That(firstResultDto.Airline, Is.EqualTo(firstExpectedEntity.Airline));
 
             _flightsReportRepositoryMock.Verify(repo => repo.GetFlightsReportAsync(It.Is<FlightsReportFilterEntity>(entity =>
                 entity.FromDate == filterDto.FromDate &&
@@ -99,16 +99,16 @@ namespace zuli_backend.Tests
         private static List<FlightsReportEntity> BuildValidFlightsReportEntities()
         {
             var reportFaker = new Faker<FlightsReportEntity>()
-                .RuleFor(r => r.Fecha, f => f.Date.Recent())
-                .RuleFor(r => r.Origen, f => f.PickRandom("SJO", "AMS", "JFK"))
-                .RuleFor(r => r.Destino, f => f.PickRandom("MIA", "PTY", "FRA"))
-                .RuleFor(r => r.NumeroVuelo, f => f.Random.Int(1, 999))
-                .RuleFor(r => r.PasajerosPrimera, f => f.Random.Int(0, 10))
-                .RuleFor(r => r.PasajerosEconomica, f => f.Random.Int(1, 150))
-                .RuleFor(r => r.Aerolinea, f => "zuliAirline")
-                .RuleFor(r => r.VentaPasajeros, f => f.Random.Decimal(500, 5000))
-                .RuleFor(r => r.VentaEquipaje, f => f.Random.Decimal(50, 500))
-                .RuleFor(r => r.TotalVenta, (_, currentEntity) => currentEntity.VentaPasajeros + currentEntity.VentaEquipaje);
+                .RuleFor(r => r.Date, f => f.Date.Recent())
+                .RuleFor(r => r.Origin, f => f.PickRandom("SJO", "AMS", "JFK"))
+                .RuleFor(r => r.Destination, f => f.PickRandom("MIA", "PTY", "FRA"))
+                .RuleFor(r => r.FlightNumber, f => f.Random.Int(1, 999))
+                .RuleFor(r => r.FirstClassPassengers, f => f.Random.Int(0, 10))
+                .RuleFor(r => r.EconomyClassPassengers, f => f.Random.Int(1, 150))
+                .RuleFor(r => r.Airline, f => "zuliAirline")
+                .RuleFor(r => r.PassengerSales, f => f.Random.Decimal(500, 5000))
+                .RuleFor(r => r.BaggageSales, f => f.Random.Decimal(50, 500))
+                .RuleFor(r => r.TotalSales, (_, currentEntity) => currentEntity.PassengerSales + currentEntity.BaggageSales);
 
             return reportFaker.Generate(3);
         }
