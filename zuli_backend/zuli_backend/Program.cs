@@ -1,3 +1,6 @@
+using FluentValidation;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Infrastructure;
@@ -8,18 +11,16 @@ using zuli_backend.Middleware;
 using zuli_Business;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
+using zuli_Business.Interface.Reports;
+using zuli_Business.Mappings;
+using zuli_Business.Reports;
 using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Business.Validation.Strategies;
-using zuli_Business.Interface.Reports;
 using zuli_Data;
 using zuli_Repository;
 using zuli_Repository.Interface;
 using zuli_Repository.Interface.Reports;
-using Mapster;
-using MapsterMapper;
-using FluentValidation;
-using zuli_Business.Reports;
 using zuli_Repository.Reports;
 using DotNetEnv;
 
@@ -78,6 +79,8 @@ builder.Services.AddAuthentication(config =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddControllers();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -120,6 +123,9 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
+builder.Services.Configure<List<ExternalAirlinesDTO>>(
+    builder.Configuration.GetSection("ExternalAirlines"));
+
 // Registrar DapperContext para manejo de conexiones SQL
 builder.Services.AddScoped<DapperContext>();
 
@@ -139,6 +145,12 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 builder.Services.AddScoped<IFlightRouteService, FlightRouteService>();
 builder.Services.AddScoped<IFlightRouteRepository, FlightRouteRepository>();
+
+// Búsqueda de vuelos con otras aerolíneas
+builder.Services.AddScoped<IOutsideFlightService, OutsideFlightService>();
+builder.Services.AddScoped<IOutsideFlightRepository, OutsideFlightRepository>();
+builder.Services.AddScoped<FluentValidation.IValidator<OutsideFlightRequestDTO>, OutsideFlightSearchValidator>();
+builder.Services.AddScoped<FluentValidation.IValidator<OutsideFlightDTO>, OutsideFlightValidator>();
 
 // Servicios y repositorios de login
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -186,7 +198,7 @@ builder.Services.AddScoped<IIncomeReportExportService, IncomeReportExportService
 builder.Services.AddScoped<IIncomeReportRepository, IncomeReportRepository>();
 
 var config = TypeAdapterConfig.GlobalSettings;
-config.Scan(typeof(FlightService).Assembly);
+config.Scan(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
