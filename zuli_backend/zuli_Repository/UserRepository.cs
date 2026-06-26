@@ -1,6 +1,7 @@
 using System.Transactions;
 using Dapper;
 using zuli_Data;
+using zuli_Data.Enums;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
@@ -284,20 +285,32 @@ namespace zuli_Repository
             );
         }
 
-        public async Task<string> DeleteUserAsync(Guid userId)
+        public async Task<UserDeletionResult> DeleteUserAsync(Guid userId)
         {
             using var connection = _dapperContext.CreateConnection();
 
-            const string sql = "dbo.sp_HandleUserDeletion";
+            const string procedureName = "dbo.sp_HandleUserDeletion";
 
-            return await connection.QuerySingleAsync<string>(
-                sql,
+            int? resultValue = await connection.ExecuteScalarAsync<int?>(
+                procedureName,
                 new
                 {
                     selectedUserToDelete = userId
                 },
                 commandType: System.Data.CommandType.StoredProcedure
             );
+
+            if (
+                !resultValue.HasValue ||
+                !Enum.IsDefined(typeof(UserDeletionResult), resultValue.Value)
+            )
+            {
+                throw new InvalidOperationException(
+                    "El procedimiento de eliminación devolvió un resultado no reconocido."
+                );
+            }
+
+            return (UserDeletionResult)resultValue.Value;
         }
         public async Task<bool> IsAdmin(string businesId)
         {

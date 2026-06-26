@@ -1,4 +1,5 @@
 using zuli_Data.Entities;
+using zuli_Data.Enums;
 
 namespace zuli_Repository.Interface
 {
@@ -15,7 +16,7 @@ namespace zuli_Repository.Interface
         
         Task UpdateUserAsync(AppUser user);
 
-        Task<string> DeleteUserAsync(Guid userId);
+        Task<UserDeletionResult> DeleteUserAsync(Guid userId);
 
         Task<bool> IsAdmin(string businesId);
         Task<Guid> GetUserId(string businesId);
