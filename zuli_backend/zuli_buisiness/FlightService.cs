@@ -20,6 +20,7 @@ namespace zuli_Business
         private const int SUCCESS_STATUS_CODE = 200;
         private const int NEXT_DAY_OFFSET = 1;
 
+        private readonly IOutsideFlightService _outsideFlightService;
         private readonly IFlightRepository _repository;
         private readonly IUserRepository _userRepository;
         private readonly IServiceRepository _serviceRepository;
@@ -30,6 +31,7 @@ namespace zuli_Business
         private readonly IMapper _mapper;
 
         public FlightService(
+            IOutsideFlightService outsideFlightService,
             IFlightRepository repository,
             IUserRepository userRepository,
             IServiceRepository serviceRepository,
@@ -39,6 +41,7 @@ namespace zuli_Business
             FluentValidation.IValidator<FlightAvailabilityRequestDTO> availabilityValidator,
             IMapper mapper)
         {
+            _outsideFlightService = outsideFlightService;
             _repository = repository;
             _userRepository = userRepository; 
             _serviceRepository = serviceRepository;
@@ -110,6 +113,17 @@ namespace zuli_Business
         {
             var validationResult = await _searchValidator.ValidateAsync(request);
             validationResult.ThrowIfInvalid();
+
+            if (!request.DirectFlightsOnly) {
+                OutsideFlightRequestDTO oustsideSearchCriteria = new OutsideFlightRequestDTO
+                {
+                    Destination = request.Destination,
+                    EarliestDeparture = request.Date,
+                    LatestDeparture = request.Date.AddDays(1),
+                    QuantityOfPassengers = request.Seats
+                };
+                await _outsideFlightService.FindOutsideFlights(oustsideSearchCriteria);
+            }
 
             var response = new FlightPaginatedResponseDTO { CurrentPage = request.Page };
 
