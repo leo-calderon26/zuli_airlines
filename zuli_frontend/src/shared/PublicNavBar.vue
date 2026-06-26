@@ -25,7 +25,7 @@
           </li>
           <li class="px-4">
             <router-link
-              to="/Mi viaje"
+              to="/Mi-viaje"
               exact-active-class="nav-active"
               class="inline-flex rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
             >
