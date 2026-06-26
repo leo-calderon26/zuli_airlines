@@ -24,13 +24,13 @@
             </AppButton>
           </li>
           <li class="px-4">
-            <AppButton
-              variant="ghost"
-              @click="openMaintenance('Consulta')"
-              class="!inline-flex !rounded-md !px-3 !py-2 !font-semibold !text-white hover:!bg-black/15 transition"
+            <router-link
+              to="/Mi viaje"
+              exact-active-class="nav-active"
+              class="inline-flex rounded-md px-3 py-2 font-semibold transition hover:bg-black/15"
             >
-              Consulta
-            </AppButton>
+              Mi viaje
+            </router-link>
           </li>
           <li class="px-4">
             <AppButton
