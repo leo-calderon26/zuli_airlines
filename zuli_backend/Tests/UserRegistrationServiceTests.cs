@@ -11,6 +11,7 @@ using zuli_Business.Interface;
 using zuli_Business.Mappings;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
+using zuli_Data.Enums;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
 
@@ -183,7 +184,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock
                 .Setup(repository => repository.DeleteUserAsync(userId))
-                .ReturnsAsync("HardDeleted");
+                .ReturnsAsync(UserDeletionResult.HardDeleted);
 
             BasicResponseDTO result = await _service.DeleteUserAsync(
                 userId,
@@ -209,7 +210,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock
                 .Setup(repository => repository.DeleteUserAsync(userId))
-                .ReturnsAsync("SoftDeleted");
+                .ReturnsAsync(UserDeletionResult.SoftDeleted);
 
             BasicResponseDTO result = await _service.DeleteUserAsync(
                 userId,
@@ -237,7 +238,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock
                 .Setup(repository => repository.DeleteUserAsync(userId))
-                .ReturnsAsync("Protected");
+                .ReturnsAsync(UserDeletionResult.Protected);
 
             Assert.That(
                 async () => await _service.DeleteUserAsync(
@@ -260,7 +261,7 @@ namespace zuli_backend.Tests
 
             _userRepositoryMock
                 .Setup(repository => repository.DeleteUserAsync(userId))
-                .ReturnsAsync("NotFound");
+                .ReturnsAsync(UserDeletionResult.NotFound);
 
             Assert.That(
                 async () => await _service.DeleteUserAsync(

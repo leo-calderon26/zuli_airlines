@@ -8,6 +8,7 @@ using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
+using zuli_Data.Enums;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
 using Microsoft.AspNetCore.Http;
@@ -22,11 +23,6 @@ namespace zuli_Business
         private readonly ActivateAccountValidator _activateAccountValidator;
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
-
-        private const string HardDeletedResult = "HardDeleted";
-        private const string SoftDeletedResult = "SoftDeleted";
-        private const string ProtectedResult = "Protected";
-        private const string NotFoundResult = "NotFound";
 
         public UserRegistrationService(
             IUserRepository userRepository,
@@ -186,9 +182,10 @@ namespace zuli_Business
                 );
             }
 
-            string deletionResult = await _userRepository.DeleteUserAsync(userId);
+            UserDeletionResult deletionResult =
+                await _userRepository.DeleteUserAsync(userId);
 
-            if (deletionResult == ProtectedResult)
+            if (deletionResult == UserDeletionResult.Protected)
             {
                 ThrowValidationError(
                     "userId",
@@ -196,7 +193,7 @@ namespace zuli_Business
                 );
             }
 
-            if (deletionResult == NotFoundResult)
+            if (deletionResult == UserDeletionResult.NotFound)
             {
                 throw new ZuliNotFoundException(
                     $"No existe un usuario disponible con id {userId}."
@@ -205,16 +202,17 @@ namespace zuli_Business
 
             return deletionResult switch
             {
-                HardDeletedResult => new BasicResponseDTO
+                UserDeletionResult.HardDeleted => new BasicResponseDTO
                 {
                     StatusCode = StatusCodes.Status200OK,
                     Message = "Usuario eliminado permanentemente."
                 },
 
-                SoftDeletedResult => new BasicResponseDTO
+                UserDeletionResult.SoftDeleted => new BasicResponseDTO
                 {
                     StatusCode = StatusCodes.Status200OK,
-                    Message = "El usuario fue desactivado porque posee registros o usuarios asociados."
+                    Message =
+                        "El usuario fue desactivado porque posee registros o usuarios asociados."
                 },
 
                 _ => throw new InvalidOperationException(
