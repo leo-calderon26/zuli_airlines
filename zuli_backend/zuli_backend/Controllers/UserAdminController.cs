@@ -67,5 +67,29 @@ namespace zuli_backend.Controllers
 
             return Ok(response);
         }
+        [HttpDelete("{userId:guid}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> DeleteUserAsync(Guid userId)
+        {
+            string? authenticatedUserIdValue = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!Guid.TryParse(authenticatedUserIdValue, out Guid authenticatedUserId))
+            {
+                return Unauthorized(new BasicResponseDTO
+                {
+                    StatusCode = StatusCodes.Status401Unauthorized,
+                    Message = "No se pudo identificar al administrador."
+                });
+            }
+
+            BasicResponseDTO response = await _userRegistrationService.DeleteUserAsync(
+                userId,
+                authenticatedUserId
+            );
+
+            return Ok(response);
+        }
     }
 }

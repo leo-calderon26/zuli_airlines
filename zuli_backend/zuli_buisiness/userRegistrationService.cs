@@ -23,6 +23,11 @@ namespace zuli_Business
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
 
+        private const string HardDeletedResult = "HardDeleted";
+        private const string SoftDeletedResult = "SoftDeleted";
+        private const string ProtectedResult = "Protected";
+        private const string NotFoundResult = "NotFound";
+
         public UserRegistrationService(
             IUserRepository userRepository,
             IEmailService emailService,
@@ -36,7 +41,6 @@ namespace zuli_Business
             _activateAccountValidator = activateAccountValidator;
             _configuration = configuration;
             _passwordHasher = new PasswordHasher<AppUser>();
-            // logger removed
         }
 
         public async Task<RegisterUserResponseDTO> RegisterUserAsync(
@@ -53,7 +57,6 @@ namespace zuli_Business
             string secondLastName = request.SecondLastName.Trim();
             string userRole = request.UserRole.Trim();
 
-            // logging removed
 
             await ValidateUniqueUserAsync(nationalId, businessEmail);
 
@@ -168,6 +171,55 @@ namespace zuli_Business
             {
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Usuario actualizado correctamente."
+            };
+        }
+        public async Task<BasicResponseDTO> DeleteUserAsync(
+            Guid userId,
+            Guid authenticatedUserId
+        )
+        {
+            if (userId == authenticatedUserId)
+            {
+                ThrowValidationError(
+                    "userId",
+                    "No puede eliminar su propia cuenta."
+                );
+            }
+
+            string deletionResult = await _userRepository.DeleteUserAsync(userId);
+
+            if (deletionResult == ProtectedResult)
+            {
+                ThrowValidationError(
+                    "userId",
+                    "El usuario está protegido y no puede eliminarse."
+                );
+            }
+
+            if (deletionResult == NotFoundResult)
+            {
+                throw new ZuliNotFoundException(
+                    $"No existe un usuario disponible con id {userId}."
+                );
+            }
+
+            return deletionResult switch
+            {
+                HardDeletedResult => new BasicResponseDTO
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Message = "Usuario eliminado permanentemente."
+                },
+
+                SoftDeletedResult => new BasicResponseDTO
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Message = "El usuario fue desactivado porque posee registros o usuarios asociados."
+                },
+
+                _ => throw new InvalidOperationException(
+                    "El proceso de eliminación devolvió un resultado no reconocido."
+                )
             };
         }
 

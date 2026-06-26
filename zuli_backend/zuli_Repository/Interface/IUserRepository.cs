@@ -12,7 +12,10 @@ namespace zuli_Repository.Interface
         Task CreatePendingUserAsync(AppUser user);
         Task UpdateLoginStateAsync(AppUser user);
         Task ActivateUserAsync(AppUser user);
+        
         Task UpdateUserAsync(AppUser user);
+
+        Task<string> DeleteUserAsync(Guid userId);
 
         Task<bool> IsAdmin(string businesId);
         Task<Guid> GetUserId(string businesId);

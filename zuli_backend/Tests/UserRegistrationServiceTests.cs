@@ -160,7 +160,121 @@ namespace zuli_backend.Tests
             _userRepositoryMock.Verify(r => r.GetByUserIdAsync(It.IsAny<Guid>()), Times.Never);
             _userRepositoryMock.Verify(r => r.UpdateUserAsync(It.IsAny<AppUser>()), Times.Never);
         }
+        [Test]
+        public void DeleteUser_SameAuthenticatedUser_ThrowsValidationException()
+        {
+            Guid userId = Guid.NewGuid();
 
+            Assert.That(
+                async () => await _service.DeleteUserAsync(userId, userId),
+                Throws.TypeOf<ZuliValidationException>()
+            );
+
+            _userRepositoryMock.Verify(
+                repository => repository.DeleteUserAsync(It.IsAny<Guid>()),
+                Times.Never
+            );
+        }
+        [Test]
+        public async Task DeleteUser_HardDeleted_ReturnsSuccessResponse()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid authenticatedUserId = Guid.NewGuid();
+
+            _userRepositoryMock
+                .Setup(repository => repository.DeleteUserAsync(userId))
+                .ReturnsAsync("HardDeleted");
+
+            BasicResponseDTO result = await _service.DeleteUserAsync(
+                userId,
+                authenticatedUserId
+            );
+
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+            Assert.That(
+                result.Message,
+                Is.EqualTo("Usuario eliminado permanentemente.")
+            );
+
+            _userRepositoryMock.Verify(
+                repository => repository.DeleteUserAsync(userId),
+                Times.Once
+            );
+        }
+        [Test]
+        public async Task DeleteUser_SoftDeleted_ReturnsSuccessResponse()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid authenticatedUserId = Guid.NewGuid();
+
+            _userRepositoryMock
+                .Setup(repository => repository.DeleteUserAsync(userId))
+                .ReturnsAsync("SoftDeleted");
+
+            BasicResponseDTO result = await _service.DeleteUserAsync(
+                userId,
+                authenticatedUserId
+            );
+
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+            Assert.That(
+                result.Message,
+                Is.EqualTo(
+                    "El usuario fue desactivado porque posee registros o usuarios asociados."
+                )
+            );
+
+            _userRepositoryMock.Verify(
+                repository => repository.DeleteUserAsync(userId),
+                Times.Once
+            );
+        }
+        [Test]
+        public void DeleteUser_ProtectedUser_ThrowsValidationException()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid authenticatedUserId = Guid.NewGuid();
+
+            _userRepositoryMock
+                .Setup(repository => repository.DeleteUserAsync(userId))
+                .ReturnsAsync("Protected");
+
+            Assert.That(
+                async () => await _service.DeleteUserAsync(
+                    userId,
+                    authenticatedUserId
+                ),
+                Throws.TypeOf<ZuliValidationException>()
+            );
+
+            _userRepositoryMock.Verify(
+                repository => repository.DeleteUserAsync(userId),
+                Times.Once
+            );
+        }
+        [Test]
+        public void DeleteUser_UserNotFound_ThrowsNotFoundException()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid authenticatedUserId = Guid.NewGuid();
+
+            _userRepositoryMock
+                .Setup(repository => repository.DeleteUserAsync(userId))
+                .ReturnsAsync("NotFound");
+
+            Assert.That(
+                async () => await _service.DeleteUserAsync(
+                    userId,
+                    authenticatedUserId
+                ),
+                Throws.TypeOf<ZuliNotFoundException>()
+            );
+
+            _userRepositoryMock.Verify(
+                repository => repository.DeleteUserAsync(userId),
+                Times.Once
+            );
+        }
         private static RegisterUserRequestDTO BuildValidRequest(string? businessEmail = null)
         {
             return new RegisterUserRequestDTO
