@@ -19,7 +19,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -55,7 +54,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -91,8 +89,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
-
             var sql = @"
                 SELECT
                     au.UserId,
@@ -127,7 +123,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -288,6 +283,22 @@ namespace zuli_Repository
                 commandType: System.Data.CommandType.StoredProcedure
             );
         }
+
+        public async Task<string> DeleteUserAsync(Guid userId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            const string sql = "dbo.sp_HandleUserDeletion";
+
+            return await connection.QuerySingleAsync<string>(
+                sql,
+                new
+                {
+                    selectedUserToDelete = userId
+                },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+        }
         public async Task<bool> IsAdmin(string businesId)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -366,7 +377,8 @@ namespace zuli_Repository
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
                 LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE {whereClause};
+                WHERE au.IsDeleted = 0
+                AND {whereClause};
             ";
 
             var usersSql = $@"
@@ -390,7 +402,8 @@ namespace zuli_Repository
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
                 LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE {whereClause}
+                WHERE au.IsDeleted = 0
+                  AND {whereClause}
                 ORDER BY p.FirstName, p.FirstLastName, p.SecondLastName
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY;
