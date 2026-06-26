@@ -85,7 +85,7 @@
               class="px-5 py-4 text-[16px] font-bold text-heading whitespace-nowrap"
               :class="col.align === 'right' ? 'text-right' : 'text-left'"
             >
-              {{ col.key === 'period' || col.key === 'month' || col.key === 'route' ? 'Total' : formatValue(computedTotals[col.key], col.format) }}
+              {{ col.key === 'period' || col.key === 'month' || col.key === 'route' || col.key === 'date' ? 'Total' : formatValue(computedTotals[col.key], col.format) }}
             </td>
           </tr>
         </tbody>
