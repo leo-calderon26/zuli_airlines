@@ -56,17 +56,17 @@ namespace zuli_Business.Reports
             int row = 2;
             foreach (var r in rows)
             {
-                ws.Cell(row, 1).Value = r.Fecha.ToString("dd/MM/yyyy");
-                ws.Cell(row, 2).Value = r.Origen;
-                ws.Cell(row, 3).Value = r.Destino;
-                ws.Cell(row, 4).Value = r.NumeroVuelo;
-                ws.Cell(row, 5).Value = r.Aerolinea;
-                ws.Cell(row, 6).Value = r.PasajerosPrimera;
-                ws.Cell(row, 7).Value = r.PasajerosEconomica;
+                ws.Cell(row, 1).Value = r.Date.ToString("dd/MM/yyyy");
+                ws.Cell(row, 2).Value = r.Origin;
+                ws.Cell(row, 3).Value = r.Destination;
+                ws.Cell(row, 4).Value = r.FlightNumber;
+                ws.Cell(row, 5).Value = r.Airline;
+                ws.Cell(row, 6).Value = r.FirstClassPassengers;
+                ws.Cell(row, 7).Value = r.EconomyClassPassengers;
 
-                SetMoney(ws.Cell(row, 8), r.VentaPasajeros);
-                SetMoney(ws.Cell(row, 9), r.VentaEquipaje);
-                SetMoney(ws.Cell(row, 10), r.TotalVenta);
+                SetMoney(ws.Cell(row, 8), r.PassengerSales);
+                SetMoney(ws.Cell(row, 9), r.BaggageSales);
+                SetMoney(ws.Cell(row, 10), r.TotalSales);
                 ws.Cell(row, 10).Style.Font.Bold = true;
 
                 row++;
