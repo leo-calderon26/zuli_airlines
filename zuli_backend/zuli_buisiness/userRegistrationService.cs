@@ -24,6 +24,11 @@ namespace zuli_Business
         private readonly IConfiguration _configuration;
         private readonly PasswordHasher<AppUser> _passwordHasher;
 
+        private const string HardDeletedResult = "HardDeleted";
+        private const string SoftDeletedResult = "SoftDeleted";
+        private const string ProtectedResult = "Protected";
+        private const string NotFoundResult = "NotFound";
+
         public UserRegistrationService(
             IUserRepository userRepository,
             IEmailService emailService,
