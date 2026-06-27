@@ -8,6 +8,9 @@ using MapsterMapper;
 using Moq;
 using NUnit.Framework;
 using zuli_Business;
+using zuli_Business.Reports;
+using zuli_Business.Interface.Reports;
+using zuli_Business.Interface;
 using zuli_Business.DTO.Filters;
 using zuli_Business.DTO.Reports;
 using zuli_Data.Entities.Filters;
@@ -94,6 +97,49 @@ namespace zuli_backend.Tests
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.Empty);
+        }
+
+        [Test]
+        public async Task GenerateFlightsReportExcelAsync_ReturnsValidXlsxStream()
+        {
+            var serviceMock = new Mock<IFlightsReportService>();
+
+            serviceMock
+                .Setup(s => s.GetFlightsReportAsync(It.IsAny<FlightsReportFilterDTO>()))
+                .ReturnsAsync(new List<FlightsReportDTO>
+                {
+            new FlightsReportDTO
+            {
+                Date = new DateTime(2026, 06, 22),
+                Origin = "SJO",
+                Destination = "FRA",
+                FlightNumber = 1,
+                Airline = "zuliAirline",
+                FirstClassPassengers = 0,
+                EconomyClassPassengers = 1,
+                PassengerSales = 1000m,
+                BaggageSales = 200m,
+                TotalSales = 1200m
+            }
+                });
+
+            var exportService = new FlightsReportExportService(serviceMock.Object);
+
+            var stream = await exportService.GenerateFlightsReportExcelAsync(new FlightsReportFilterDTO
+            {
+                FromDate = DateTime.Parse("2026-06-01"),
+                ToDate = DateTime.Parse("2026-06-30")
+            });
+
+            Assert.That(stream, Is.Not.Null);
+            Assert.That(stream.CanRead, Is.True);
+
+            stream.Position = 0;
+            var buffer = new byte[4];
+            await stream.ReadExactlyAsync(buffer, 0, 4);
+
+            Assert.That(buffer, Is.EqualTo(new byte[] { 0x50, 0x4B, 0x03, 0x04 }));
+            await stream.DisposeAsync();
         }
 
         private static List<FlightsReportEntity> BuildValidFlightsReportEntities()

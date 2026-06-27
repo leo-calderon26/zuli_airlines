@@ -191,6 +191,7 @@ builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 
 builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
 builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
+builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
 
 QuestPDF.Settings.License = LicenseType.Community;
 
