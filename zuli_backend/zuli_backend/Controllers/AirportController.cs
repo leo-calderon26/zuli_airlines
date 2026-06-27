@@ -10,7 +10,6 @@ namespace zuli_backend.Controllers
     [ApiController]
     public class AirportController : ControllerBase
     {
-        // Inyeccion de dependencias
         private readonly IAirportService _service;
         public AirportController(IAirportService service) => _service = service;
 
@@ -18,9 +17,6 @@ namespace zuli_backend.Controllers
         public async Task<ActionResult<BasicResponseDTO>> CreateAirport(AirportDTO Airport)
             => await _service.CreateAirport(Airport);
 
-        //[HttpGet("GetAll")]
-        //public async Task<ActionResult<IEnumerable<AirportDTO>>> GetAll()
-        //    => Ok(await _service.GetAll());
 
         [HttpGet("suggestions")]
         public async Task<ActionResult<List<AirportSuggestionDTO>>> GetSuggestions([FromQuery] string query)
@@ -33,6 +29,10 @@ namespace zuli_backend.Controllers
         [HttpPut("{code}")]
         public async Task<ActionResult<BasicResponseDTO>> UpdateAirportAsync(string code, AirportDTO airport)
             => await _service.UpdateAirportAsync(code, airport);
+
+        [HttpDelete("DeleteAirport/{code}")]
+        public async Task<ActionResult<BasicResponseDTO>> DeleteAirport(string code)
+            => await _service.DeleteAirport(code);
 
     }
 }
