@@ -239,8 +239,6 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 
-// app.UseAuthorization();
-
 app.UseMiddleware<LoginValidationMiddleware>();
 
 app.MapControllers();
