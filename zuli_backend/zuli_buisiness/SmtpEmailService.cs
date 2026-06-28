@@ -104,6 +104,28 @@ namespace zuli_Business
             );
         }
 
+        public async Task SendCancellationRequestEmailAsync(
+            string toEmail,
+            string buyerName,
+            string confirmationLink)
+        {
+            string body = _emailTemplateService.BuildCancellationRequestEmailBody(
+                buyerName,
+                confirmationLink
+            );
+
+            await SendEmailAsync(
+                toEmail,
+                "Solicitud de cancelación de reserva - Zuli Airlines",
+                body
+            );
+
+            _logger.LogInformation(
+                "Cancellation request email sent to {Email}",
+                toEmail
+            );
+        }
+
         private async Task SendEmailAsync(
             string toEmail,
             string subject,

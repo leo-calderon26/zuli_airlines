@@ -8,6 +8,7 @@ namespace zuli_Business.DTO.ReservationSearch
         public string ReservationCode { get; set; } = string.Empty;
         public string DestinationCity { get; set; } = string.Empty;
         public string DestinationCode { get; set; } = string.Empty;
+        public int ReservationStatusId { get; set; }
         public int DaysRemaining { get; set; }
         public int PassengerCount { get; set; }
         public List<ReservationSearchPassengerDTO> Passengers { get; set; } = new();
@@ -30,11 +31,9 @@ namespace zuli_Business.DTO.ReservationSearch
         public string DestinationCity { get; set; } = string.Empty;
         public string DestinationCode { get; set; } = string.Empty;
         public string FlightClass { get; set; } = string.Empty;
-        
         public int Stops { get; set; }
         public int TotalDurationMinutes { get; set; }
-
-        public List<ReservationSearchLayoverDTO> Layovers { get; set; } = new(); 
+        public List<ReservationSearchLayoverDTO> Layovers { get; set; } = new();
         public List<ReservationSearchSegmentDTO> Segments { get; set; } = new();
     }
 

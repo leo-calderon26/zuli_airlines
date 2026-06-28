@@ -12,5 +12,6 @@ namespace zuli_Data.Entities
         public string Airline { get; set; } = string.Empty;
         public string FlightNumber { get; set; } = string.Empty;
         public string AircraftModel { get; set; } = string.Empty;
+        public int ReservationStatusId { get; set; }
     }
 }

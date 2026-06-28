@@ -183,6 +183,9 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 builder.Services.AddScoped<IReservationSearchRepository, ReservationSearchRepository>();
 builder.Services.AddScoped<IReservationSearchService, ReservationSearchService>();
 
+builder.Services.AddScoped<IReservationCancellationRepository, ReservationCancellationRepository>();
+builder.Services.AddScoped<IReservationCancellationService, ReservationCancellationService>();
+
 // FlightRoute strategies
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteAirportExistenceStrategy>();
@@ -231,6 +234,8 @@ app.UseCors("FrontendPolicy");
 app.UseRateLimiter();
 
 app.UseAuthentication();
+
+// app.UseAuthorization();
 
 app.UseMiddleware<LoginValidationMiddleware>();
 
