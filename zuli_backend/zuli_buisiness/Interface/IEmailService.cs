@@ -17,5 +17,11 @@ namespace zuli_Business.Interface
             string reservationCode,
             byte[] confirmationPdf
         );
+
+        Task SendCancellationRequestEmailAsync(
+            string toEmail,
+            string buyerName,
+            string confirmationLink
+        );
     }
 }
