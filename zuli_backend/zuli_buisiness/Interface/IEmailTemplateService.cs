@@ -16,5 +16,10 @@ namespace zuli_Business.Interface
             string buyerName,
             string reservationCode
         );
+
+        string BuildCancellationRequestEmailBody(
+            string buyerName,
+            string confirmationLink
+        );
     }
 }
