@@ -49,8 +49,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
+import { computed, ref } from 'vue';
 import { useReservationSearch } from '../composable/useReservationSearch';
 import ReservationSearchForm from '../components/ReservationSearchForm.vue';
 import ReservationResult from '../components/ReservationResult.vue';

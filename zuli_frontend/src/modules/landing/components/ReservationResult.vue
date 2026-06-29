@@ -56,7 +56,6 @@
         </span>
 
         <span class="text-border-medium">|</span>
-
         <span>
           {{ reservationData.passengerCount }} Pasajero(s)
         </span>
@@ -103,7 +102,6 @@
               </svg>
               Gestionar equipaje
             </span>
-
             <svg
               class="w-4 h-4 text-content-light group-hover:text-white transition-colors"
               fill="none"
