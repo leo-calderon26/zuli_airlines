@@ -107,6 +107,7 @@ namespace zuli_Repository
                     touristPrice,
                     firstClassPrice
                 FROM FlightRoute
+                WHERE Status = 'Habilitada'
                 ORDER BY flightRouteId
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY";
@@ -114,6 +115,18 @@ namespace zuli_Repository
             var flightRoutes = (await connection.QueryAsync<FlightRouteEntity>(sql, new { Offset = offset, PageSize = pageSize })).ToList();
             return (flightRoutes, totalCount);
         }
-    }
+    public async Task<int> DeleteFlightRoute(int flightRouteId)
+        {
+            using var connection = _context.CreateConnection();
 
+            const string sql = "dbo.sp_HandleFlightRouteDeletion";
+
+            var deletionResult = await connection.ExecuteScalarAsync<int>(
+                sql,
+                new { selectedFlightRouteToDelete = flightRouteId },
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return deletionResult;
+        }
+    }
 }
