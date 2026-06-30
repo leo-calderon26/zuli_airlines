@@ -13,6 +13,10 @@ export function useUser() {
         store.updateUser(userId, userData);
         return response;
     };
+    
+    const deleteUser = async (userId) => {
+        return await userService.deleteUser(userId);
+    };
 
     const fetchUsersPaginated = async (pageNumber = 1, pageSize = 10, search = "", searchType = "name") => {
         const response = await userService.getUsers({ page: pageNumber, pageSize, search, searchType });
@@ -32,6 +36,7 @@ export function useUser() {
     return {
         createUser,
         updateUser,
+        deleteUser,
         fetchUsersPaginated,
         changePage,
     };
