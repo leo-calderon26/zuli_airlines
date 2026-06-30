@@ -1,0 +1,6 @@
+insert into airline (AirlineName, Email, Phone, Host)
+values ('AirDreams', 'contacto@airdreams.com', '555-5678', 'airdreams.com')
+insert into airline (AirlineName, Email, Phone, Host)
+values ('Snoopy', 'contacto@snoopy.com', '555-9101', 'snoopy.com')
+insert into airline (AirlineName, Email, Phone, Host)
+values ('Mushu', 'contacto@mushu.com', '555-1121', 'mushu.com')
