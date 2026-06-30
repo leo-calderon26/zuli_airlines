@@ -1,23 +1,11 @@
-using FluentValidation;
 using MapsterMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
-using System.Buffers.Text;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Threading.Tasks;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Utils;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
-using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
 
 namespace zuli_Business
@@ -60,12 +48,10 @@ namespace zuli_Business
                     var client = _httpClientFactory.CreateClient();
                     UriBuilder builder = new UriBuilder(externalAirline.url);
                     builder.Query = $"destination={outsideFlight.Destination}&earliestdeparture={outsideFlight.EarliestDeparture.ToString("yyyy-MM-ddTHH:mm")}&latestdeparture={outsideFlight.LatestDeparture.ToString("yyyy-MM-ddTHH:mm")}&quantityOfPassengers={outsideFlight.QuantityOfPassengers}&ApiKey={externalAirline.token}";
-                    Console.WriteLine(builder.Uri.ToString());
                     var response = await client.GetAsync(builder.Uri);
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(jsonString);
                         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                         var apiResponse = JsonSerializer.Deserialize<OutsideFlightResponseDTO>(jsonString, options);
 

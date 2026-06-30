@@ -119,7 +119,7 @@ namespace zuli_Business
                 {
                     Destination = request.Destination,
                     EarliestDeparture = request.Date,
-                    LatestDeparture = request.Date.AddDays(1),
+                    LatestDeparture = request.Date.AddDays(NEXT_DAY_OFFSET),
                     QuantityOfPassengers = request.Seats
                 };
                 await _outsideFlightService.FindOutsideFlights(oustsideSearchCriteria);
