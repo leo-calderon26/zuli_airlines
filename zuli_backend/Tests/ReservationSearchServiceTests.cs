@@ -24,14 +24,11 @@ namespace zuli_backend.Tests
         private const string ValidLastName = "Gomez";
         private const string InvalidReservationCode = "PAPUA";
         private const string InvalidLastName = "";
-
         private const string DestinationCity = "Ciudad de Panamá";
         private const string DestinationCode = "PTY";
 
-        private const int ExpectedPassengerCount = 2;
         private const int ExpectedDaysRemaining = 10;
         private const int ExpectedSegmentCount = 1;
-        private const int NoPassengers = 0;
 
         // Fecha de simulación para las pruebas, utilizando el huso horario de Costa Rica (UTC-6).
         private readonly DateTimeOffset TestCurrentDate =
@@ -89,6 +86,12 @@ namespace zuli_backend.Tests
                 }
             };
 
+            var passengersEntityList = new List<ReservationSearchPassengerEntity>
+            {
+                new ReservationSearchPassengerEntity { FirstName = "Luis", FirstLastName = "Gomez", SecondLastName = "Oses" },
+                new ReservationSearchPassengerEntity { FirstName = "Ana", FirstLastName = "Gomez", SecondLastName = "Mora" }
+            };
+
             var expectedMappedResponse = new ReservationSearchResponseDTO
             {
                 Journey = new ReservationSearchJourneyDTO
@@ -97,20 +100,31 @@ namespace zuli_backend.Tests
                 }
             };
 
+            var expectedMappedPassengers = new List<ReservationSearchPassengerDTO>
+            {
+                new ReservationSearchPassengerDTO { FirstName = "Luis", FirstLastName = "Gomez", SecondLastName = "Oses" },
+                new ReservationSearchPassengerDTO { FirstName = "Ana", FirstLastName = "Gomez", SecondLastName = "Mora" }
+            };
+
             _validatorMock.Setup(v => v.ValidateAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
             _repositoryMock.Setup(r => r.GetReservationDataAsync(request.ReservationCode, It.IsAny<string>()))
-                .ReturnsAsync((flightsEntityList, ExpectedPassengerCount));
+                .ReturnsAsync((flightsEntityList, passengersEntityList));
 
             _mapperMock.Setup(m => m.Map<ReservationSearchResponseDTO>(flightsEntityList))
                 .Returns(expectedMappedResponse);
+
+            _mapperMock.Setup(m => m.Map<List<ReservationSearchPassengerDTO>>(passengersEntityList))
+                .Returns(expectedMappedPassengers);
 
             var result = await _service.GetReservationDetailsAsync(request);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.ReservationCode, Is.EqualTo(request.ReservationCode));
-            Assert.That(result.PassengerCount, Is.EqualTo(ExpectedPassengerCount));
+            Assert.That(result.PassengerCount, Is.EqualTo(passengersEntityList.Count));
+            Assert.That(result.Passengers, Is.Not.Null);
+            Assert.That(result.Passengers.Count, Is.EqualTo(passengersEntityList.Count));
             Assert.That(result.DaysRemaining, Is.EqualTo(ExpectedDaysRemaining));
             Assert.That(result.Journey.Segments.Count, Is.EqualTo(ExpectedSegmentCount));
 
@@ -130,12 +144,13 @@ namespace zuli_backend.Tests
             };
 
             var emptyFlightList = new List<ReservationSearchFlightEntity>();
+            var emptyPassengersList = new List<ReservationSearchPassengerEntity>();
 
             _validatorMock.Setup(v => v.ValidateAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
             _repositoryMock.Setup(r => r.GetReservationDataAsync(request.ReservationCode, It.IsAny<string>()))
-                .ReturnsAsync((emptyFlightList, NoPassengers));
+                .ReturnsAsync((emptyFlightList, emptyPassengersList));
 
             Assert.That(
                 async () => await _service.GetReservationDetailsAsync(request),

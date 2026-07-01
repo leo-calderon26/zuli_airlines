@@ -1,6 +1,7 @@
 using System.Transactions;
 using Dapper;
 using zuli_Data;
+using zuli_Data.Enums;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
 
@@ -19,7 +20,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -55,7 +55,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -91,8 +90,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
-
             var sql = @"
                 SELECT
                     au.UserId,
@@ -127,7 +124,6 @@ namespace zuli_Repository
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // (logging removed)
 
             var sql = @"
                 SELECT
@@ -288,6 +284,34 @@ namespace zuli_Repository
                 commandType: System.Data.CommandType.StoredProcedure
             );
         }
+
+        public async Task<UserDeletionResult> DeleteUserAsync(Guid userId)
+        {
+            using var connection = _dapperContext.CreateConnection();
+
+            const string procedureName = "dbo.sp_HandleUserDeletion";
+
+            int? resultValue = await connection.ExecuteScalarAsync<int?>(
+                procedureName,
+                new
+                {
+                    selectedUserToDelete = userId
+                },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+
+            if (
+                !resultValue.HasValue ||
+                !Enum.IsDefined(typeof(UserDeletionResult), resultValue.Value)
+            )
+            {
+                throw new InvalidOperationException(
+                    "El procedimiento de eliminación devolvió un resultado no reconocido."
+                );
+            }
+
+            return (UserDeletionResult)resultValue.Value;
+        }
         public async Task<bool> IsAdmin(string businesId)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -366,7 +390,8 @@ namespace zuli_Repository
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
                 LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE {whereClause};
+                WHERE au.IsDeleted = 0
+                AND {whereClause};
             ";
 
             var usersSql = $@"
@@ -390,7 +415,8 @@ namespace zuli_Repository
                 FROM AirlineUser au
                 INNER JOIN Person p ON au.PersonId = p.PersonId
                 LEFT JOIN PersonEmail pe ON p.PersonId = pe.PersonId
-                WHERE {whereClause}
+                WHERE au.IsDeleted = 0
+                  AND {whereClause}
                 ORDER BY p.FirstName, p.FirstLastName, p.SecondLastName
                 OFFSET @Offset ROWS
                 FETCH NEXT @PageSize ROWS ONLY;

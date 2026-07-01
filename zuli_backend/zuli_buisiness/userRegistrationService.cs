@@ -8,6 +8,7 @@ using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
+using zuli_Data.Enums;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +37,6 @@ namespace zuli_Business
             _activateAccountValidator = activateAccountValidator;
             _configuration = configuration;
             _passwordHasher = new PasswordHasher<AppUser>();
-            // logger removed
         }
 
         public async Task<RegisterUserResponseDTO> RegisterUserAsync(
@@ -53,7 +53,6 @@ namespace zuli_Business
             string secondLastName = request.SecondLastName.Trim();
             string userRole = request.UserRole.Trim();
 
-            // logging removed
 
             await ValidateUniqueUserAsync(nationalId, businessEmail);
 
@@ -168,6 +167,57 @@ namespace zuli_Business
             {
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Usuario actualizado correctamente."
+            };
+        }
+        public async Task<BasicResponseDTO> DeleteUserAsync(
+            Guid userId,
+            Guid authenticatedUserId
+        )
+        {
+            if (userId == authenticatedUserId)
+            {
+                ThrowValidationError(
+                    "userId",
+                    "No puede eliminar su propia cuenta."
+                );
+            }
+
+            UserDeletionResult deletionResult =
+                await _userRepository.DeleteUserAsync(userId);
+
+            if (deletionResult == UserDeletionResult.Protected)
+            {
+                ThrowValidationError(
+                    "userId",
+                    "El usuario está protegido y no puede eliminarse."
+                );
+            }
+
+            if (deletionResult == UserDeletionResult.NotFound)
+            {
+                throw new ZuliNotFoundException(
+                    $"No existe un usuario disponible con id {userId}."
+                );
+            }
+
+            return deletionResult switch
+            {
+                UserDeletionResult.HardDeleted => new BasicResponseDTO
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Message = "Usuario eliminado permanentemente."
+                },
+
+                UserDeletionResult.SoftDeleted => new BasicResponseDTO
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Message =
+                        "El usuario fue desactivado porque posee registros o usuarios asociados."
+                },
+
+                _ => throw new InvalidOperationException(
+                    "El proceso de eliminación devolvió un resultado no reconocido."
+                )
             };
         }
 

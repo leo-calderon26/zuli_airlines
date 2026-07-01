@@ -170,7 +170,7 @@ builder.Services.AddScoped<IBaggageRepository, BaggageRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationRepository, PurchaseConfirmationRepository>();
 builder.Services.AddScoped<IPurchaseConfirmationService, PurchaseConfirmationService>();
 builder.Services.AddScoped<IPurchaseConfirmationPdfService, PurchaseConfirmationPdfService>();
-builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>,PurchaseConfirmationValidator>();
+builder.Services.AddScoped<FluentValidation.IValidator<PurchaseConfirmationPageDTO>, PurchaseConfirmationValidator>();
 
 builder.Services.AddSingleton<LoginValidator>();
 builder.Services.AddSingleton<RegisterUserValidator>();
@@ -178,6 +178,9 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 
 builder.Services.AddScoped<IReservationSearchRepository, ReservationSearchRepository>();
 builder.Services.AddScoped<IReservationSearchService, ReservationSearchService>();
+
+builder.Services.AddScoped<IReservationCancellationRepository, ReservationCancellationRepository>();
+builder.Services.AddScoped<IReservationCancellationService, ReservationCancellationService>();
 
 // FlightRoute strategies
 builder.Services.AddScoped<IValidationStrategy<FlightRouteDTO>, FlightRouteBusinessIdStrategy>();
@@ -190,6 +193,7 @@ builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 builder.Services.AddScoped<IFilterOptionsService, FilterOptionsService>();
 builder.Services.AddScoped<IFilterOptionsRepository, FilterOptionsRepository>();
 builder.Services.AddScoped<IIncomeReportService, IncomeReportService>();
+builder.Services.AddScoped<IIncomeReportExportService, IncomeReportExportService>();
 builder.Services.AddScoped<IIncomeReportRepository, IncomeReportRepository>();
 
 var config = TypeAdapterConfig.GlobalSettings;
@@ -199,6 +203,10 @@ builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<zuli_Business.Validation.FlightValidator>();
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
+builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
+builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
 
 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -220,8 +228,6 @@ app.UseCors("FrontendPolicy");
 app.UseRateLimiter();
 
 app.UseAuthentication();
-
-// app.UseAuthorization();
 
 app.UseMiddleware<LoginValidationMiddleware>();
 

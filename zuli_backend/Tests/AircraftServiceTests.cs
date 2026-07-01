@@ -116,6 +116,54 @@ namespace zuli_backend.Tests
             _aircraftRepositoryMock.Verify(r => r.UpdateAircraftAsync(It.IsAny<AircraftEntity>()), Times.Never);
         }
 
+        [Test]
+        public async Task DeleteAircraft_ExistingAircraft_DeletesSuccessfully()
+        {
+            // Arrange
+            var aircraftId = Guid.NewGuid();
+            var existingAircraft = new AircraftEntity
+            {
+                aircraftId = aircraftId,
+                model = "B737",
+                AdminId = Guid.NewGuid()
+            };
+
+            _aircraftRepositoryMock
+                .Setup(r => r.GetById(aircraftId))
+                .ReturnsAsync(existingAircraft);
+
+            _aircraftRepositoryMock
+                .Setup(r => r.DeleteAircraft(aircraftId))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _service.DeleteAircraft(aircraftId);
+
+            // Assert
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+            Assert.That(result.Message, Is.EqualTo("Se eliminó la aeronave correctamente"));
+
+            _aircraftRepositoryMock.Verify(r => r.GetById(aircraftId), Times.Once);
+            _aircraftRepositoryMock.Verify(r => r.DeleteAircraft(aircraftId), Times.Once);
+        }
+
+        [Test]
+        public void DeleteAircraft_AircraftDoesNotExist_ThrowsNotFound()
+        {
+            // Arrange
+            var aircraftId = Guid.NewGuid();
+
+            _aircraftRepositoryMock
+                .Setup(r => r.GetById(aircraftId))
+                .ReturnsAsync((AircraftEntity?)null);
+
+            // Act & Assert
+            Assert.That(async () => await _service.DeleteAircraft(aircraftId), Throws.TypeOf<ZuliNotFoundException>());
+
+            _aircraftRepositoryMock.Verify(r => r.GetById(aircraftId), Times.Once);
+            _aircraftRepositoryMock.Verify(r => r.DeleteAircraft(It.IsAny<Guid>()), Times.Never);
+        }
+
         private static AircraftDTO BuildValidAircraftDto()
         {
             return new AircraftDTO

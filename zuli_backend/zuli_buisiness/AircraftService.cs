@@ -106,5 +106,21 @@ namespace zuli_Business
                 Message = "Se actualizó la aeronave correctamente"
             };
         }
+        public async Task<BasicResponseDTO> DeleteAircraft(Guid aircraftId)
+        {
+            var existingAircraft = await _repository.GetById(aircraftId);
+            if (existingAircraft == null)
+            {
+                throw new ZuliNotFoundException($"La aeronave con ID {aircraftId} no existe.");
+            }
+
+            await _repository.DeleteAircraft(aircraftId);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = 200,
+                Message = "Se eliminó la aeronave correctamente"
+            };
+        }
     }
 }

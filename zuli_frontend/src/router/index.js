@@ -106,7 +106,7 @@ const router = createRouter({
             meta: {requiresAuth: false, adminRequired: false}
         },
         {
-            path: "/consulta",
+            path: "/Mi-viaje",
             name: "consult",
             component: ConsultView,
             meta: {requiresAuth: false, adminRequired: false}

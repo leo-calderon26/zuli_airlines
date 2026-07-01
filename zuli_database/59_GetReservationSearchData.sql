@@ -1,4 +1,6 @@
-CREATE PROCEDURE sp_GetReservationSearchData
+USE ZuliAirlines;
+
+CREATE OR ALTER PROCEDURE sp_GetReservationSearchData
     @ReservationCode NVARCHAR(50),
     @LastNameSearch NVARCHAR(100)
 AS
@@ -45,7 +47,13 @@ BEGIN
     )
     ORDER BY DepartureDateTime ASC;
 
-    SELECT COUNT(DISTINCT PassengerId) 
-    FROM BoardingPass 
-    WHERE ReservationCode = @ReservationCode;
-END
+    SELECT 
+        p.FirstName, 
+        p.FirstLastName, 
+        p.SecondLastName
+    FROM dbo.PassengerReservation pr
+    INNER JOIN dbo.Person p ON pr.PassengerId = p.PersonId
+    INNER JOIN dbo.Reservation r ON pr.ReservationId = r.ReservationId
+    WHERE r.ReservationCode = @ReservationCode;
+
+END;

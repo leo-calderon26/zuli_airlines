@@ -15,7 +15,6 @@ namespace zuli_backend.Controllers
         public AircraftController(IAircraftService service) => _service = service;
 
         [HttpPost("CreateAircraft")]
-        
         public async Task<ActionResult<BasicResponseDTO>> CreateAircraft([FromBody]AircraftDTO aircraft)
             => await _service.CreateAircraft(aircraft);
 
@@ -30,5 +29,8 @@ namespace zuli_backend.Controllers
         [HttpPut("{aircraftId:guid}")]
         public async Task<ActionResult<BasicResponseDTO>> UpdateAircraftAsync(Guid aircraftId, [FromBody] AircraftDTO aircraft)
             => await _service.UpdateAircraftAsync(aircraftId, aircraft);
+        [HttpDelete("DeleteAircraft/{aircraftId:guid}")]
+        public async Task<ActionResult<BasicResponseDTO>> DeleteAircraft(Guid aircraftId)
+            => await _service.DeleteAircraft(aircraftId);
     }
 }
