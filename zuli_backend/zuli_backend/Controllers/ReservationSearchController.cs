@@ -21,5 +21,14 @@ namespace zuli_backend.Controllers
             var result = await _service.GetReservationDetailsAsync(request);
             return Ok(result);
         }
+
+        [HttpGet("itinerary")]
+        public async Task<IActionResult> DownloadItinerary([FromQuery] string reservationCode, [FromQuery] string lastName)
+        {
+            var request = new ReservationSearchRequestDTO { ReservationCode = reservationCode, LastName = lastName };
+            var (fileContents, contentType, fileName) = await _service.GenerateItineraryPdfAsync(request);
+            
+            return File(fileContents, contentType, fileName);
+        }
     }
 }

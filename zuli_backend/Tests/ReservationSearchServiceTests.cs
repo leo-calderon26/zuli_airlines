@@ -13,6 +13,7 @@ using zuli_Business.DTO.ReservationSearch;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
+using zuli_Business.Interface;
 
 namespace zuli_backend.Tests
 {
@@ -45,6 +46,7 @@ namespace zuli_backend.Tests
         private Mock<IMapper> _mapperMock;
         
         private FakeTimeProvider _fakeTimeProvider;
+        private Mock<IReservationItineraryPdfService> _pdfServiceMock;
 
         private ReservationSearchService _service;
 
@@ -54,6 +56,7 @@ namespace zuli_backend.Tests
             _repositoryMock = new Mock<IReservationSearchRepository>();
             _validatorMock = new Mock<IValidator<ReservationSearchRequestDTO>>();
             _mapperMock = new Mock<IMapper>();
+            _pdfServiceMock = new Mock<IReservationItineraryPdfService>();
 
             _fakeTimeProvider = new CostaRicaTimeProvider();
             _fakeTimeProvider.SetUtcNow(TestCurrentDate);
@@ -62,7 +65,8 @@ namespace zuli_backend.Tests
                 _repositoryMock.Object,
                 _validatorMock.Object,
                 _mapperMock.Object,
-                _fakeTimeProvider
+                _fakeTimeProvider,
+                _pdfServiceMock?.Object
             );
         }
 
@@ -185,8 +189,65 @@ namespace zuli_backend.Tests
                 Times.Never
             );
         }
-    }
 
+        [Test]
+        public async Task GenerateItineraryPdfAsync_ValidRequestAndDataFound_ReturnsFileTuple()
+        {
+            // Arrange
+            var request = new ReservationSearchRequestDTO
+            {
+                ReservationCode = LowerCaseReservationCode,
+                LastName = ValidLastName
+            };
+
+            var flightsEntityList = new List<ReservationSearchFlightEntity>
+            {
+                new ReservationSearchFlightEntity
+                {
+                    DepartureDateTime = TestDepartureDate,
+                    ArrivalDateTime = TestArrivalDate,
+                    DestinationCity = DestinationCity,
+                    DestinationCode = DestinationCode,
+                    ReservationStatusId = 1
+                }
+            };
+            var passengersEntityList = new List<ReservationSearchPassengerEntity>();
+
+            var expectedResponseDto = new ReservationSearchResponseDTO { ReservationCode = LowerCaseReservationCode };
+            var expectedPdfBytes = new byte[] { 1, 2, 3, 4, 5 };
+
+            _validatorMock.Setup(v => v.ValidateAsync(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResult());
+
+            _repositoryMock.Setup(r => r.GetReservationDataAsync(request.ReservationCode, It.IsAny<string>()))
+                .ReturnsAsync((flightsEntityList, passengersEntityList));
+
+            // Usar It.IsAny<> previene que el Mapper devuelva null por no coincidir la referencia de memoria
+            _mapperMock.Setup(m => m.Map<ReservationSearchResponseDTO>(It.IsAny<List<ReservationSearchFlightEntity>>()))
+                .Returns(expectedResponseDto);
+                
+            // Faltaba este Mock para los pasajeros, lo que también causaba null internamente
+            _mapperMock.Setup(m => m.Map<List<ReservationSearchPassengerDTO>>(It.IsAny<List<ReservationSearchPassengerEntity>>()))
+                .Returns([]);
+
+            _pdfServiceMock.Setup(p => p.GenerateItineraryPdf(It.IsAny<ReservationSearchResponseDTO>()))
+                .Returns(expectedPdfBytes);
+
+            // Act
+            var result = await _service.GenerateItineraryPdfAsync(request);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.FileContents, Is.EqualTo(expectedPdfBytes));
+                Assert.That(result.ContentType, Is.EqualTo("application/pdf"));
+                Assert.That(result.FileName, Is.EqualTo($"Itinerario_{LowerCaseReservationCode}.pdf"));
+            });
+            
+            _pdfServiceMock.Verify(p => p.GenerateItineraryPdf(It.IsAny<ReservationSearchResponseDTO>()), Times.Once);
+
+        }
+    }
     public class CostaRicaTimeProvider : FakeTimeProvider
     {
         public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.FindSystemTimeZoneById("America/Costa_Rica");
