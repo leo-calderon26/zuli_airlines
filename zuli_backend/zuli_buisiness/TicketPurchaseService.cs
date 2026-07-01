@@ -1,10 +1,8 @@
 using System.Transactions;
-using MapsterMapper;
 using zuli_Business.DTO;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
-using zuli_Data.Exceptions;
 
 namespace zuli_Business
 {
@@ -16,10 +14,7 @@ namespace zuli_Business
         private readonly IPassengerCreationService _passengerCreationService;
         private readonly IBaggageRegistrationService _baggageRegistrationService;
         private readonly IReservationRepository _reservationRepository;
-        private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
-        private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
-        private readonly IEmailService _emailService;
-        private readonly IMapper _mapper;
+        private readonly IEmailJobQueue _emailJobQueue;
 
         public TicketPurchaseService(
             IFlightResolverService flightResolverService,
@@ -28,10 +23,7 @@ namespace zuli_Business
             IPassengerCreationService passengerCreationService,
             IBaggageRegistrationService baggageRegistrationService,
             IReservationRepository reservationRepository,
-            IPurchaseConfirmationRepository purchaseConfirmationRepository,
-            IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
-            IEmailService emailService,
-            IMapper mapper)
+            IEmailJobQueue emailJobQueue)
         {
             _flightResolverService = flightResolverService;
             _passengerValidationService = passengerValidationService;
@@ -39,10 +31,7 @@ namespace zuli_Business
             _passengerCreationService = passengerCreationService;
             _baggageRegistrationService = baggageRegistrationService;
             _reservationRepository = reservationRepository;
-            _purchaseConfirmationRepository = purchaseConfirmationRepository;
-            _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
-            _emailService = emailService;
-            _mapper = mapper;
+            _emailJobQueue = emailJobQueue;
         }
 
         public async Task<TicketPurchaseResponseDTO> Purchase(TicketPurchaseRequestDTO request)
@@ -113,7 +102,11 @@ namespace zuli_Business
                 scope.Complete();
             }
 
-            await SendPurchaseEmails(reservationCode);
+            await _emailJobQueue.QueueAsync(new EmailJobDTO
+            {
+                Type = EmailJobType.PurchaseConfirmation,
+                ReservationCode = reservationCode
+            });
 
             return new TicketPurchaseResponseDTO
             {
@@ -200,37 +193,6 @@ namespace zuli_Business
                 CarryOnTotal = carryOnTotal,
                 PassengerTotal = passengerTotal
             };
-        }
-        
-        private async Task SendPurchaseEmails(string reservationCode)
-        {
-            var confirmation = await _purchaseConfirmationRepository
-                .GetPurchaseConfirmationAsync(reservationCode);
-
-            if (confirmation == null)
-            {
-                throw new ZuliNotFoundException("No se encontró la confirmación de compra.");
-            }
-
-            var confirmationDto = _mapper.Map<PurchaseConfirmationPageDTO>(confirmation);
-            confirmationDto.Breakdown = PurchaseConfirmationService.BuildPurchaseBreakdown(confirmationDto);
-
-            var invoicePdf = _purchaseConfirmationPdfService.GenerateInvoicePdf(confirmationDto);
-            var confirmationPdf = _purchaseConfirmationPdfService.GenerateConfirmationPdf(confirmationDto);
-
-            await _emailService.SendInvoiceEmailAsync(
-                confirmationDto.BuyerEmail,
-                confirmationDto.BuyerName,
-                confirmationDto.ReservationCode,
-                invoicePdf
-            );
-
-            await _emailService.SendPurchaseConfirmationEmailAsync(
-                confirmationDto.BuyerEmail,
-                confirmationDto.BuyerName,
-                confirmationDto.ReservationCode,
-                confirmationPdf
-            );
         }
     }
 }

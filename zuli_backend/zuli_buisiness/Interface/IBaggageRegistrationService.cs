@@ -1,5 +1,6 @@
 using zuli_Business.DTO;
 using zuli_Business.DTO.ReservationSearch;
+using zuli_Data.DTO;
 
 namespace zuli_Business.Interface
 {
@@ -14,7 +15,7 @@ namespace zuli_Business.Interface
             List<PassengerTicketDTO> passengers,
             List<Guid> flightIds
         );
-        Task AddAdditionalBaggageTransactional(
+        Task<AdditionalBaggagePurchaseResultDTO> AddAdditionalBaggageTransactional(
             string reservationCode,
             List<AdditionalBaggagePassengerDTO> passengers
         );

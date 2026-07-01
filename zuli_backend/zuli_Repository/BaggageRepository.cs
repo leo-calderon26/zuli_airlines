@@ -34,7 +34,7 @@ namespace zuli_Repository
             });
         }
 
-        public async Task AddAdditionalBaggageTransactional(string reservationCode, List<BaggageEntity> baggages)
+        public async Task<AdditionalBaggagePurchaseResultDTO> AddAdditionalBaggageTransactional(string reservationCode, List<BaggageEntity> baggages)
         {
             await using var connection = _context.CreateConnection();
             await connection.OpenAsync();
@@ -104,10 +104,11 @@ namespace zuli_Repository
                     existingCheckedBagsByPassenger
                 );
 
-                await connection.ExecuteAsync(
+                var reservationTotal = await connection.QuerySingleAsync<decimal>(
                     @"
                     UPDATE dbo.Reservation
                     SET TotalPayment = ISNULL(TotalPayment, 0) + @additionalBaggageTotal
+                    OUTPUT INSERTED.TotalPayment
                     WHERE ReservationId = @reservationId;
                     ",
                     new { reservationId, additionalBaggageTotal },
@@ -129,6 +130,12 @@ namespace zuli_Repository
                 );
 
                 await transaction.CommitAsync();
+
+                return new AdditionalBaggagePurchaseResultDTO
+                {
+                    AdditionalBaggageTotal = additionalBaggageTotal,
+                    ReservationTotal = reservationTotal
+                };
             }
             catch
             {
