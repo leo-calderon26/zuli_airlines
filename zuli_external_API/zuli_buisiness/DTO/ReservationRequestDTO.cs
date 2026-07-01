@@ -76,8 +76,6 @@ namespace zuli_Business.DTO
     }
     public class ReservationRequestDTO
     {
-        // [Required(ErrorMessage = "El api key es requerido")]
-        // public string apiKey { get; set; } = string.Empty;
         [Required(ErrorMessage = "El código del vuelo es requerido")]
         public Guid flightGUID { get; set; }
         public bool firstClass { get; set; } = false;
