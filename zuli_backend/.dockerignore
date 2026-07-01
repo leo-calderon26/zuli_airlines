@@ -1,0 +1,24 @@
+# Backend .dockerignore
+**/.git
+**/.gitignore
+**/bin
+**/obj
+**/.vs
+**/.vscode
+**/.idea
+**/*.user
+**/*.userosscache
+**/*.suo
+**/*.rsuser
+**/.env
+**/.env.local
+**/.env.*.local
+**/Dockerfile
+**/.dockerignore
+**/node_modules
+**/dist
+**/logs
+**/*.log
+**/*.md
+**/TestResults
+**/coverage

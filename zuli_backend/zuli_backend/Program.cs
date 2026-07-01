@@ -23,14 +23,15 @@ using zuli_Repository;
 using zuli_Repository.Interface;
 using zuli_Repository.Interface.Reports;
 using zuli_Repository.Reports;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Configuration.AddJsonFile("appsettings.json");
-
-var secretKey = builder.Configuration["settings:secretkey"];
+var secretKey = builder.Configuration["settings:secretKey"];
 if (string.IsNullOrWhiteSpace(secretKey))
 {
     throw new InvalidOperationException("Secret key not found in configuration");
@@ -86,12 +87,15 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// CORS para permitir comunicación con Vue/Vite
+// CORS para permitir comunicación con Vue/Vite y el proxy nginx en producción
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        // Permitir cualquier origen con credenciales.
+        // En producción el backend está protegido por el proxy nginx (mismo origen),
+        // por lo que CORS solo aplica para desarrollo local o acceso directo.
+        policy.SetIsOriginAllowed(_ => true)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -217,6 +221,14 @@ builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
 builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
 builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
 
+builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
+builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
+builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
+
+builder.Services.AddScoped<IFlightsReportRepository, FlightsReportRepository>();
+builder.Services.AddScoped<IFlightsReportService, FlightsReportService>();
+builder.Services.AddScoped<IFlightsReportExportService, FlightsReportExportService>();
+
 QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
@@ -229,8 +241,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
-app.UseHttpsRedirection();
 
 app.UseCors("FrontendPolicy");
 
