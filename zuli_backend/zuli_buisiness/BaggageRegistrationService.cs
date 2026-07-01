@@ -1,4 +1,5 @@
 using zuli_Business.DTO;
+using zuli_Business.DTO.ReservationSearch;
 using zuli_Business.Interface;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
@@ -143,6 +144,46 @@ namespace zuli_Business
             return passengers.Sum(passenger =>
                 passenger.CheckedBaggage * DEFAULT_CHECKED_BAGGAGE_WEIGHT
             );
+        }
+
+        public async Task AddAdditionalBaggageTransactional(
+            string reservationCode,
+            List<AdditionalBaggagePassengerDTO> passengers)
+        {
+            reservationCode = reservationCode.Trim().ToUpperInvariant();
+            var baggages = new List<BaggageEntity>();
+
+            foreach (var passenger in passengers)
+            {
+                for (int baggage = 0; baggage < passenger.AdditionalCheckedBaggage; baggage++)
+                {
+                    baggages.Add(new BaggageEntity
+                    {
+                        PassengerId = passenger.PassengerId,
+                        Weight = DEFAULT_CHECKED_BAGGAGE_WEIGHT,
+                        Size = "Mediano",
+                        Type = "Maleta"
+                    });
+                }
+
+                for (int baggageSmall = 0; baggageSmall < passenger.AdditionalCarryOn; baggageSmall++)
+                {
+                    baggages.Add(new BaggageEntity
+                    {
+                        PassengerId = passenger.PassengerId,
+                        Weight = DEFAULT_CARRY_ON_WEIGHT,
+                        Size = "Pequeño",
+                        Type = "Mano"
+                    });
+                }
+            }
+
+            if (baggages.Count == 0)
+            {
+                throw new ZuliValidationException("baggage", "No se proporcionó equipaje adicional para agregar.");
+            }
+
+            await _baggageRepository.AddAdditionalBaggageTransactional(reservationCode, baggages);
         }
     }
 }

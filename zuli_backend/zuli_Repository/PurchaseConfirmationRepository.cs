@@ -40,22 +40,22 @@ namespace zuli_Repository
                 SELECT
                     r.ReservationId,
                     r.ReservationCode,
-                    CONCAT(
-                        buyerPerson.FirstName,
+                    LTRIM(RTRIM(CONCAT(
+                        ISNULL(buyerPerson.FirstName, ''),
                         ' ',
-                        buyerPerson.FirstLastName,
+                        ISNULL(buyerPerson.FirstLastName, ''),
                         ' ',
-                        buyerPerson.SecondLastName
-                    ) AS BuyerName,
-                    buyerEmail.Email AS BuyerEmail,
+                        ISNULL(buyerPerson.SecondLastName, '')
+                    ))) AS BuyerName,
+                    ISNULL(buyerEmail.Email, '') AS BuyerEmail,
                     ISNULL(b.Phone, '') AS BuyerPhone,
                     ISNULL(r.PaymentMethod, '') AS PaymentMethod,
                     ISNULL(r.FlightClass, '') AS FlightClass,
                     ISNULL(r.TotalPayment, 0) AS TotalAmount
                 FROM dbo.Reservation r
-                INNER JOIN dbo.Buyer b
+                LEFT JOIN dbo.Buyer b
                     ON r.BuyerId = b.BuyerId
-                INNER JOIN dbo.Person buyerPerson
+                LEFT JOIN dbo.Person buyerPerson
                     ON b.PersonId = buyerPerson.PersonId
                 LEFT JOIN dbo.PersonEmail buyerEmail
                     ON buyerPerson.PersonId = buyerEmail.PersonId
@@ -74,6 +74,7 @@ namespace zuli_Repository
         {
             const string query = @"
                 SELECT
+                    pr.PassengerId,
                     CONCAT(
                         passengerPerson.FirstName,
                         ' ',
