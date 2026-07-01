@@ -208,7 +208,6 @@ namespace zuli_backend.Test
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
                     CarryOn = 1
-                    CarryOn = 1
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -276,7 +275,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CheckedBaggage = 5
+                    CheckedBaggage = 15
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -287,7 +286,7 @@ namespace zuli_backend.Test
         }
 
         [Test]
-        public async Task RegisterAllBaggage_CreatesMaxCarryOn()
+        public async Task RegisterAllBaggage_ClampsCarryOnToMax2()
         {
             var passengers = new List<PassengerTicketDTO>
             {
@@ -298,7 +297,7 @@ namespace zuli_backend.Test
                     SecondLastName = "Garcia",
                     BirthDate = "1990-01-15",
                     PassportCountry = "Costa Rica",
-                    CarryOn = 1
+                    CarryOn = 5
                 }
             };
             var passengerIds = new List<int> { 1 };
@@ -477,7 +476,7 @@ namespace zuli_backend.Test
                 res.BuyerId == 99 &&
                 res.TotalPayment == 750.50m &&
                 res.FlightClass == "Turista" &&
-                res.PaymentMethod == "crypto" &&
+                res.PaymentMethod == "Targeta" &&
                 res.ReservationOrigin == "Agent"
             )), Times.Once);
         }
