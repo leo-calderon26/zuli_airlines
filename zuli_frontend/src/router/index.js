@@ -28,6 +28,7 @@ import ConsultView from '../modules/landing/view/ConsultView.vue'
 import HelpView from '../modules/landing/view/HelpView.vue'
 import Login from '../modules/auth/view/Login.vue'
 import BuyTicketView from '../modules/buyTicket/view/BuyTicketView.vue'
+import AdditionalBaggageView from '../modules/additionalBaggage/view/AdditionalBaggageView.vue'
 
 import UnauthorizedAccess from "../modules/unauthorizedAccessPage/view/UnauthorizedAccess.vue";
 import UserList from "../modules/user/view/UserList.vue";
@@ -206,6 +207,12 @@ const router = createRouter({
             path: "/comprar-boleto",
             name: "buyTicket",
             component: BuyTicketView,
+            meta: {requiresAuth: false, adminRequired: false}
+        },
+        {
+            path: "/equipaje-adicional",
+            name: "additionalBaggage",
+            component: AdditionalBaggageView,
             meta: {requiresAuth: false, adminRequired: false}
         },
         {

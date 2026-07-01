@@ -55,13 +55,16 @@
       <div class="space-y-6 lg:mt-11">
         <div class="bg-white rounded-xl p-6 shadow-2xl">
           <h3 class="font-bold text-content text-lg mb-4 border-b border-border-xlight pb-3">Opciones de viaje</h3>
-          <button class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light">
+          <router-link
+            :to="{ name: 'additionalBaggage', query: { reservationCode: reservationData.reservationCode } }"
+            class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light"
+          >
             <span class="flex items-center gap-3">
               <svg class="w-5 h-5 text-primary group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
               Gestionar equipaje
             </span>
             <svg class="w-4 h-4 text-content-light group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-          </button>
+          </router-link>
         </div>
 
         <div class="bg-white rounded-xl p-6 shadow-2xl">

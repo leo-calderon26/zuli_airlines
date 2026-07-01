@@ -26,7 +26,8 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted } from 'vue';
+import { computed } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import { useReservationSearch } from '../composable/useReservationSearch';
 import ReservationSearchForm from '../components/ReservationSearchForm.vue';
 import ReservationResult from '../components/ReservationResult.vue';
@@ -43,7 +44,9 @@ const handleClear = () => {
   clear();
 };
 
-onUnmounted(() => {
-  clear();
+onBeforeRouteLeave((to) => {
+  if (to.name !== 'additionalBaggage') {
+    clear();
+  }
 });
 </script>
