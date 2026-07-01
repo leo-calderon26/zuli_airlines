@@ -9,6 +9,7 @@ namespace zuli_Business.Mappings
 {
     public class FlightReservationMappingConfig : IRegister
     {
+        private const Decimal BAGGAGEDEFAULTWEIGHT = 23.0m;
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<FlightRouteEntity, SummarizedFlightRouteDTO>()
@@ -38,7 +39,7 @@ namespace zuli_Business.Mappings
                     BaggageItems = Enumerable.Range(0, passenger.Checked)
                         .Select(_ => new BaggageItemDTO
                         {
-                            Weight = 23.0m,
+                            Weight = BAGGAGEDEFAULTWEIGHT,
                             Size = "Mediano",
                             Type = "Maleta"
                         })
