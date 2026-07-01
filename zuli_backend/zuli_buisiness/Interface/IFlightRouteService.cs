@@ -9,5 +9,6 @@ namespace zuli_Business.Interface
     {
         Task<BasicResponseDTO> CreateFlightRouter(FlightRouteDTO flightRouter);
         Task<FlightRoutePaginatedResponseDTO> GetFlightRoutesPaginated(int pageNumber, int pageSize);
+        Task<BasicResponseDTO> DeleteFlightRoute(int flightRouteId);
     }
 }

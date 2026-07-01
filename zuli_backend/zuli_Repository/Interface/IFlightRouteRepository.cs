@@ -10,5 +10,6 @@ namespace zuli_Repository.Interface
         Task<int> CreateFlightRouter(FlightRouteEntity flightRouter);
         Task<bool> AlreadyExistFlightRoute(FlightRouteEntity flightRoute);
         Task<(IEnumerable<FlightRouteEntity> flightRoutes, int totalCount)> GetFlightRoutesPaginated(int pageNumber, int pageSize);
+        Task<int> DeleteFlightRoute(int flightRouteId);
     }
 }

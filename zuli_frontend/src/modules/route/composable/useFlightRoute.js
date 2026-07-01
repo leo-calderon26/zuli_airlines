@@ -1,4 +1,4 @@
-import { getFlightRoutesPaginated } from "../service/routeService";
+import { getFlightRoutesPaginated,deleteFlightRoute as deleteFlightRouteRequest } from "../service/routeService";
 import { useFlightRouteStore } from "../store/flightRouteStore";
 
 export function useFlightRoute() {
@@ -22,11 +22,21 @@ export function useFlightRoute() {
     const selectRoute = (routeId) => {
         store.setSelectedRouteId(routeId);
     };
+    const deleteRoute = async flightRouteId => {
+        const response = await deleteFlightRouteRequest(flightRouteId);
 
+        await fetchRoutesPaginated(
+            store.pageNumber,
+            store.pageSize
+        );
+
+        return response;
+    };
     return {
         fetchRoutesPaginated,
         changePage,
         selectRoute,
+        deleteRoute,
         routes: store.routes,
         selectedRouteId: store.selectedRouteId,
         pageNumber: store.pageNumber,
