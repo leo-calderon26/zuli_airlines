@@ -50,7 +50,20 @@ const userService = {
 
         return data;
     },
+    async deleteUser(userId) {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
 
+        const data = await readResponseBody(response);
+
+        if (!response.ok) {
+            throw buildRequestError(response, data);
+        }
+
+        return data;
+    },
     async getUsers(filters) {
         const query = new URLSearchParams({
             searchType: filters.searchType,

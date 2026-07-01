@@ -22,31 +22,45 @@ export function useForm() {
     showSuccessModal.value = true
   }
 
+  function getFirstBackendError(data) {
+    const backendErrors = data?.errors
+
+    if (!backendErrors) {
+      return null
+    }
+
+    for (const messages of Object.values(backendErrors)) {
+      if (Array.isArray(messages) && messages.length > 0) {
+        return messages[0]
+      }
+
+      if (typeof messages === 'string' && messages.trim()) {
+        return messages
+      }
+    }
+
+    return null
+  }
+
   function onError(error, fallback) {
     const data = error?.response?.data || error?.data
-    const msg = data?.detail
+
+    const msg = getFirstBackendError(data)
       || data?.message
+      || data?.detail
       || error?.message
       || fallback
       || 'Ocurrió un error al procesar la solicitud'
+
     errorMessage.value = msg
     showErrorModal.value = true
-
-    const backendErrors = data?.errors
-    if (backendErrors) {
-      for (const [field, msgs] of Object.entries(backendErrors)) {
-        const fieldName = field.charAt(0).toLowerCase() + field.slice(1)
-        errors.fields[fieldName] = Array.isArray(msgs) ? msgs[0] : msgs
-      }
+  }
+    function resetModals() {
+      showErrorModal.value = false
+      showSuccessModal.value = false
+      errorMessage.value = ''
+      successMessage.value = ''
     }
-  }
-
-  function resetModals() {
-    showErrorModal.value = false
-    showSuccessModal.value = false
-    errorMessage.value = ''
-    successMessage.value = ''
-  }
 
   async function handleSubmit(fn, errorFallback) {
     if (isLoading.value) return
