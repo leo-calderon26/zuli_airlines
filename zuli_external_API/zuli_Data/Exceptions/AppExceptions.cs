@@ -45,4 +45,13 @@ namespace zuli_Data.Exceptions
         public ZuliUnauthorizedException(string msg, int errorId = -1)
        : base(msg, StatusCodes.Status401Unauthorized, "FORBIDDEN", errorId) { }
     }
+
+    public class ZuliBadRequestException : AppExceptions
+    {
+        public IReadOnlyDictionary<string, List<string>> Errors { get; }
+
+        public ZuliBadRequestException(string msg, Dictionary<string, List<string>>? errors = null, int errorId = -1)
+            : base(msg, StatusCodes.Status400BadRequest, "BAD_REQUEST", errorId)
+            => Errors = errors ?? new Dictionary<string, List<string>>();
+    }
 }

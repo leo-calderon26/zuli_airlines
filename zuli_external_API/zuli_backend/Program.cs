@@ -11,8 +11,7 @@ using zuli_Data;
 using zuli_external_API.Middleware;
 using zuli_Repository;
 using zuli_Repository.Interface;
-using Mapster;
-using MapsterMapper;
+using zuli_Business.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +47,7 @@ builder.Services.AddAuthorization().AddAuthentication(config =>
             ValidateAudience = false
         };
     });
-
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -70,6 +69,8 @@ TypeAdapterConfig<zuli_Data.Entities.RawFlightEntity, zuli_Business.DTO.BookedFl
     .Map(d => d.carryOnPrice, s => s.CarryOnPrice)
     .Map(d => d.checkedPrice, s => s.CheckedPrice);
 
+builder.Services.Configure<AirlineClientDTO>(
+    builder.Configuration.GetSection("AirlineClient"));
 
 // Registrar DapperContext para manejo de conexiones SQL
 builder.Services.AddScoped<DapperContext>();
@@ -79,7 +80,10 @@ builder.Services.AddScoped<IFlightDateGenerator, FlightDateGenerator>();
 builder.Services.AddScoped<IFlightPathFinder, FlightPathFinder>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 
-builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 var app = builder.Build();

@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace zuli_Business.DTO
+{
+    public class AirlineClientDTO
+    {
+        public string name { get; set; } = string.Empty;
+        public int airlineId { get; set; } = 0;
+        public string url { get; set; } = string.Empty;
+        public string token { get; set; } = string.Empty;
+    }
+}

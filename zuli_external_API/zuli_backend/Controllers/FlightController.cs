@@ -17,5 +17,9 @@ namespace zuli_backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookedFlightDTO>>> RetrieveAvailableFlights([FromQuery]RequestedFlightDTO requestedFlight)
             => Ok(await _service.RetrieveAvailableFlights(requestedFlight));
+
+        [HttpPost("order")]
+        public async Task<ActionResult<ReservationResponseDTO>> ReserveFlight([FromBody] ReservationRequestDTO reservationInfo)
+            => Ok(await _service.ReserveFlight(reservationInfo));
     }
 }

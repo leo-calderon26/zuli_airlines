@@ -1,25 +1,29 @@
+using Mapster;
+using MapsterMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
-using Mapster;
 using System;
 using System.Threading.Tasks;
 using zuli_Business;
 using zuli_Business.DTO;
+using zuli_Business.Interface;
 using zuli_Business.Mappings;
 using zuli_Business.Validation;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
-using zuli_Business.Interface;
-using MapsterMapper;
 using Assert = NUnit.Framework.Assert;
-using Microsoft.Extensions.Configuration;
 
 namespace zuli_backend.Tests
 {
     [TestFixture]
     public class APIServiceTests
     {
+        private Mock<IOptions<AirlineClientDTO>> _airlineClientMock;
+        private Mock<IHttpClientFactory> _httpClientFactoryMock;
+        private Mock<FlightValidator> _validatorMock;
         private Mock<IFlightRepository> _flightRepositoryMock;
         private Mock<IFlightDateGenerator> _dateGeneratorMock;
         private Mock<IFlightPathFinder> _pathFinderMock;
@@ -30,6 +34,9 @@ namespace zuli_backend.Tests
         [SetUp]
         public void SetUp()
         {
+            _airlineClientMock = new Mock<IOptions<AirlineClientDTO>>();
+            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            _validatorMock = new Mock<FlightValidator>();
             _flightRepositoryMock = new Mock<IFlightRepository>();
             _dateGeneratorMock = new Mock<IFlightDateGenerator>();
             _pathFinderMock = new Mock<IFlightPathFinder>();
@@ -39,7 +46,10 @@ namespace zuli_backend.Tests
                 _pathFinderMock.Object,
                 _flightRepositoryMock.Object,
                 _dateGeneratorMock.Object,
-                _mapperMock.Object);
+                _mapperMock.Object,
+                _httpClientFactoryMock.Object,
+                _airlineClientMock.Object
+                );
         }
 
         [Test]

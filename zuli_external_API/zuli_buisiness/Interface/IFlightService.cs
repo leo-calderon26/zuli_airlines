@@ -8,5 +8,6 @@ namespace zuli_Business.Interface
     public interface IFlightService
     {
         Task<IEnumerable<BookedFlightDTO>> RetrieveAvailableFlights(RequestedFlightDTO requestedFlight);
+        Task<ReservationResponseDTO> ReserveFlight(ReservationRequestDTO reservationInfo);
     }
 }
