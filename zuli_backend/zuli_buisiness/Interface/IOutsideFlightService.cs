@@ -8,5 +8,6 @@ namespace zuli_Business.Interface
     public interface IOutsideFlightService
     {
         Task FindOutsideFlights(OutsideFlightRequestDTO outsideFlight);
+        Task UpdateOutsideFlightsStatus();
     }
 }

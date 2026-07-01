@@ -128,7 +128,7 @@ namespace zuli_Business
             var response = new FlightPaginatedResponseDTO { CurrentPage = request.Page };
 
             var departureRoutes = await FindConfiguredRoutes(request.Origin, request.Destination, request.Date, request);
-            
+
             response.TotalRecordsDeparture = departureRoutes.TotalRecords;
             response.TotalPagesDeparture = departureRoutes.TotalPages;
             response.DepartureFlights = departureRoutes.Flights;
@@ -141,6 +141,8 @@ namespace zuli_Business
                 response.TotalPagesReturn = returnRoutes.TotalPages;
                 response.ReturnFlights = returnRoutes.Flights;
             }
+
+            await _outsideFlightService.UpdateOutsideFlightsStatus();
 
             return response;
         }

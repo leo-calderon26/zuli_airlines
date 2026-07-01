@@ -62,7 +62,7 @@ namespace zuli_Business
                                 flight.AirlineId = externalAirline.airlineId;
                                 flight.Frequency = outsideFlight.EarliestDeparture.ToDayOfWeekMask();
                                 TimeSpan duracion = TimeSpan.Parse(flight.Duration);
-                                flight.DurationOnMinutes = (int)duracion.TotalMinutes;
+                                flight.DurationOnSeconds = (int)duracion.TotalSeconds;
                             }
 
                             outsideFlights.AddRange(apiResponse.OutsideFlights);
@@ -75,6 +75,10 @@ namespace zuli_Business
                 }
             }
             await CreateOutsideFlights(outsideFlights);
+        }
+
+        public async Task UpdateOutsideFlightsStatus() {
+            await _repository.UpdateOutsideFlightsStatus();
         }
 
         private async Task CreateOutsideFlights(List<OutsideFlightDTO> outsideFlights)
