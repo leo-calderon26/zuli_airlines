@@ -21,6 +21,7 @@ namespace zuli_backend.Tests
     [TestFixture]
     public class FlightServiceTests
     {
+        private Mock<IOutsideFlightService> _outsideFlightService;
         private Mock<IFlightRepository> _flightRepoMock;
         private Mock<IUserRepository> _userRepoMock;
         private Mock<IServiceRepository> _serviceRepoMock;
@@ -35,6 +36,7 @@ namespace zuli_backend.Tests
         [SetUp]
         public void SetUp()
         {
+            _outsideFlightService = new Mock<IOutsideFlightService>();
             _flightRepoMock = new Mock<IFlightRepository>();
             _userRepoMock = new Mock<IUserRepository>();
             _serviceRepoMock = new Mock<IServiceRepository>();
@@ -45,6 +47,7 @@ namespace zuli_backend.Tests
             _availabilityValidatorMock = new Mock<IValidator<FlightAvailabilityRequestDTO>>();
 
             _flightService = new FlightService(
+                _outsideFlightService.Object,
                 _flightRepoMock.Object,
                 _userRepoMock.Object,
                 _serviceRepoMock.Object,
