@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Transactions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Mapster;
@@ -54,29 +55,40 @@ namespace zuli_Business
             string userRole = request.UserRole.Trim();
 
 
-            await ValidateUniqueUserAsync(nationalId, businessEmail);
+            var user = request.Adapt<AppUser>();
 
             string activationToken = GenerateSecureToken();
             string activationTokenHash = HashToken(activationToken);
 
-            var user = request.Adapt<AppUser>();
-            user.UserId = Guid.NewGuid();
-            user.ManagedByAdminId = adminUserId;
-            user.ActivationTokenHash = activationTokenHash;
+            var transactionOptions = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted
+            };
 
-            if (string.IsNullOrWhiteSpace(user.BusinessId))
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
             {
-                int num = RandomNumberGenerator.GetInt32(10000000, 100000000);
-                user.BusinessId = num.ToString();
-            }
+                try
+                {
+                    await ValidateUniqueUserAsync(nationalId, businessEmail);
 
-            try
-            {
-                await _userRepository.CreatePendingUserAsync(user);
-            }
-            catch (Exception)
-            {
-                throw;
+                    user.UserId = Guid.NewGuid();
+                    user.ManagedByAdminId = adminUserId;
+                    user.ActivationTokenHash = activationTokenHash;
+
+                    if (string.IsNullOrWhiteSpace(user.BusinessId))
+                    {
+                        int num = RandomNumberGenerator.GetInt32(10000000, 100000000);
+                        user.BusinessId = num.ToString();
+                    }
+
+                    await _userRepository.CreatePendingUserAsync(user);
+
+                    scope.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
             }
 
             string fullName = $"{user.FirstName} {user.FirstLastName} {user.SecondLastName}";
@@ -104,25 +116,42 @@ namespace zuli_Business
 
             string tokenHash = HashToken(request.Token);
 
-            AppUser? user = await _userRepository.GetByActivationTokenHashAsync(tokenHash);
-
-            if (user == null)
+            var transactionOptions = new TransactionOptions
             {
-                ThrowValidationError("token", "El enlace de activación no es válido.");
-            }
+                IsolationLevel = IsolationLevel.ReadCommitted
+            };
 
-            if (user!.IsActive)
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
             {
-                ThrowValidationError("token", "La cuenta ya fue activada.");
+                try
+                {
+                    AppUser? user = await _userRepository.GetByActivationTokenHashAsync(tokenHash);
+
+                    if (user == null)
+                    {
+                        ThrowValidationError("token", "El enlace de activación no es válido.");
+                    }
+
+                    if (user!.IsActive)
+                    {
+                        ThrowValidationError("token", "La cuenta ya fue activada.");
+                    }
+
+                    user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+                    user.IsActive = true;
+                    user.FailedLoginAttempts = 0;
+                    user.LockoutEnd = null;
+                    user.ActivationTokenHash = null;
+
+                    await _userRepository.ActivateUserAsync(user);
+
+                    scope.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
             }
-
-            user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
-            user.IsActive = true;
-            user.FailedLoginAttempts = 0;
-            user.LockoutEnd = null;
-            user.ActivationTokenHash = null;
-
-            await _userRepository.ActivateUserAsync(user);
 
             return new BasicResponseDTO
             {
@@ -136,32 +165,49 @@ namespace zuli_Business
             var validationResult = await _registerUserValidator.ValidateAsync(request);
             validationResult.ThrowIfInvalid();
 
-            AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
-
-            if (existingUser == null)
+            var transactionOptions = new TransactionOptions
             {
-                throw new ZuliNotFoundException($"No existe un usuario con id {userId}.");
-            }
+                IsolationLevel = IsolationLevel.ReadCommitted
+            };
 
-            string businessEmail = request.BusinessEmail.Trim().ToLower();
-            AppUser? userByEmail = await _userRepository.GetByBusinessEmailAsync(businessEmail);
-
-            if (userByEmail != null && userByEmail.UserId != userId)
+            using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
             {
-                ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
+                try
+                {
+                    AppUser? existingUser = await _userRepository.GetByUserIdAsync(userId);
+
+                    if (existingUser == null)
+                    {
+                        throw new ZuliNotFoundException($"No existe un usuario con id {userId}.");
+                    }
+
+                    string businessEmail = request.BusinessEmail.Trim().ToLower();
+                    AppUser? userByEmail = await _userRepository.GetByBusinessEmailAsync(businessEmail);
+
+                    if (userByEmail != null && userByEmail.UserId != userId)
+                    {
+                        ThrowValidationError("businessEmail", "Ya existe un usuario con ese correo institucional.");
+                    }
+
+                    string nationalId = request.NationalId.Trim();
+                    AppUser? userByNationalId = await _userRepository.GetByNationalIdAsync(nationalId);
+
+                    if (userByNationalId != null && userByNationalId.UserId != userId)
+                    {
+                        ThrowValidationError("nationalId", "Ya existe una persona registrada con esa cédula.");
+                    }
+
+                    request.Adapt(existingUser, TypeAdapterConfig.GlobalSettings);
+
+                    await _userRepository.UpdateUserAsync(existingUser);
+
+                    scope.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
             }
-
-            string nationalId = request.NationalId.Trim();
-            AppUser? userByNationalId = await _userRepository.GetByNationalIdAsync(nationalId);
-
-            if (userByNationalId != null && userByNationalId.UserId != userId)
-            {
-                ThrowValidationError("nationalId", "Ya existe una persona registrada con esa cédula.");
-            }
-
-            request.Adapt(existingUser, TypeAdapterConfig.GlobalSettings);
-
-            await _userRepository.UpdateUserAsync(existingUser);
 
             return new BasicResponseDTO
             {
