@@ -58,6 +58,14 @@ namespace zuli_Business
                 );
             }
 
+            foreach (var flight in flights)
+            {
+                if (flight.ArrivalDateTime < flight.DepartureDateTime)
+                {
+                    flight.ArrivalDateTime = flight.ArrivalDateTime.AddDays(1);
+                }
+            }
+
             var firstFlight = flights.First();
 
             var daysRemaining =
