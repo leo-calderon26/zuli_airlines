@@ -28,6 +28,14 @@ services:
       ExternalAirlines__0__airlineId: ${ExternalAirlines__0__airlineId}
       ExternalAirlines__0__url: ${ExternalAirlines__0__url}
       ExternalAirlines__0__token: ${ExternalAirlines__0__token}
+      ExternalAirlines__1__name: ${ExternalAirlines__1__name}
+      ExternalAirlines__1__airlineId: ${ExternalAirlines__1__airlineId}
+      ExternalAirlines__1__url: ${ExternalAirlines__1__url}
+      ExternalAirlines__1__token: ${ExternalAirlines__1__token}
+      ExternalAirlines__2__name: ${ExternalAirlines__2__name}
+      ExternalAirlines__2__airlineId: ${ExternalAirlines__2__airlineId}
+      ExternalAirlines__2__url: ${ExternalAirlines__2__url}
+      ExternalAirlines__2__token: ${ExternalAirlines__2__token}
 
     networks:
       - zuli-network
