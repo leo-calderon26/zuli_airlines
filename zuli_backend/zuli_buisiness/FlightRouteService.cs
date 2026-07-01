@@ -92,5 +92,31 @@ namespace zuli_Business
                 Data = flightRouteDtos
             };
         }
+        public async Task<BasicResponseDTO> DeleteFlightRoute(int flightRouteId)
+        {
+            var deletionResult = await _flightRouteRepository.DeleteFlightRoute(flightRouteId);
+
+            switch (deletionResult)
+            {
+                case 1:
+                    return new BasicResponseDTO
+                    {
+                        StatusCode = 200,
+                        Message = "La ruta se eliminó correctamente."
+                    };
+
+                case 2:
+                    return new BasicResponseDTO
+                    {
+                        StatusCode = 200,
+                        Message = "La ruta tenía compras o reservas asociadas, " +
+                                "por lo que se deshabilitó conservando su historial."
+                    };
+
+                default:
+                    throw new ZuliNotFoundException(
+                        $"La ruta con ID {flightRouteId} no existe o ya fue eliminada.");
+            }
+        }
     }
 }

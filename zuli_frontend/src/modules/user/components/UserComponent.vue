@@ -4,13 +4,29 @@ import { useRouter } from 'vue-router';
 import { useUser } from '../composable/useUser';
 import { useUserStore } from '../store/userStore';
 import AppTable from '../../../shared/AppTable.vue';
+import AlertModal from '../../../shared/AlertModal.vue';
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import { useForm } from '../../../shared/useForm.js';
 
 const router = useRouter();
 const userStore = useUserStore();
-const { fetchUsersPaginated } = useUser();
+const { fetchUsersPaginated, deleteUser } = useUser();
 const canCreateUsers = sessionStorage.getItem('userRole') === 'Administrator';
 const canEditUsers = Boolean(sessionStorage.getItem('userRole'));
+const canDeleteUsers = sessionStorage.getItem('userRole') === 'Administrator';
 
+const {
+    showSuccessModal,
+    successMessage,
+    showErrorModal,
+    errorMessage,
+    onSuccess,
+    handleSubmit
+} = useForm();
+
+const showDeletionModal = ref(false);
+const userToDelete = ref(null);
 const search = ref('');
 const searchType = ref('name');
 let searchTimeoutId = null;
@@ -55,7 +71,66 @@ function goToUserEdit(user) {
         state: { user: plainUser }
     });
 }
+function chooseUserToDelete(user) {
+    userToDelete.value = user;
+    showDeletionModal.value = true;
+}
 
+function getUserFullName(user) {
+    if (!user) {
+        return '';
+    }
+
+    return [
+        user.firstName,
+        user.firstLastName,
+        user.secondLastName
+    ]
+        .filter(Boolean)
+        .join(' ');
+}
+
+async function refreshUsersAfterDeletion() {
+    const currentPage = userStore.pageNumber;
+
+    await fetchUsersPaginated(
+        currentPage,
+        userStore.pageSize,
+        search.value,
+        searchType.value
+    );
+
+    if (userStore.users.length === 0 && currentPage > 1) {
+        await fetchUsersPaginated(
+            currentPage - 1,
+            userStore.pageSize,
+            search.value,
+            searchType.value
+        );
+    }
+}
+
+async function processUserDeletion() {
+    const selectedUser = userToDelete.value;
+
+    if (!selectedUser) {
+        return;
+    }
+
+    showDeletionModal.value = false;
+
+    await handleSubmit(async () => {
+        const response = await deleteUser(selectedUser.userId);
+
+        await refreshUsersAfterDeletion();
+
+        onSuccess(
+            response.message || 'El usuario se eliminó correctamente.'
+        );
+    }, 'No se pudo eliminar el usuario.');
+
+    userToDelete.value = null;
+}
 function formatRole(userRole) {
     if (userRole === 'Administrator') return 'Administrador';
     if (userRole === 'Operator') return 'Operador';
@@ -115,6 +190,12 @@ function formatRole(userRole) {
         <th scope="col" class="px-8 py-4 font-medium">Correo</th>
         <th scope="col" class="px-8 py-4 font-medium">Rol</th>
         <th v-if="canEditUsers" scope="col" class="px-8 py-4 font-medium">Editar</th>
+        <th
+            v-if="canDeleteUsers"
+            scope="col"
+            class="px-4 py-4 font-medium"
+        >
+        </th>
     </template>
 
     <tr v-for="user in userStore.users" :key="user.userId" class="border-b border-gray-200 bg-white hover:bg-gray-50">
@@ -136,9 +217,48 @@ function formatRole(userRole) {
                 class="font-medium text-gold hover:underline"
                 @click="goToUserEdit(user)"
             >
-                Edit
+                Editar
+            </button>
+        </td>
+        <td
+            v-if="canDeleteUsers"
+            class="px-4 py-5"
+        >
+            <button
+                type="button"
+                class="rounded-md bg-primary px-2 py-2 text-sm font-semibold text-white hover:bg-select"
+                :aria-label="`Eliminar usuario ${getUserFullName(user)}`"
+                @click="chooseUserToDelete(user)"
+            >
+                <img
+                    src="../../../assets/TrashCan.png"
+                    alt=""
+                    aria-hidden="true"
+                    class="h-6 w-6 shrink-0"
+                />
             </button>
         </td>
     </tr>
 </AppTable>
+<SuccessModal
+    v-model="showSuccessModal"
+    :message="successMessage"
+/>
+
+<ErrorModal
+    v-model="showErrorModal"
+    :message="errorMessage"
+/>
+
+<AlertModal
+    v-model="showDeletionModal"
+    title="Eliminar usuario"
+    :message="
+        userToDelete
+            ? `¿Está seguro de que desea eliminar a ${getUserFullName(userToDelete)}?\nEsta acción no podrá deshacerse.`
+            : ''
+    "
+    buttonText="Eliminar"
+    @confirm="processUserDeletion"
+/>
 </template>

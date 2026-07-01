@@ -10,6 +10,7 @@ namespace zuli_Business.Utils
     // Adapted from: https://www.geeksforgeeks.org/dsa/find-paths-given-source-destination/
     public class FlightPathFinder : IFlightPathFinder
     {
+        private const string MAIN_AIRLINE = "zuliAirline";
         private const int MIN_LAYOVER_HOURS = 1;
         private const int MAX_LAYOVER_HOURS = 12;
         private const int EXTRA_LAYOVER_OFFSET = 1;
@@ -35,7 +36,8 @@ namespace zuli_Business.Utils
             return pool
                 .Where(flight => flight.Origin == origin && 
                                  flight.Destination == destination && 
-                                 flight.DepartureTime.Date == targetDate.Date)
+                                 flight.DepartureTime.Date == targetDate.Date &&
+                                 flight.AirlineName == MAIN_AIRLINE)
                 .Select(flight => new List<RawFlightEntity> { flight })
                 .ToList();
         }
@@ -47,7 +49,8 @@ namespace zuli_Business.Utils
 
             IEnumerable<RawFlightEntity> startingFlights = pool.Where(flight =>
                 flight.Origin == parameters.Origin &&
-                flight.DepartureTime.Date == parameters.TargetDate.Date);
+                flight.DepartureTime.Date == parameters.TargetDate.Date &&
+                flight.AirlineName == MAIN_AIRLINE);
 
             foreach (RawFlightEntity firstFlight in startingFlights)
             {

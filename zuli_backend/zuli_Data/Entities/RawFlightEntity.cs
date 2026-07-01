@@ -20,5 +20,6 @@ namespace zuli_Data.Entities
         public decimal? CheckedPrice { get; set; }
         public decimal MaxWeightPerBag { get; set; }
         public decimal CheckedBagMultiplier { get; set; }
+        public string AirlineName { get; set; }
     }
 }

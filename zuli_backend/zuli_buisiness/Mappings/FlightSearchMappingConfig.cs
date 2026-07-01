@@ -49,7 +49,8 @@ namespace zuli_Business.Mappings
                         DepartureDateText = current.DepartureTime.ToString("yyyy-MM-dd", culture),
                         CheckedPrice = current.CheckedPrice,
                         CarryOnPrice = current.CarryOnPrice,
-                        CheckedBagMultiplier = current.CheckedBagMultiplier
+                        CheckedBagMultiplier = current.CheckedBagMultiplier,
+                        AirlineName = current.AirlineName
                     }).ToList()
                 });
         }

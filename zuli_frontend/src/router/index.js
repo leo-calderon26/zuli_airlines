@@ -37,6 +37,7 @@ import UserEdit from "../modules/user/view/UserEdit.vue";
 import UserActivation from "../modules/user/view/UserActivation.vue";
 
 import PurchaseConfirmationView from "../modules/purchaseConfirmation/view/PurchaseConfirmationView.vue";
+import CancelReservationView from "../modules/landing/view/CancelReservationView.vue";
 
 
 const router = createRouter({
@@ -219,6 +220,12 @@ const router = createRouter({
             path: "/purchase-confirmation/:reservationCode",
             name: "purchaseConfirmation",
             component: PurchaseConfirmationView,
+            meta: { requiresAuth: false, adminRequired: false }
+        },
+        {
+            path: "/cancelar-reserva",
+            name: "cancelReservation",
+            component: CancelReservationView,
             meta: { requiresAuth: false, adminRequired: false }
         }
     ]

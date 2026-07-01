@@ -41,3 +41,18 @@ export const searchAirportSuggestionsByName = async (query) => {
     throw error;
   }
 };
+export const deleteFlightRoute = async flightRouteId => {
+  try {
+    const response = await axios.delete(
+      `${ROUTE_API_URL}/DeleteFlightRoute/${flightRouteId}`,
+      {
+        withCredentials: true
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar la ruta:', error);
+    throw error;
+  }
+};
