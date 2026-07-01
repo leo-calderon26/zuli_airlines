@@ -125,6 +125,23 @@ namespace zuli_Business
             return new BasicResponseDTO { StatusCode = 200, Message = "Aeropuerto actualizado correctamente" };
         }
 
+        public async Task<BasicResponseDTO> DeleteAirport(string airportCode)
+        {
+            var airport = await _repository.GetByCodeAsync(airportCode);
+            if (airport == null)
+            {
+                throw new ZuliNotFoundException($"El aeropuerto con el código {airportCode} no existe.");
+            }
+
+            await _repository.DeleteAirport(airportCode);
+
+            return new BasicResponseDTO
+            {
+                StatusCode = 200,
+                Message = "Se eliminó el aeropuerto correctamente"
+            };
+        }
+
 
     }
 }

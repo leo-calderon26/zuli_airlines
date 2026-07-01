@@ -140,5 +140,17 @@ namespace zuli_Repository
             });
         }
 
+        public async Task DeleteAirport(string airportCode)
+        {
+            using var connection = _context.CreateConnection();
+
+            var sql = "dbo.sp_HandleAirportDeletion";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                selectedAirportToDelete = airportCode
+            }, commandType: System.Data.CommandType.StoredProcedure);
+        }
+
     }
 }

@@ -1,19 +1,45 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAirport } from '../composable/useAirport';
 import { useAirportStore } from '../store/airportStore';
 import AppTable from '../../../shared/AppTable.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue'; 
+import ErrorModal from '../../../shared/ErrorModal.vue';
+import AlertModal from '../../../shared/AlertModal.vue';
+import { useForm } from '../../../shared/useForm.js';
 
 const airportStore = useAirportStore();
-const { fetchAirportsPaginated, changePage } = useAirport();
+const { fetchAirportsPaginated, changePage,deleteAirport: apiDeleteAirport } = useAirport();
+const { showSuccessModal, successMessage, showErrorModal, errorMessage, handleSubmit, onSuccess } = useForm();
+const showDeletionModal = ref(false);
+const airportToDelete = ref(null);
 
 const cacheAirportForEdit = (airport) => {
     sessionStorage.setItem('airportEditData', JSON.stringify(airport));
 };
 
+const chooseAirportToDelete = (airportCode) => {
+    airportToDelete.value = airportCode;
+    showDeletionModal.value = true;
+};
+
+const processAirportDeletion = async (code) => {
+    showDeletionModal.value = false;
+
+
+    await handleSubmit(async () => {
+        await apiDeleteAirport(code);
+        
+        onSuccess('El proceso de eliminación o deshabilitación del aeropuerto se ejecutó correctamente.');
+        
+        await fetchAirportsPaginated(airportStore.pageNumber, airportStore.pageSize);
+    }, 'Ocurrió un error al intentar eliminar el aeropuerto.');
+};
+
 onMounted(async () => {
     await fetchAirportsPaginated(1, 10);
 })
+
 </script>
 
 <template>
@@ -73,6 +99,26 @@ onMounted(async () => {
                 Editar
             </router-link>
         </td>
+
+        <td class="px-4 py-5">
+            <button
+                type="button"
+                class="rounded-md bg-primary px-2 py-2 text-sm font-semibold text-white hover:bg-select"
+                @click="chooseAirportToDelete(airport.airportCode)"
+            >
+                <img src="../../../assets/TrashCan.png" alt="Trash Can Icon" class="h-6 w-6 shrink-0" />
+            </button>
+        </td>
     </tr>
 </AppTable>
+<SuccessModal v-model="showSuccessModal" :message="successMessage" />
+<ErrorModal v-model="showErrorModal" :message="errorMessage" />
+
+<AlertModal
+    v-model="showDeletionModal"
+    title="Eliminar Aeropuerto"
+    :message="'¿Está seguro de querer eliminar el aeropuerto seleccionado?\nEsta acción deshabilitará sus rutas comerciales activas o lo eliminará permanentemente del sistema.'"
+    buttonText="Eliminar"
+    @confirm="processAirportDeletion(airportToDelete)"
+/>
 </template>
