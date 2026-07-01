@@ -94,7 +94,6 @@ namespace zuli_Business
         }
         public async Task<BasicResponseDTO> DeleteFlightRoute(int flightRouteId)
         {
-            // 1 = HardDeleted, 2 = SoftDeleted, 4 = NotFound
             var deletionResult = await _flightRouteRepository.DeleteFlightRoute(flightRouteId);
 
             switch (deletionResult)
@@ -114,7 +113,7 @@ namespace zuli_Business
                                 "por lo que se deshabilitó conservando su historial."
                     };
 
-                default: // 4 = NotFound (no existe o ya fue eliminada)
+                default:
                     throw new ZuliNotFoundException(
                         $"La ruta con ID {flightRouteId} no existe o ya fue eliminada.");
             }
