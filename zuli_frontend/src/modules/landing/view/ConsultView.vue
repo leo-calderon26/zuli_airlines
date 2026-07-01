@@ -18,8 +18,10 @@
       <ReservationResult
         v-else
         :reservation-data="store.reservationData"
+        :is-downloading="store.isDownloading"
         @clear="handleClear"
         @request-cancel="onRequestCancel"
+        @request-itinerary="handleDownloadItinerary"
       />
 
     </main>
@@ -57,7 +59,7 @@ import AlertModal from '../../../shared/AlertModal.vue';
 import SuccessModal from '../../../shared/SuccessModal.vue';
 import { requestCancellation } from '../service/reservationCancellationService';
 
-const { search, clear, store } = useReservationSearch();
+const { search, clear, downloadItinerary, store } = useReservationSearch();
 
 const hasResults = computed(() => store.reservationData !== null);
 
@@ -78,6 +80,13 @@ const handleClear = () => {
   clear();
 };
 
+const handleDownloadItinerary = async () => {
+  const reservationCode = store.reservationData?.reservationCode;
+  const lastName = store.lastSearchedName;
+  if (reservationCode && lastName) {
+    await downloadItinerary(reservationCode, lastName);
+  }
+};
 
 const onRequestCancel = () => {
   showCancelConfirmModal.value = true;

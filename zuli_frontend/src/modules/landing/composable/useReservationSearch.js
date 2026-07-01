@@ -7,6 +7,10 @@ export function useReservationSearch() {
         await store.performSearch(reservationCode, lastName);
     };
 
+    const downloadItinerary = async (reservationCode, lastName) => {
+        await store.downloadItinerary(reservationCode, lastName);
+    };
+
     const clear = () => {
         store.clearSearch();
     };
@@ -14,6 +18,7 @@ export function useReservationSearch() {
     return {
         search,
         clear,
+        downloadItinerary,
         store
     };
 }
