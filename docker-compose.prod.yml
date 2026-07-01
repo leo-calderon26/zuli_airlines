@@ -24,6 +24,35 @@ services:
       EmailSettings__FromEmail: ${EmailSettings__FromEmail}
       EmailSettings__FromName: ${EmailSettings__FromName}
 
+      ExternalAirlines__0__name: ${ExternalAirlines__0__name}
+      ExternalAirlines__0__airlineId: ${ExternalAirlines__0__airlineId}
+      ExternalAirlines__0__url: ${ExternalAirlines__0__url}
+      ExternalAirlines__0__token: ${ExternalAirlines__0__token}
+
+    networks:
+      - zuli-network
+
+  external-api:
+    image: ${EXTERNAL_API_IMAGE}
+    pull_policy: always
+    restart: unless-stopped
+
+    expose:
+      - "7064"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:7064
+
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      settings__secretKey: ${settings__secretKey}
+      settings__apiKey: ${ExternalApi__ApiKey}
+
+      AirlineClient__name: ${AirlineClient__name}
+      AirlineClient__airlineId: ${AirlineClient__airlineId}
+      AirlineClient__url: ${AirlineClient__url}
+      AirlineClient__token: ${AirlineClient__token}
+
     networks:
       - zuli-network
 

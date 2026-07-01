@@ -47,7 +47,7 @@ namespace zuli_Business
                 {
                     var client = _httpClientFactory.CreateClient();
                     UriBuilder builder = new UriBuilder(externalAirline.url);
-                    builder.Query = $"destination={outsideFlight.Destination}&earliestdeparture={outsideFlight.EarliestDeparture.ToString("yyyy-MM-ddTHH:mm")}&latestdeparture={outsideFlight.LatestDeparture.ToString("yyyy-MM-ddTHH:mm")}&quantityOfPassengers={outsideFlight.QuantityOfPassengers}&ApiKey={externalAirline.token}";
+                    builder.Query = $"destination={outsideFlight.Destination}&earliestdeparture={outsideFlight.EarliestDeparture.ToString("yyyy-MM-ddTHH:mm")}&latestdeparture={outsideFlight.LatestDeparture.ToString("yyyy-MM-ddTHH:mm")}&quantityOfPassengers={outsideFlight.QuantityOfPassengers}&ApiToken={externalAirline.token}";
                     var response = await client.GetAsync(builder.Uri);
                     if (response.IsSuccessStatusCode)
                     {

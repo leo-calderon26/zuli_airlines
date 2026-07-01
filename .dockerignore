@@ -29,7 +29,15 @@ zuli_frontend/dist
 zuli_database/
 
 # External API
-zuli_external_API/
+zuli_external_API/**/bin
+zuli_external_API/**/obj
+zuli_external_API/**/.vs
+zuli_external_API/**/*.user
+zuli_external_API/**/*.userosscache
+zuli_external_API/**/*.suo
+zuli_external_API/**/*.rsuser
+zuli_external_API/**/TestResults
+zuli_external_API/**/coverage
 
 # Others
 *.sln.docstates

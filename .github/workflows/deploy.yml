@@ -3,13 +3,14 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - deploymente/v1
+      - deployment-external
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_BACKEND: ghcr.io/${{ github.repository }}/zuli-backend
   IMAGE_FRONTEND: ghcr.io/${{ github.repository }}/zuli-frontend
+  IMAGE_EXTERNAL_API: ghcr.io/${{ github.repository }}/zuli-external-api
 
 jobs:
   build-and-push:
@@ -53,6 +54,18 @@ jobs:
           tags: |
             ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
             ${{ env.IMAGE_FRONTEND }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push external API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: zuli_external_API/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_EXTERNAL_API }}:${{ github.sha }}
+            ${{ env.IMAGE_EXTERNAL_API }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
