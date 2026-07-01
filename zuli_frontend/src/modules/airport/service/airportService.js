@@ -43,3 +43,15 @@ export const updateAirport = async (code, airportData) => {
     const response = await axios.put(`${API_URL}/${code}`, airportData, { withCredentials: true });
   return response.data;
 };
+
+export const deleteAirport = async (code) => {
+    try {
+        const response = await axios.delete(`${API_URL}/DeleteAirport/${code}`, {
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error al eliminar aeropuerto:", error);
+        throw error;
+    }
+};
