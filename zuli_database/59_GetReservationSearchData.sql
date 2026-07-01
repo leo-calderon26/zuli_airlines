@@ -1,5 +1,3 @@
-USE ZuliAirlines;
-
 CREATE OR ALTER PROCEDURE sp_GetReservationSearchData
     @ReservationCode NVARCHAR(50),
     @LastNameSearch NVARCHAR(100)
@@ -23,7 +21,9 @@ BEGIN
         r.FlightClass,
         al.AirlineName AS Airline,
         CONCAT('ZL ', fr.FlightRouteId) AS FlightNumber,
-        ac.Model AS AircraftModel
+        ac.Model AS AircraftModel,
+        r.ReservationStatusId,
+        pe.Email AS BuyerEmail
     FROM Reservation r
     INNER JOIN BoardingPass bp ON r.ReservationCode = bp.ReservationCode
     INNER JOIN Flight f ON bp.FlightId = f.Id
@@ -32,13 +32,16 @@ BEGIN
     INNER JOIN Airport aDest ON fr.ArrivalAirport = aDest.AirportCode
     INNER JOIN Airline al ON fr.AirlineId = al.AirlineId
     INNER JOIN Aircraft ac ON fr.AircraftId = ac.AircraftId
+    INNER JOIN Buyer b ON r.BuyerId = b.BuyerId
+    INNER JOIN Person bp_person ON b.PersonId = bp_person.PersonId
+    LEFT JOIN PersonEmail pe ON bp_person.PersonId = pe.PersonId
     WHERE r.ReservationCode = @ReservationCode 
     AND EXISTS (
         SELECT 1 
         FROM Person p
-        LEFT JOIN Buyer b ON p.PersonId = b.PersonId
+        LEFT JOIN Buyer b2 ON p.PersonId = b2.PersonId
         LEFT JOIN PassengerReservation pr ON p.PersonId = pr.PassengerId
-        WHERE (b.BuyerId = r.BuyerId OR pr.ReservationId = r.ReservationId)
+        WHERE (b2.BuyerId = r.BuyerId OR pr.ReservationId = r.ReservationId)
         AND (
             LOWER(p.FirstLastName) LIKE @LastNameSearch OR 
             LOWER(p.SecondLastName) LIKE @LastNameSearch OR 
@@ -50,10 +53,14 @@ BEGIN
     SELECT 
         p.FirstName, 
         p.FirstLastName, 
-        p.SecondLastName
+        p.SecondLastName,
+        ISNULL(SUM(CASE WHEN b.Type = 'Maleta' THEN 1 ELSE 0 END), 0) AS CheckedBaggageQuantity,
+        ISNULL(SUM(CASE WHEN b.Type = 'Mano' THEN 1 ELSE 0 END), 0) AS CarryOnQuantity
     FROM dbo.PassengerReservation pr
     INNER JOIN dbo.Person p ON pr.PassengerId = p.PersonId
     INNER JOIN dbo.Reservation r ON pr.ReservationId = r.ReservationId
-    WHERE r.ReservationCode = @ReservationCode;
+    LEFT JOIN dbo.Baggage b ON pr.PassengerId = b.PassengerId AND r.ReservationId = b.ReservationId
+    WHERE r.ReservationCode = @ReservationCode
+    GROUP BY p.FirstName, p.FirstLastName, p.SecondLastName;
 
 END;
