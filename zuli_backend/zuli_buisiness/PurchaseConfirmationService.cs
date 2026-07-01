@@ -31,7 +31,8 @@ namespace zuli_Business
 
         public async Task<PurchaseConfirmationPageDTO> GetConfirmationPageAsync(string reservationCode)
         {
-            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationCode);
+            var normalizedReservationCode = reservationCode.Trim().ToUpperInvariant();
+            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(normalizedReservationCode);
 
             if (confirmationEntity == null)
             {
@@ -45,7 +46,8 @@ namespace zuli_Business
 
         public async Task<PurchaseConfirmationPageDTO> CompleteConfirmationAsync(string reservationCode)
         {
-            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(reservationCode);
+            var normalizedReservationCode = reservationCode.Trim().ToUpperInvariant();
+            var confirmationEntity = await _purchaseConfirmationRepository.GetPurchaseConfirmationAsync(normalizedReservationCode);
 
             if (confirmationEntity == null)
             {

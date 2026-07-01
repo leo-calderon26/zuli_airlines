@@ -5,5 +5,6 @@ namespace zuli_Repository.Interface
     public interface IBaggageRepository
     {
         Task CreateBaggageBulk(List<BaggageEntity> baggages);
+        Task AddAdditionalBaggageTransactional(string reservationCode, List<BaggageEntity> baggages);
     }
 }
