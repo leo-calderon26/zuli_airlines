@@ -17,6 +17,8 @@ namespace zuli_Business
 
         public async Task<List<Guid>> ResolveFlightIds(TicketPurchaseRequestDTO request)
         {
+            await ValidateFlightAvailability(request);
+
             var flightIds = new List<Guid>();
 
             foreach (var flightRoute in request.FlightRoutes)
@@ -67,6 +69,36 @@ namespace zuli_Business
                 throw new ZuliNotFoundException("Vuelo no encontrado");
             }
             return flightList;
+        }
+
+        public async Task ValidateFlightAvailability(TicketPurchaseRequestDTO request)
+        {
+            var requestedSeats = request.Passengers.Count;
+
+            foreach (var flightRoute in request.FlightRoutes)
+            {
+                if (!DateTime.TryParse(flightRoute.DepartureDate, out var departureDate))
+                {
+                    throw new ZuliBadRequestException(
+                        "flightRoutes",
+                        "La fecha de salida del vuelo no tiene un formato valido."
+                    );
+                }
+
+                var hasAvailability = await _flightRepository.CheckAvailability(
+                    flightRoute.FlightRouteId,
+                    departureDate,
+                    requestedSeats
+                );
+
+                if (hasAvailability == 0)
+                {
+                    throw new ZuliBadRequestException(
+                        "seats",
+                        "No hay espacios suficientes en el vuelo seleccionado."
+                    );
+                }
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ namespace zuli_backend.Test
         private PassengerValidationService _passengerValidationService;
         private BaggageRegistrationService _baggageRegistrationService;
         private ReservationCreationService _reservationCreationService;
+        private FlightResolverService _flightResolverService;
 
         [SetUp]
         public void SetUp()
@@ -32,6 +33,41 @@ namespace zuli_backend.Test
             _passengerValidationService = new PassengerValidationService(_reservationRepoMock.Object);
             _baggageRegistrationService = new BaggageRegistrationService(_baggageRepoMock.Object, _flightRepoMock.Object);
             _reservationCreationService = new ReservationCreationService(_reservationRepoMock.Object);
+            _flightResolverService = new FlightResolverService(_flightRepoMock.Object);
+        }
+
+        [Test]
+        public void ResolveFlightIds_WithInsufficientSeats_ThrowsZuliBadRequestException()
+        {
+            var request = BuildTicketPurchaseRequest(passengerCount: 2);
+
+            _flightRepoMock
+                .Setup(r => r.CheckAvailability(1, It.IsAny<DateTime>(), 2))
+                .ReturnsAsync(0);
+
+            Assert.That(
+                async () => await _flightResolverService.ResolveFlightIds(request),
+                Throws.TypeOf<ZuliBadRequestException>()
+                    .With.Property(nameof(ZuliBadRequestException.StatusCode)).EqualTo(400)
+            );
+        }
+
+        [Test]
+        public async Task ResolveFlightIds_WithAvailableSeats_ReturnsFlightIds()
+        {
+            var request = BuildTicketPurchaseRequest(passengerCount: 2);
+            var flightId = Guid.NewGuid();
+
+            _flightRepoMock
+                .Setup(r => r.CheckAvailability(1, It.IsAny<DateTime>(), 2))
+                .ReturnsAsync(1);
+            _flightRepoMock
+                .Setup(r => r.GetFlightByRoute(1, "2026-07-15"))
+                .ReturnsAsync(flightId);
+
+            var result = await _flightResolverService.ResolveFlightIds(request);
+
+            Assert.That(result, Is.EquivalentTo(new[] { flightId }));
         }
 
         [Test]
@@ -649,6 +685,31 @@ namespace zuli_backend.Test
 
             Assert.That(breakdown.Flights[0].Passengers[0].TicketPrice, Is.EqualTo(500m));
             Assert.That(breakdown.GrandTotal, Is.EqualTo(500m));
+        }
+
+        private static TicketPurchaseRequestDTO BuildTicketPurchaseRequest(int passengerCount)
+        {
+            return new TicketPurchaseRequestDTO
+            {
+                FlightRoutes = new List<SummarizedFlightRoute>
+                {
+                    new SummarizedFlightRoute
+                    {
+                        FlightRouteId = 1,
+                        DepartureDate = "2026-07-15"
+                    }
+                },
+                Passengers = Enumerable.Range(1, passengerCount)
+                    .Select(index => new PassengerTicketDTO
+                    {
+                        FirstName = $"Passenger{index}",
+                        FirstLastName = "Test",
+                        SecondLastName = "User",
+                        BirthDate = "1990-01-01",
+                        PassportCountry = "Costa Rica"
+                    })
+                    .ToList()
+            };
         }
     }
 }

@@ -65,6 +65,9 @@ namespace zuli_backend.Middleware
             if (appEx is ZuliValidationException ve)
                 error.Extensions["errors"] = ve.Errors;
 
+            if (appEx is ZuliBadRequestException bre)
+                error.Extensions["errors"] = bre.Errors;
+
             await context.Response.WriteAsJsonAsync(error);
         }
     }

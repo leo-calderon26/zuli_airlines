@@ -8,5 +8,6 @@ namespace zuli_Business.Interface
         Task<List<Guid>> ResolveFlightIds(TicketPurchaseRequestDTO request);
         Task<Guid> ResolveFlightId(SummarizedFlightRoute flightRoute);
         Task<List<FlightEntity>> GetFlights(List<Guid> flightIds);
+        Task ValidateFlightAvailability(TicketPurchaseRequestDTO request);
     }
 }
