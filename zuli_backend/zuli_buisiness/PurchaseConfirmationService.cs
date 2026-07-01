@@ -10,21 +10,18 @@ namespace zuli_Business
     public class PurchaseConfirmationService : IPurchaseConfirmationService
     {
         private readonly IPurchaseConfirmationRepository _purchaseConfirmationRepository;
-        private readonly IPurchaseConfirmationPdfService _purchaseConfirmationPdfService;
-        private readonly IEmailService _emailService;
+        private readonly IPurchaseEmailService _purchaseEmailService;
         private readonly IMapper _mapper;
         private readonly IValidator<PurchaseConfirmationPageDTO> _purchaseConfirmationValidator;
 
         public PurchaseConfirmationService(
             IPurchaseConfirmationRepository purchaseConfirmationRepository,
-            IPurchaseConfirmationPdfService purchaseConfirmationPdfService,
-            IEmailService emailService,
+            IPurchaseEmailService purchaseEmailService,
             IMapper mapper,
             IValidator<PurchaseConfirmationPageDTO> purchaseConfirmationValidator)
         {
             _purchaseConfirmationRepository = purchaseConfirmationRepository;
-            _purchaseConfirmationPdfService = purchaseConfirmationPdfService;
-            _emailService = emailService;
+            _purchaseEmailService = purchaseEmailService;
             _mapper = mapper;
             _purchaseConfirmationValidator = purchaseConfirmationValidator;
         }
@@ -59,27 +56,10 @@ namespace zuli_Business
 
             ValidateConfirmationData(confirmation);
 
-            byte[] invoicePdf = _purchaseConfirmationPdfService.GenerateInvoicePdf(confirmation);
-            byte[] confirmationPdf = _purchaseConfirmationPdfService.GenerateConfirmationPdf(confirmation);
-
             try
             {
-                await _emailService.SendInvoiceEmailAsync(
-                    confirmation.BuyerEmail,
-                    confirmation.BuyerName,
-                    confirmation.ReservationCode,
-                    invoicePdf
-                );
-
+                await _purchaseEmailService.SendPurchaseEmailsAsync(confirmation);
                 confirmation.InvoiceEmailSent = true;
-
-                await _emailService.SendPurchaseConfirmationEmailAsync(
-                    confirmation.BuyerEmail,
-                    confirmation.BuyerName,
-                    confirmation.ReservationCode,
-                    confirmationPdf
-                );
-
                 confirmation.ConfirmationEmailSent = true;
             }
             catch

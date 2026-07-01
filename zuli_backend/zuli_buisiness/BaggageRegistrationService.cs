@@ -1,6 +1,7 @@
 using zuli_Business.DTO;
 using zuli_Business.DTO.ReservationSearch;
 using zuli_Business.Interface;
+using zuli_Data.DTO;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -16,13 +17,16 @@ namespace zuli_Business
 
         private readonly IBaggageRepository _baggageRepository;
         private readonly IFlightRepository _flightRepository;
+        private readonly IEmailJobQueue? _emailJobQueue;
 
         public BaggageRegistrationService(
             IBaggageRepository baggageRepository,
-            IFlightRepository flightRepository)
+            IFlightRepository flightRepository,
+            IEmailJobQueue? emailJobQueue = null)
         {
             _baggageRepository = baggageRepository;
             _flightRepository = flightRepository;
+            _emailJobQueue = emailJobQueue;
         }
 
         public async Task ValidateBaggageCapacity(
@@ -146,15 +150,20 @@ namespace zuli_Business
             );
         }
 
-        public async Task AddAdditionalBaggageTransactional(
+        public async Task<AdditionalBaggagePurchaseResultDTO> AddAdditionalBaggageTransactional(
             string reservationCode,
             List<AdditionalBaggagePassengerDTO> passengers)
         {
             reservationCode = reservationCode.Trim().ToUpperInvariant();
             var baggages = new List<BaggageEntity>();
+            var additionalCheckedBaggage = 0;
+            var additionalCarryOn = 0;
 
             foreach (var passenger in passengers)
             {
+                additionalCheckedBaggage += passenger.AdditionalCheckedBaggage;
+                additionalCarryOn += passenger.AdditionalCarryOn;
+
                 for (int baggage = 0; baggage < passenger.AdditionalCheckedBaggage; baggage++)
                 {
                     baggages.Add(new BaggageEntity
@@ -183,7 +192,22 @@ namespace zuli_Business
                 throw new ZuliValidationException("baggage", "No se proporcionó equipaje adicional para agregar.");
             }
 
-            await _baggageRepository.AddAdditionalBaggageTransactional(reservationCode, baggages);
+            var result = await _baggageRepository.AddAdditionalBaggageTransactional(reservationCode, baggages);
+
+            if (_emailJobQueue != null)
+            {
+                await _emailJobQueue.QueueAsync(new EmailJobDTO
+                {
+                    Type = EmailJobType.AdditionalBaggagePurchase,
+                    ReservationCode = reservationCode,
+                    AdditionalCheckedBaggage = additionalCheckedBaggage,
+                    AdditionalCarryOn = additionalCarryOn,
+                    AdditionalBaggageTotal = result.AdditionalBaggageTotal,
+                    ReservationTotal = result.ReservationTotal
+                });
+            }
+
+            return result;
         }
     }
 }

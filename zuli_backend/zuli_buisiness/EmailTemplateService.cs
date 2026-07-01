@@ -93,6 +93,52 @@ namespace zuli_Business
             return BuildHtmlTemplate(content);
         }
 
+        public string BuildAdditionalBaggagePurchaseEmailBody(
+            string buyerName,
+            string reservationCode,
+            int additionalCheckedBaggage,
+            int additionalCarryOn,
+            decimal additionalBaggageTotal,
+            decimal reservationTotal)
+        {
+            string safeBuyerName = WebUtility.HtmlEncode(buyerName);
+            string safeReservationCode = WebUtility.HtmlEncode(reservationCode);
+
+            string content = $@"
+                <h3>Compra de equipaje adicional</h3>
+
+                <p>Hola {safeBuyerName},</p>
+
+                <p>
+                    Se registró correctamente la compra de equipaje adicional para su reservación.
+                </p>
+
+                <p>
+                    <strong>Código de reserva:</strong> {safeReservationCode}
+                </p>
+
+                <table style='width: 100%; border-collapse: collapse; margin-top: 16px;'>
+                    <tr>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb;'>Maletas documentadas adicionales</td>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{additionalCheckedBaggage}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb;'>Equipaje de mano adicional</td>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;'>{additionalCarryOn}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb;'>Monto de esta compra</td>
+                        <td style='padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;'><strong>{additionalBaggageTotal:C}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 8px;'>Total acumulado de la reservación</td>
+                        <td style='padding: 8px; text-align: right;'><strong>{reservationTotal:C}</strong></td>
+                    </tr>
+                </table>";
+
+            return BuildHtmlTemplate(content);
+        }
+
         public string BuildCancellationRequestEmailBody(
     string buyerName,
     string confirmationLink)

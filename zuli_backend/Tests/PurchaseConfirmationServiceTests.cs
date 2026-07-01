@@ -19,8 +19,7 @@ namespace zuli_backend.Tests
     public class PurchaseConfirmationServiceTests
     {
         private Mock<IPurchaseConfirmationRepository> _purchaseConfirmationRepositoryMock;
-        private Mock<IPurchaseConfirmationPdfService> _purchaseConfirmationPdfServiceMock;
-        private Mock<IEmailService> _emailServiceMock;
+        private Mock<IPurchaseEmailService> _purchaseEmailServiceMock;
         private Mock<IMapper> _mapperMock;
         private Mock<IValidator<PurchaseConfirmationPageDTO>> _purchaseConfirmationValidatorMock;
 
@@ -30,15 +29,13 @@ namespace zuli_backend.Tests
         public void SetUp()
         {
             _purchaseConfirmationRepositoryMock = new Mock<IPurchaseConfirmationRepository>();
-            _purchaseConfirmationPdfServiceMock = new Mock<IPurchaseConfirmationPdfService>();
-            _emailServiceMock = new Mock<IEmailService>();
+            _purchaseEmailServiceMock = new Mock<IPurchaseEmailService>();
             _mapperMock = new Mock<IMapper>();
             _purchaseConfirmationValidatorMock = new Mock<IValidator<PurchaseConfirmationPageDTO>>();
 
             _purchaseConfirmationService = new PurchaseConfirmationService(
                 _purchaseConfirmationRepositoryMock.Object,
-                _purchaseConfirmationPdfServiceMock.Object,
-                _emailServiceMock.Object,
+                _purchaseEmailServiceMock.Object,
                 _mapperMock.Object,
                 _purchaseConfirmationValidatorMock.Object
             );
@@ -83,17 +80,10 @@ namespace zuli_backend.Tests
                 Times.Never
             );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
-                Times.Never
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendInvoiceEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    It.IsAny<PurchaseConfirmationPageDTO>(),
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Never
             );
@@ -128,17 +118,10 @@ namespace zuli_backend.Tests
                 Times.Never
             );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
-                Times.Never
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendPurchaseConfirmationEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    It.IsAny<PurchaseConfirmationPageDTO>(),
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Never
             );
@@ -150,9 +133,6 @@ namespace zuli_backend.Tests
             var reservationCode = "ZUTEST001";
             var confirmationEntity = BuildValidConfirmationEntity();
             var confirmationDto = BuildValidConfirmationDto();
-            var invoicePdf = new byte[] { 1, 2, 3 };
-            var confirmationPdf = new byte[] { 4, 5, 6 };
-
             _purchaseConfirmationRepositoryMock
                 .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
@@ -165,29 +145,10 @@ namespace zuli_backend.Tests
                 .Setup(validator => validator.Validate(confirmationDto))
                 .Returns(new ValidationResult());
 
-            _purchaseConfirmationPdfServiceMock
-                .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
-                .Returns(invoicePdf);
-
-            _purchaseConfirmationPdfServiceMock
-                .Setup(pdfService => pdfService.GenerateConfirmationPdf(confirmationDto))
-                .Returns(confirmationPdf);
-
-            _emailServiceMock
-                .Setup(emailService => emailService.SendInvoiceEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
-                ))
-                .Returns(Task.CompletedTask);
-
-            _emailServiceMock
-                .Setup(emailService => emailService.SendPurchaseConfirmationEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock
+                .Setup(service => service.SendPurchaseEmailsAsync(
+                    confirmationDto,
+                    It.IsAny<CancellationToken>()
                 ))
                 .Returns(Task.CompletedTask);
 
@@ -219,32 +180,10 @@ namespace zuli_backend.Tests
                 Times.Once
             );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateInvoicePdf(confirmationDto),
-                Times.Once
-            );
-
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateConfirmationPdf(confirmationDto),
-                Times.Once
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendInvoiceEmailAsync(
-                    "buyer@test.com",
-                    "Valeria Jimenez Castro",
-                    reservationCode,
-                    invoicePdf
-                ),
-                Times.Once
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendPurchaseConfirmationEmailAsync(
-                    "buyer@test.com",
-                    "Valeria Jimenez Castro",
-                    reservationCode,
-                    confirmationPdf
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    confirmationDto,
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Once
             );
@@ -313,17 +252,10 @@ namespace zuli_backend.Tests
                 Times.Never
             );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
-                Times.Never
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendInvoiceEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    It.IsAny<PurchaseConfirmationPageDTO>(),
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Never
             );
@@ -368,17 +300,10 @@ namespace zuli_backend.Tests
                 Times.Once
             );
 
-            _purchaseConfirmationPdfServiceMock.Verify(
-                pdfService => pdfService.GenerateInvoicePdf(It.IsAny<PurchaseConfirmationPageDTO>()),
-                Times.Never
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendInvoiceEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    It.IsAny<PurchaseConfirmationPageDTO>(),
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Never
             );
@@ -390,9 +315,6 @@ namespace zuli_backend.Tests
             var reservationCode = "ZUTEST001";
             var confirmationEntity = BuildValidConfirmationEntity();
             var confirmationDto = BuildValidConfirmationDto();
-            var invoicePdf = new byte[] { 1, 2, 3 };
-            var confirmationPdf = new byte[] { 4, 5, 6 };
-
             _purchaseConfirmationRepositoryMock
                 .Setup(repository => repository.GetPurchaseConfirmationAsync(reservationCode))
                 .ReturnsAsync(confirmationEntity);
@@ -405,20 +327,10 @@ namespace zuli_backend.Tests
                 .Setup(validator => validator.Validate(confirmationDto))
                 .Returns(new ValidationResult());
 
-            _purchaseConfirmationPdfServiceMock
-                .Setup(pdfService => pdfService.GenerateInvoicePdf(confirmationDto))
-                .Returns(invoicePdf);
-
-            _purchaseConfirmationPdfServiceMock
-                .Setup(pdfService => pdfService.GenerateConfirmationPdf(confirmationDto))
-                .Returns(confirmationPdf);
-
-            _emailServiceMock
-                .Setup(emailService => emailService.SendInvoiceEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
+            _purchaseEmailServiceMock
+                .Setup(service => service.SendPurchaseEmailsAsync(
+                    confirmationDto,
+                    It.IsAny<CancellationToken>()
                 ))
                 .ThrowsAsync(new Exception("SMTP error"));
 
@@ -432,24 +344,12 @@ namespace zuli_backend.Tests
                 Times.Once
             );
 
-            _emailServiceMock.Verify(
-                emailService => emailService.SendInvoiceEmailAsync(
-                    "buyer@test.com",
-                    "Valeria Jimenez Castro",
-                    reservationCode,
-                    invoicePdf
+            _purchaseEmailServiceMock.Verify(
+                service => service.SendPurchaseEmailsAsync(
+                    confirmationDto,
+                    It.IsAny<CancellationToken>()
                 ),
                 Times.Once
-            );
-
-            _emailServiceMock.Verify(
-                emailService => emailService.SendPurchaseConfirmationEmailAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<byte[]>()
-                ),
-                Times.Never
             );
         }
 
