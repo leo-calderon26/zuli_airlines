@@ -13,5 +13,7 @@ namespace zuli_Repository.Interface
         Task<(IEnumerable<AirportEntity> airports, int totalCount)> GetAirportsPaginated(int pageNumber, int pageSize);
         Task<AirportEntity?> GetByCodeAsync(string airportCode);
         Task UpdateAirportAsync(AirportEntity airport);
+        Task DeleteAirport(string airportCode);
+
     }
 }

@@ -14,3 +14,16 @@ export const searchReservation = async (reservationCode, lastName) => {
         throw error;
     }
 };
+
+export const downloadItineraryPdf = async (reservationCode, lastName) => {
+    try {
+        const response = await axios.get(`${RESERVATION_SEARCH_API_URL}/itinerary`, {
+            params: { reservationCode, lastName },
+            responseType: 'blob'
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error al descargar el itinerario:", error);
+        throw error;
+    }
+};

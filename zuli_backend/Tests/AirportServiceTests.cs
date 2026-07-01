@@ -135,5 +135,49 @@ namespace zuli_backend.Tests
                 businessId = "123456789"
             };
         }
+
+        [Test]
+        public void DeleteAirport_AirportDoesNotExist_ThrowsNotFound()
+        {
+            var airportCode = "XYZ";
+
+            _airportRepositoryMock
+                .Setup(r => r.GetByCodeAsync(airportCode))
+                .ReturnsAsync((AirportEntity?)null);
+
+            Assert.That(async () => await _service.DeleteAirport(airportCode),
+                Throws.TypeOf<ZuliNotFoundException>());
+
+            _airportRepositoryMock.Verify(r => r.GetByCodeAsync(airportCode), Times.Once);
+            _airportRepositoryMock.Verify(r => r.DeleteAirport(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task DeleteAirport_ExistingAirport_DeletesSuccessfully()
+        {
+            var airportCode = "SJO";
+            var existingAirport = new AirportEntity
+            {
+                AirportCode = airportCode,
+                Name = "Juan Santamaría International",
+                AdminId = Guid.NewGuid()
+            };
+
+            _airportRepositoryMock
+                .Setup(r => r.GetByCodeAsync(airportCode))
+                .ReturnsAsync(existingAirport);
+
+            _airportRepositoryMock
+                .Setup(r => r.DeleteAirport(airportCode))
+                .Returns(Task.CompletedTask);
+
+            var result = await _service.DeleteAirport(airportCode);
+
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+            Assert.That(result.Message, Is.EqualTo("Se eliminó el aeropuerto correctamente"));
+
+            _airportRepositoryMock.Verify(r => r.GetByCodeAsync(airportCode), Times.Once);
+            _airportRepositoryMock.Verify(r => r.DeleteAirport(airportCode), Times.Once);
+        }
     }
 }

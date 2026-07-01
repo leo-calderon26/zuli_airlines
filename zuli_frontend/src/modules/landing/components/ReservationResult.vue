@@ -114,10 +114,17 @@
 
           <div class="space-y-3">
             <button
-              class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light"
+              @click="$emit('request-itinerary')"
+              :disabled="isDownloading"
+              class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span class="flex items-center gap-3">
+                <svg v-if="isDownloading" class="w-5 h-5 animate-spin text-primary group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
                 <svg
+                  v-else
                   class="w-5 h-5 text-primary group-hover:text-white transition-colors"
                   fill="none"
                   stroke="currentColor"
@@ -130,7 +137,7 @@
                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
                   />
                 </svg>
-                Imprimir itinerario
+                {{ isDownloading ? 'Generando PDF...' : 'Imprimir itinerario' }}
               </span>
 
               <svg
@@ -225,10 +232,14 @@ const props = defineProps({
   reservationData: {
     type: Object,
     required: true
+  },
+  isDownloading: {
+    type: Boolean,
+    default: false
   }
 });
 
-defineEmits(['clear', 'request-cancel']);
+defineEmits(['clear', 'request-cancel', 'request-itinerary']);
 
 const reservationStatusId = computed(() => {
   return props.reservationData.reservationStatusId;

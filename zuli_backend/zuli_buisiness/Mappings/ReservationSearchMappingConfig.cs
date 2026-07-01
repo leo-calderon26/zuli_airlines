@@ -29,6 +29,7 @@ namespace zuli_Business.Mappings
             config.NewConfig<List<ReservationSearchFlightEntity>, ReservationSearchResponseDTO>()
                 .Map(dest => dest.DestinationCity, src => src.Last().DestinationCity)
                 .Map(dest => dest.DestinationCode, src => src.Last().DestinationCode)
+                .Map(dest => dest.ContactEmail, src => src.First().BuyerEmail)
                 .Map(dest => dest.Journey, src => src)
                 .Ignore(dest => dest.ReservationCode)
                 .Ignore(dest => dest.DaysRemaining)
