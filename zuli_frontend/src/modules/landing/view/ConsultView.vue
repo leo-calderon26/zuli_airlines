@@ -51,6 +51,7 @@
 </template>
 
 <script setup>
+import { onBeforeRouteLeave } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useReservationSearch } from '../composable/useReservationSearch';
 import ReservationSearchForm from '../components/ReservationSearchForm.vue';
@@ -80,6 +81,11 @@ const handleClear = () => {
   clear();
 };
 
+onBeforeRouteLeave((to) => {
+  if (to.name !== 'additionalBaggage') {
+    clear();
+  }
+});
 const handleDownloadItinerary = async () => {
   const reservationCode = store.reservationData?.reservationCode;
   const lastName = store.lastSearchedName;

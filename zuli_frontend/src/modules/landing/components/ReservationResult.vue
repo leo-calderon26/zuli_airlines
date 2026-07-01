@@ -82,11 +82,9 @@
 
       <div class="space-y-6 lg:mt-11">
         <div class="bg-white rounded-xl p-6 shadow-2xl">
-          <h3 class="font-bold text-content text-lg mb-4 border-b border-border-xlight pb-3">
-            Opciones de viaje
-          </h3>
-
-          <button
+          <h3 class="font-bold text-content text-lg mb-4 border-b border-border-xlight pb-3">Opciones de viaje</h3>
+          <router-link
+            :to="{ name: 'additionalBaggage', query: { reservationCode: reservationData.reservationCode } }"
             class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light"
           >
             <span class="flex items-center gap-3">
@@ -105,21 +103,8 @@
               </svg>
               Gestionar equipaje
             </span>
-
-            <svg
-              class="w-4 h-4 text-content-light group-hover:text-white transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+            <svg class="w-4 h-4 text-content-light group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </router-link>
         </div>
 
         <div class="bg-white rounded-xl p-6 shadow-2xl">
