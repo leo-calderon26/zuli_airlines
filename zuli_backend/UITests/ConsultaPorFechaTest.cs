@@ -15,8 +15,8 @@ namespace Tests.UITests
 
         private const string UrlReporte = "http://localhost:5173/admin/reports/flights";
         private const string UrlLogin = "http://localhost:5173/login";
-        private const string Email = "geijomontoya@gmail.com";
-        private const string Password = "Adatgg1515155*";
+        private const string Email = "admin@zuliairlines.com";
+        private const string Password = "adatgg1515155*";
 
         [SetUp]
         public void Setup()
