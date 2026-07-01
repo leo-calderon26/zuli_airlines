@@ -93,6 +93,48 @@ namespace zuli_Business
             return BuildHtmlTemplate(content);
         }
 
+        public string BuildCancellationRequestEmailBody(
+    string buyerName,
+    string confirmationLink)
+{
+    string safeBuyerName = WebUtility.HtmlEncode(buyerName);
+    string safeConfirmationLink = WebUtility.HtmlEncode(confirmationLink);
+
+    string content = $@"
+        <h3>Solicitud de cancelación de reserva</h3>
+
+        <p>Hola {safeBuyerName},</p>
+
+        <p>
+            Se ha solicitado la cancelación de la reserva.
+        </p>
+
+        <p>
+            Si desea continuar, dé clic en el siguiente enlace.
+        </p>
+
+        <p>
+            <strong>Esta acción no es reversible.</strong>
+        </p>
+
+        <p>
+            Si no fue usted quien realizó esta solicitud, ignore este correo.
+        </p>
+
+        <p style='text-align: center; margin: 32px 0;'>
+            <a href='{safeConfirmationLink}'
+               style='display: inline-block; padding: 12px 24px; background-color: #711717; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;'>
+                Confirmar cancelación
+            </a>
+        </p>
+
+        <p style='word-break: break-all; color: #711717;'>
+            {safeConfirmationLink}
+        </p>";
+
+    return BuildHtmlTemplate(content);
+}
+
         private static string BuildHtmlTemplate(string content)
         {
             return $@"

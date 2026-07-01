@@ -1,5 +1,8 @@
 using System.Data;
 using Dapper;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using zuli_Data;
 using zuli_Data.Entities;
 using zuli_Repository.Interface;
@@ -10,7 +13,7 @@ namespace zuli_Repository
     {
         public ReservationSearchRepository(DapperContext context) : base(context) { }
 
-        public async Task<(List<ReservationSearchFlightEntity> Flights, int PassengerCount)> GetReservationDataAsync(
+        public async Task<(List<ReservationSearchFlightEntity> Flights, List<ReservationSearchPassengerEntity> Passengers)> GetReservationDataAsync(
             string reservationCode, 
             string lastNameSearch)
         {
@@ -22,14 +25,14 @@ namespace zuli_Repository
                     commandType: CommandType.StoredProcedure);
 
                 var flights = (await multi.ReadAsync<ReservationSearchFlightEntity>()).ToList();
-                var passengerCount = await multi.ReadSingleOrDefaultAsync<int>();
+                var passengers = (await multi.ReadAsync<ReservationSearchPassengerEntity>()).ToList();
 
                 if (!flights.Any())
                 {
-                    passengerCount = 0;
+                    passengers = new List<ReservationSearchPassengerEntity>();
                 }
 
-                return (flights, passengerCount);
+                return (flights, passengers);
             });
         }
     }
