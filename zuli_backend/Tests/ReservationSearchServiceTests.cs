@@ -222,21 +222,17 @@ namespace zuli_backend.Tests
             _repositoryMock.Setup(r => r.GetReservationDataAsync(request.ReservationCode, It.IsAny<string>()))
                 .ReturnsAsync((flightsEntityList, passengersEntityList));
 
-            // Usar It.IsAny<> previene que el Mapper devuelva null por no coincidir la referencia de memoria
             _mapperMock.Setup(m => m.Map<ReservationSearchResponseDTO>(It.IsAny<List<ReservationSearchFlightEntity>>()))
                 .Returns(expectedResponseDto);
                 
-            // Faltaba este Mock para los pasajeros, lo que también causaba null internamente
             _mapperMock.Setup(m => m.Map<List<ReservationSearchPassengerDTO>>(It.IsAny<List<ReservationSearchPassengerEntity>>()))
                 .Returns([]);
 
             _pdfServiceMock.Setup(p => p.GenerateItineraryPdf(It.IsAny<ReservationSearchResponseDTO>()))
                 .Returns(expectedPdfBytes);
 
-            // Act
             var result = await _service.GenerateItineraryPdfAsync(request);
 
-            // Assert
             Assert.Multiple(() =>
             {
                 Assert.That(result.FileContents, Is.EqualTo(expectedPdfBytes));
