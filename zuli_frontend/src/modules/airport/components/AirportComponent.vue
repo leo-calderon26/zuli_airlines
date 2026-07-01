@@ -70,7 +70,7 @@ onMounted(async () => {
                 @click="cacheAirportForEdit(airport)"
                 class="font-medium text-gold hover:underline"
             >
-                Edit
+                Editar
             </router-link>
         </td>
     </tr>
