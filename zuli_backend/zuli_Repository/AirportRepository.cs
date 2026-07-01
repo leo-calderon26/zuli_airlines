@@ -146,9 +146,9 @@ namespace zuli_Repository
 
             var sql = "dbo.sp_HandleAirportDeletion";
 
-            await connection.ExecuteScalarAsync(sql, new
+            await connection.ExecuteAsync(sql, new
             {
-                SelectedAirportToDelete = airportCode
+                selectedAirportToDelete = airportCode
             }, commandType: System.Data.CommandType.StoredProcedure);
         }
 
