@@ -18,8 +18,12 @@ namespace zuli_Repository
             {
                 var table = new DataTable();
                 table.Columns.Add("AirlineId", typeof(int));
-                table.Columns.Add("RealArrivalAirport", typeof(string));
-                table.Columns.Add("RealDepartureAirport", typeof(string));
+                table.Columns.Add("ArrivalAirportCode", typeof(string));
+                table.Columns.Add("ArrivalAirportName", typeof(string));
+                table.Columns.Add("ArrivalAirportCity", typeof(string));
+                table.Columns.Add("DepartureAirportCode", typeof(string));
+                table.Columns.Add("DepartureAirportName", typeof(string));
+                table.Columns.Add("DepartureAirportCity", typeof(string));
                 table.Columns.Add("RealArrivalTime", typeof(TimeSpan));
                 table.Columns.Add("RealDepartureTime", typeof(TimeSpan));
                 table.Columns.Add("Frequency", typeof(int));
@@ -31,7 +35,7 @@ namespace zuli_Repository
                 
                 foreach (var o in outsideFlights)
                 {
-                    table.Rows.Add(o.AirlineId, o.ArrivalAirportCode, o.DepartureAirportCode, o.RealArrivalTime, o.RealDepartureTime, o.Frequency, o.DurationOnMinutes, o.CarryOnPrice, o.CheckedPrice, o.TouristPrice, o.FirstClassPrice);
+                    table.Rows.Add(o.AirlineId, o.ArrivalAirportCode, o.ArrivalAirportName, o.ArrivalAirportCity, o.DepartureAirportCode, o.DepartureAirportName, o.DepartureAirportCity, o.RealArrivalTime, o.RealDepartureTime, o.Frequency, o.DurationOnSeconds, o.CarryOnPrice, o.CheckedPrice, o.TouristPrice, o.FirstClassPrice);
                 }
                 var parameters = new DynamicParameters();
                 parameters.Add("OutsideFlightRoutes", table.AsTableValuedParameter("dbo.OutsideFlightRouteBulkType"));
@@ -41,6 +45,16 @@ namespace zuli_Repository
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
+            });
+        }
+
+        public async Task UpdateOutsideFlightsStatus() {
+            await WithConnectionAsync(async (connection) =>
+            {
+                var sql = @"
+                    UPDATE FlightRoute SET Status = 'Deshabilitada' WHERE AirlineId <> 1";
+
+                return await connection.ExecuteScalarAsync(sql);
             });
         }
     }
