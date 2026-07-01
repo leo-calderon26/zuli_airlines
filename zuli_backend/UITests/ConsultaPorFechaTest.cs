@@ -39,7 +39,7 @@ namespace Tests.UITests
             passwordInput.Clear();
             passwordInput.SendKeys(Password);
 
-            var loginButton = _wait.Until(d => d.FindElement(By.XPath("//button[contains(normalize-space(.), 'Iniciar sesión')]")));
+            var loginButton = _wait.Until(d => d.FindElement(By.XPath("//button[contains(normalize-space(.), 'Iniciar sesión')]") ));
             loginButton.Click();
 
             _wait.Until(d => d.Url.Contains("/admin/") || d.Url.EndsWith("/admin"));
@@ -62,7 +62,7 @@ namespace Tests.UITests
             SetDateValue(dateInputs[0], "2026-07-01");
             SetDateValue(dateInputs[1], "2026-07-31");
 
-            var btnAplicar = _wait.Until(d => d.FindElement(By.XPath("//button[contains(normalize-space(.), 'Aplicar filtros')]")));
+            var btnAplicar = _wait.Until(d => d.FindElement(By.XPath("//button[contains(normalize-space(.), 'Aplicar filtros')]") ));
             btnAplicar.Click();
 
             _wait.Until(d => d.FindElement(By.CssSelector("table")));
