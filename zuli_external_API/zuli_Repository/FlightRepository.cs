@@ -16,7 +16,6 @@ namespace zuli_Repository
             _context = context;
             
         }
-
         public async Task<IEnumerable<RawFlightEntity>> GetAvailableFlights(DateTime earliestDeparture, string destination, int passengersQuantity)
         {
             using var connection = _context.CreateConnection();
@@ -65,6 +64,56 @@ namespace zuli_Repository
             };
 
             return await connection.QueryAsync<RawFlightEntity>(sql, parameters);
+        }
+
+        public async Task<FlightRouteEntity> GetRouteByFlightId(Guid flightId) {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT
+                    fr.FlightRouteId,
+                    f.FlightDate AS departureDate
+                FROM Flight f
+                INNER JOIN FlightRoute fr on f.FlightRouteId = fr.FlightRouteId
+                WHERE f.Id = @FlightId";
+
+            var parameters = new
+            {
+                FlightId = flightId
+            };
+
+            return await connection.QuerySingleOrDefaultAsync<FlightRouteEntity>(sql, parameters);
+        }
+
+        public async Task<ReservedFlightEntity> GetReservedFlightData(Guid flightId) {
+            using var connection = _context.CreateConnection();
+
+            var sql = @"
+                SELECT
+                    f.RealDepartureTime,
+                    f.RealArrivalTime,
+                    f.Duration,
+                    f.RealArrivalAirport AS ArrivalAiportCode,
+                    aa.Name AS ArrivalAirportName,
+                    aa.City AS ArrivalAirportCity,
+                    f.RealDepartureAirport AS DepartureAirportCode,
+                    da.Name AS DepartureAirportName,
+                    da.City AS DepartureCityName,
+                    f.TouristPrice,
+                    f.FirstClassPrice,
+                    f.CarryOnPrice,
+                    f.CheckedPrice
+                FROM Flight f
+                INNER JOIN Airport aa on f.RealArrivalAirport = aa.AirportCode
+                INNER JOIN Airport da on f.RealDepartureAirport = da.AirportCode
+                WHERE f.Id = @FlightId";
+
+            var parameters = new
+            {
+                FlightId = flightId
+            };
+
+            return await connection.QuerySingleOrDefaultAsync<ReservedFlightEntity>(sql, parameters);
         }
     }   
 }
