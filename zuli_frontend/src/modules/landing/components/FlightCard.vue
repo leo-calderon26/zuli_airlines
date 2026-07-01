@@ -80,7 +80,7 @@
                 <div class="absolute w-3 h-3 bg-primary rounded-full -left-[1.65rem] top-1.5 border-2 border-white"></div>
                 
                 <div class="bg-surface-muted p-4 rounded-lg border border-border-light">
-                    <p class="text-sm font-bold text-content mb-2">ZU-{{ segment.flightId }} | {{ segment.departureDateText }} </p>
+                    <p class="text-sm font-bold text-content mb-2">ZU-{{ segment.flightId }} | {{ segment.departureDateText }} | {{ segment.airlineName }}</p>
                     <div class="flex justify-between items-center text-sm">
                         <div>
                             <p class="font-semibold">{{ segment.departureTimeText }} - {{ segment.origin }}</p>
