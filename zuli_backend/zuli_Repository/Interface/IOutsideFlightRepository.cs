@@ -8,5 +8,6 @@ namespace zuli_Repository.Interface
     public interface IOutsideFlightRepository
     {
         Task CreateOutsideFlightBulk(List<OutsideFlightEntity> outsideFlights);
+        Task UpdateOutsideFlightsStatus();
     }
 }

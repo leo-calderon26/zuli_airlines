@@ -144,8 +144,11 @@ namespace zuli_Repository
                     fr.CarryOnPrice,
                     fr.CheckedPrice,
                     fr.MaxWeightPerBag,
-                    fr.CheckedBagMultiplier
+                    fr.CheckedBagMultiplier,
+                    al.AirlineName
                 FROM FlightRoute fr
+            INNER JOIN Airline al
+                ON fr.AirlineId = al.AirlineId
             LEFT JOIN Aircraft a 
                 ON fr.AircraftId = a.AircraftId
             LEFT JOIN Flight f 
@@ -158,7 +161,8 @@ namespace zuli_Repository
                         OR 
                         (f.Id IS NOT NULL AND f.Status != 'Cancelado' AND f.AvailableSeats >= @Seats)
                     )
-                    AND (CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME)) > @CurrentTime";
+                    AND (CAST(CAST(@TargetDate AS DATE) AS DATETIME) + CAST(fr.ScheduledDepartureTime AS DATETIME)) > @CurrentTime
+                    AND fr.Status != 'Deshabilitada'";
 
             var parameters = new 
             { 
