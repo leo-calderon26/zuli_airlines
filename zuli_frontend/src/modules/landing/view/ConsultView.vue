@@ -49,7 +49,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import { useReservationSearch } from '../composable/useReservationSearch';
 import ReservationSearchForm from '../components/ReservationSearchForm.vue';
 import ReservationResult from '../components/ReservationResult.vue';
@@ -78,7 +79,6 @@ const handleClear = () => {
   clear();
 };
 
-
 const onRequestCancel = () => {
   showCancelConfirmModal.value = true;
 };
@@ -99,4 +99,9 @@ const onCancelConfirmed = async () => {
     showErrorModal.value = true;
   }
 };
+onBeforeRouteLeave((to) => {
+  if (to.name !== 'additionalBaggage') {
+    clear();
+  }
+});
 </script>

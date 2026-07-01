@@ -82,11 +82,9 @@
 
       <div class="space-y-6 lg:mt-11">
         <div class="bg-white rounded-xl p-6 shadow-2xl">
-          <h3 class="font-bold text-content text-lg mb-4 border-b border-border-xlight pb-3">
-            Opciones de viaje
-          </h3>
-
-          <button
+          <h3 class="font-bold text-content text-lg mb-4 border-b border-border-xlight pb-3">Opciones de viaje</h3>
+          <router-link
+            :to="{ name: 'additionalBaggage', query: { reservationCode: reservationData.reservationCode } }"
             class="group w-full flex justify-between items-center bg-surface-muted hover:bg-primary hover:text-white transition-all p-4 rounded-lg text-sm font-semibold text-content border border-border-light"
           >
             <span class="flex items-center gap-3">
