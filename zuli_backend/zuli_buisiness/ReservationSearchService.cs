@@ -14,21 +14,27 @@ namespace zuli_Business
 {
     public class ReservationSearchService : IReservationSearchService
     {
+        private const string PDF_CONTENT_TYPE = "application/pdf";
+        private const string PDF_FILENAME_FORMAT = "Itinerario_{0}.pdf";
+
         private readonly IReservationSearchRepository _repository;
         private readonly FluentValidation.IValidator<ReservationSearchRequestDTO> _validator;
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
+        private readonly IReservationItineraryPdfService _pdfService;
 
         public ReservationSearchService(
             IReservationSearchRepository repository,
             FluentValidation.IValidator<ReservationSearchRequestDTO> validator,
             IMapper mapper,
-            TimeProvider timeProvider)
+            TimeProvider timeProvider,
+            IReservationItineraryPdfService pdfService)
         {
             _repository = repository;
             _validator = validator;
             _mapper = mapper;
             _timeProvider = timeProvider;
+            _pdfService = pdfService;
         }
 
         public async Task<ReservationSearchResponseDTO> GetReservationDetailsAsync(
@@ -91,5 +97,15 @@ namespace zuli_Business
 
             return layovers;
         }
-    }
+
+        public async Task<(byte[] FileContents, string ContentType, string FileName)> GenerateItineraryPdfAsync(ReservationSearchRequestDTO request)
+        {
+            var reservationDetails = await GetReservationDetailsAsync(request);
+            var pdfBytes = _pdfService.GenerateItineraryPdf(reservationDetails);
+            
+            var fileName = string.Format(PDF_FILENAME_FORMAT, request.ReservationCode);
+
+            return (pdfBytes, PDF_CONTENT_TYPE, fileName);
+        }
+    } 
 }

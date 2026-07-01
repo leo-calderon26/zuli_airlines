@@ -183,6 +183,9 @@ builder.Services.AddSingleton<ActivateAccountValidator>();
 builder.Services.AddScoped<IReservationSearchRepository, ReservationSearchRepository>();
 builder.Services.AddScoped<IReservationSearchService, ReservationSearchService>();
 
+builder.Services.AddScoped<IReservationItineraryPdfService, ReservationItineraryPdfService>();
+builder.Services.AddScoped<IQrCodeService, QrCodeService>();
+
 builder.Services.AddScoped<IReservationCancellationRepository, ReservationCancellationRepository>();
 builder.Services.AddScoped<IReservationCancellationService, ReservationCancellationService>();
 

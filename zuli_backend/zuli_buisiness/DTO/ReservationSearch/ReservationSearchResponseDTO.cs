@@ -11,6 +11,7 @@ namespace zuli_Business.DTO.ReservationSearch
         public int ReservationStatusId { get; set; }
         public int DaysRemaining { get; set; }
         public int PassengerCount { get; set; }
+        public string ContactEmail { get; set; } = string.Empty;
         public List<ReservationSearchPassengerDTO> Passengers { get; set; } = new();
         public ReservationSearchJourneyDTO Journey { get; set; } = new();
     }
@@ -20,6 +21,8 @@ namespace zuli_Business.DTO.ReservationSearch
         public string FirstName { get; set; } = string.Empty;
         public string FirstLastName { get; set; } = string.Empty;
         public string SecondLastName { get; set; } = string.Empty;
+        public int CheckedBaggageQuantity { get; set; }
+        public int CarryOnQuantity { get; set; }
     }
 
     public class ReservationSearchJourneyDTO
