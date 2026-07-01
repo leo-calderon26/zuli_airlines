@@ -40,6 +40,15 @@ namespace zuli_Data.Exceptions
             => Errors = new Dictionary<string, List<string>> { { errorKey, new List<string> { errorValue } } };
     }
 
+    public class ZuliBadRequestException : AppExceptions
+    {
+        public IReadOnlyDictionary<string, List<string>> Errors { get; }
+
+        public ZuliBadRequestException(string errorKey, string errorValue, int errorId = -1)
+            : base(errorValue, StatusCodes.Status400BadRequest, "BAD_REQUEST", errorId)
+            => Errors = new Dictionary<string, List<string>> { { errorKey, new List<string> { errorValue } } };
+    }
+
     public class ZuliUnauthorizedException : AppExceptions
     {
         public ZuliUnauthorizedException(string msg, int errorId = -1)
