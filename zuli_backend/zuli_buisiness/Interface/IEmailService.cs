@@ -18,6 +18,16 @@ namespace zuli_Business.Interface
             byte[] confirmationPdf
         );
 
+        Task SendAdditionalBaggagePurchaseEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            int additionalCheckedBaggage,
+            int additionalCarryOn,
+            decimal additionalBaggageTotal,
+            decimal reservationTotal
+        );
+
         Task SendCancellationRequestEmailAsync(
             string toEmail,
             string buyerName,

@@ -1,7 +1,10 @@
 using Bogus;
 using Moq;
 using zuli_Business;
+using zuli_Business.DTO;
 using zuli_Business.DTO.ReservationSearch;
+using zuli_Business.Interface;
+using zuli_Data.DTO;
 using zuli_Data.Entities;
 using zuli_Data.Exceptions;
 using zuli_Repository.Interface;
@@ -23,6 +26,17 @@ namespace zuli_backend.Tests
 
             _baggageRepositoryMock = new Mock<IBaggageRepository>();
             _flightRepositoryMock = new Mock<IFlightRepository>();
+
+            _baggageRepositoryMock
+                .Setup(repository => repository.AddAdditionalBaggageTransactional(
+                    It.IsAny<string>(),
+                    It.IsAny<List<BaggageEntity>>()
+                ))
+                .ReturnsAsync(new AdditionalBaggagePurchaseResultDTO
+                {
+                    AdditionalBaggageTotal = 150m,
+                    ReservationTotal = 1200m
+                });
 
             _baggageRegistrationService = new BaggageRegistrationService(
                 _baggageRepositoryMock.Object,
@@ -164,6 +178,40 @@ namespace zuli_backend.Tests
                     It.IsAny<List<BaggageEntity>>()
                 ),
                 Times.Never
+            );
+        }
+
+        [Test]
+        public async Task AddAdditionalBaggageTransactional_WhenQueueIsAvailable_QueuesAdditionalBaggageEmailJob()
+        {
+            var reservationCode = BuildReservationCode();
+            var emailJobQueueMock = new Mock<IEmailJobQueue>();
+            var service = new BaggageRegistrationService(
+                _baggageRepositoryMock.Object,
+                _flightRepositoryMock.Object,
+                emailJobQueueMock.Object
+            );
+            var passengers = new List<AdditionalBaggagePassengerDTO>
+            {
+                BuildAdditionalBaggagePassengerDto(passengerId: 20, checkedBaggage: 2, carryOn: 1),
+                BuildAdditionalBaggagePassengerDto(passengerId: 21, checkedBaggage: 1, carryOn: 0)
+            };
+
+            await service.AddAdditionalBaggageTransactional(reservationCode, passengers);
+
+            emailJobQueueMock.Verify(
+                queue => queue.QueueAsync(
+                    It.Is<EmailJobDTO>(job =>
+                        job.Type == EmailJobType.AdditionalBaggagePurchase &&
+                        job.ReservationCode == reservationCode &&
+                        job.AdditionalCheckedBaggage == 3 &&
+                        job.AdditionalCarryOn == 1 &&
+                        job.AdditionalBaggageTotal == 150m &&
+                        job.ReservationTotal == 1200m
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
             );
         }
 

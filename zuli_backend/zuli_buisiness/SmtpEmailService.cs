@@ -104,6 +104,37 @@ namespace zuli_Business
             );
         }
 
+        public async Task SendAdditionalBaggagePurchaseEmailAsync(
+            string toEmail,
+            string buyerName,
+            string reservationCode,
+            int additionalCheckedBaggage,
+            int additionalCarryOn,
+            decimal additionalBaggageTotal,
+            decimal reservationTotal)
+        {
+            string body = _emailTemplateService.BuildAdditionalBaggagePurchaseEmailBody(
+                buyerName,
+                reservationCode,
+                additionalCheckedBaggage,
+                additionalCarryOn,
+                additionalBaggageTotal,
+                reservationTotal
+            );
+
+            await SendEmailAsync(
+                toEmail,
+                $"Compra de equipaje adicional - Reserva {reservationCode}",
+                body
+            );
+
+            _logger.LogInformation(
+                "Additional baggage purchase email sent to {Email} for reservation {ReservationCode}",
+                toEmail,
+                reservationCode
+            );
+        }
+
         public async Task SendCancellationRequestEmailAsync(
             string toEmail,
             string buyerName,
