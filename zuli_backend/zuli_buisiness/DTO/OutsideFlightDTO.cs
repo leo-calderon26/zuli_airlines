@@ -29,7 +29,7 @@ namespace zuli_Business.DTO
         [JsonPropertyName("arrivalTime")]
         public DateTime ArrivalDateTime { get; set; }
         public string Duration { get; set; }
-        public int DurationOnMinutes { get; set; }
+        public int DurationOnSeconds { get; set; }
         public decimal? CarryOnPrice { get; set; }
         public decimal? CheckedPrice { get; set; }
         [JsonPropertyName("arrivalAirport")]

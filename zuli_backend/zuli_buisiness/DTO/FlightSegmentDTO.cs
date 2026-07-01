@@ -17,5 +17,6 @@ namespace zuli_Business.DTO
         public decimal? CheckedPrice { get; set; }
         public decimal? CarryOnPrice { get; set; }
         public decimal CheckedBagMultiplier { get; set; }
+        public string AirlineName { get; set; }
     }
 }

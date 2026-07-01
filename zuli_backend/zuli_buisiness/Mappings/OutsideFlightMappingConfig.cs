@@ -15,9 +15,13 @@ namespace zuli_Business.Mappings
                 .Map(dest => dest.CarryOnPrice, src => src.CarryOnPrice)
                 .Map(dest => dest.CheckedPrice, src => src.CheckedPrice)
                 .Map(dest => dest.Frequency, src => src.Frequency)
-                .Map(dest => dest.DurationOnMinutes, src => src.DurationOnMinutes)
+                .Map(dest => dest.DurationOnSeconds, src => src.DurationOnSeconds)
                 .Map(dest => dest.ArrivalAirportCode, src => src.RealArrivalAirport.code)
+                .Map(dest => dest.ArrivalAirportName, src => src.RealArrivalAirport.name)
+                .Map(dest => dest.ArrivalAirportCity, src => src.RealArrivalAirport.city)
                 .Map(dest => dest.DepartureAirportCode, src => src.RealDepartureAirport.code)
+                .Map(dest => dest.DepartureAirportName, src => src.RealDepartureAirport.name)
+                .Map(dest => dest.DepartureAirportCity, src => src.RealDepartureAirport.city)
                 .Map(dest => dest.RealDepartureTime, src => src.DepartureDateTime.TimeOfDay)
                 .Map(dest => dest.RealArrivalTime, src => src.ArrivalDateTime.TimeOfDay);
 
