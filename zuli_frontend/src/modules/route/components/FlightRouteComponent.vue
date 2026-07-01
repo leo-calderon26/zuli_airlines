@@ -5,12 +5,25 @@ import { useFlightRoute } from "../composable/useFlightRoute";
 import { useFlightRouteStore } from "../store/flightRouteStore";
 import AppTable from '../../../shared/AppTable.vue';
 import ErrorModal from '../../../shared/ErrorModal.vue';
+import SuccessModal from '../../../shared/SuccessModal.vue';
+import AlertModal from '../../../shared/AlertModal.vue';
+import { useForm } from '../../../shared/useForm.js';
 
 const router = useRouter();
 const flightRouteStore = useFlightRouteStore();
-const { fetchRoutesPaginated, changePage } = useFlightRoute();
+const { fetchRoutesPaginated, changePage, deleteRoute } = useFlightRoute();
 const showMaintenanceModal = ref(false);
+const {
+    showSuccessModal,
+    successMessage,
+    showErrorModal,
+    errorMessage,
+    onSuccess,
+    handleSubmit
+} = useForm();
 
+const showDeletionModal = ref(false);
+const routeToDelete = ref(null);
 const dayLabels = [
   { bit: 1, label: "Lun" },
   { bit: 2, label: "Mar" },
@@ -57,7 +70,22 @@ const formatDuration = (value) => {
 const selectRoute = (route) => {
   showMaintenanceModal.value = true;
 };
+function chooseRouteToDelete(flightRouteId) {
+    routeToDelete.value = flightRouteId;
+    showDeletionModal.value = true;
+}
 
+async function processRouteDeletion(flightRouteId) {
+    await handleSubmit(async () => {
+        await deleteRoute(flightRouteId);
+
+        onSuccess('La ruta se ha eliminado correctamente');
+    }, 'Error al eliminar la ruta');
+
+    if (showErrorModal.value) {
+        showErrorModal.value = false;
+    }
+}
 onMounted(async () => {
   await fetchRoutesPaginated(1, 10);
 });
@@ -120,13 +148,29 @@ onMounted(async () => {
             <p>{{ formatFrequency(route.frequency) }}</p>
         </td>
         <td class="px-8 py-5">
-            <button
-                type="button"
-                class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-select"
-                @click="selectRoute(route)"
-            >
-                Seleccionar
-            </button>
+            <div class="flex items-center gap-2 whitespace-nowrap">
+                <button
+                    type="button"
+                    class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-select"
+                    @click="selectRoute(route)"
+                >
+                    Seleccionar
+                </button>
+
+                <button
+                    type="button"
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary text-white hover:bg-select"
+                    title="Eliminar ruta"
+                    :aria-label="`Eliminar ruta ${route.departureAirport} - ${route.arrivalAirport}`"
+                    @click="chooseRouteToDelete(route.flightRouteId)"
+                >
+                    <img
+                        src="../../../assets/TrashCan.png"
+                        alt="Trash Can Icon"
+                        class="h-6 w-6 shrink-0"
+                    />
+                </button>
+            </div>
         </td>
     </tr>
 </AppTable>
@@ -136,5 +180,22 @@ onMounted(async () => {
     title="En Mantenimiento" 
     message="La funcionalidad para gestionar vuelos a partir de esta ruta se encuentra actualmente en mantenimiento. Por favor, intente más tarde." 
     buttonText="Entendido"
+/>
+<SuccessModal
+    v-model="showSuccessModal"
+    :message="successMessage"
+/>
+
+<ErrorModal
+    v-model="showErrorModal"
+    :message="errorMessage"
+/>
+
+<AlertModal
+    v-model="showDeletionModal"
+    title="Eliminar Ruta"
+    :message="'¿Está seguro de querer eliminar la ruta seleccionada?\nSi la ruta tiene compras o reservas asociadas, se deshabilitará para conservar el historial; de lo contrario, se eliminará permanentemente.'"
+    buttonText="Eliminar"
+    @confirm="processRouteDeletion(routeToDelete)"
 />
 </template>

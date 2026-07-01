@@ -217,7 +217,7 @@ function formatRole(userRole) {
                 class="font-medium text-gold hover:underline"
                 @click="goToUserEdit(user)"
             >
-                Edit
+                Editar
             </button>
         </td>
         <td

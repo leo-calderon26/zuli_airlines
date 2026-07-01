@@ -85,7 +85,7 @@ namespace zuli_Repository
         {
             using var connection = _context.CreateConnection();
 
-            var countSql = "SELECT COUNT(1) FROM FlightRoute";
+            var countSql = "SELECT COUNT(1) FROM FlightRoute WHERE Status = 'Habilitada'";
             var totalCount = await connection.ExecuteScalarAsync<int>(countSql);
 
             var offset = (pageNumber - 1) * pageSize;
