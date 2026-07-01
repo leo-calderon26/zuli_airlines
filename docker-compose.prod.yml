@@ -43,9 +43,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:7064
+      AllowedHosts: ${ExternalApi__AllowedHosts:-*}
 
       ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
-      settings__secretKey: ${settings__secretKey}
+      settings__secretKey: ${ExternalApi__SecretKey}
       settings__apiKey: ${ExternalApi__ApiKey}
 
       AirlineClient__name: ${AirlineClient__name}
